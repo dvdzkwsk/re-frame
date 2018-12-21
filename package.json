@@ -1,0 +1,32 @@
+{
+  "name": "re-frame",
+  "version": "0.0.0",
+  "description": "JavaScript port of Clojure's popular re-frame library",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "files": [
+    "lib",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "trailingComma": "all"
+  },
+  "devDependencies": {
+    "ava": "^1.0.1",
+    "esm": "^3.0.84",
+    "prettier": "^1.15.3"
+  }
+}

@@ -1,0 +1,7 @@
+* implement `path` interceptor
+* implement `debug` interceptor
+* implement `path` interceptor
+* implement `enrich` interceptor
+* implement `payload` interceptor (trim-v)
+* implement `after` interceptor
+* implement `on-changes` interceptor

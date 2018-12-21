@@ -1,0 +1,7 @@
+.DS_STORE
+*.log
+.idea
+node_modules
+dist
+templates/*/yarn.lock
+templates/*/package-lock.json
