@@ -1,5 +1,5 @@
 {
-  "name": "re-frame",
+  "name": "@re-frame/core",
   "version": "0.0.0",
   "description": "JavaScript port of Clojure's popular re-frame library",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
@@ -22,7 +22,7 @@
     "semi": false,
     "singleQuote": true,
     "bracketSpacing": false,
-    "trailingComma": "all"
+    "trailingComma": "es5"
   },
   "devDependencies": {
     "ava": "^1.0.1",

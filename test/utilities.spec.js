@@ -10,6 +10,6 @@ test('removes falsy values', t => {
   const expected = [1, 2, 3]
   t.deepEqual(
     flatten([0, false, 1, [null, [], 2, [undefined, void 0, 3]]]),
-    expected,
+    expected
   )
 })
