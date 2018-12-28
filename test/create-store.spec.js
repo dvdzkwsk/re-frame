@@ -1,30 +1,71 @@
 import test from 'ava'
 import * as reframe from '../lib/index.js'
 
-test('accepts an optional initial state', t => {
-  t.plan(1)
+function flush() {
+  return new Promise(resolve => setTimeout(resolve))
+}
 
+test('accepts an optional initial state', t => {
   const initialState = {foo: 'bar'}
   const store = reframe.createStore(initialState)
-  store.registerEventDB('expect', (db, [_, value]) => t.is(db, value))
-  store.dispatch(['expect', initialState])
+  t.is(store.snapshot().db, initialState)
 })
 
-// test('Uses result of EventDB handler to update DB state', t => {
-//   t.plan(4)
+test('dispatch > EventDB handler updates DB state', async t => {
+  const store = reframe.createStore(1)
+  store.registerEventDB('double', db => db * 2)
 
-//   const store = reframe.createStore(1)
-//   store.registerEventDB('expect', (db, [_, value]) => t.is(db, value))
-//   store.registerEventDB('double', db => {
-//     console.log('call double!', db * 2)
-//     return db * 2
-//   })
+  store.dispatch(['double'])
+  await flush()
+  t.is(store.snapshot().db, 2)
 
-//   store.dispatch(['expect', 1])
-//   store.dispatch(['double'])
-//   store.dispatch(['expect', 2])
-//   // store.dispatch(['double'])
-//   // store.dispatch(['expect', 4])
-//   // store.dispatch(['double'])
-//   // store.dispatch(['expect', 8])
-// })
+  store.dispatch(['double'])
+  await flush()
+  t.is(store.snapshot().db, 4)
+
+  store.dispatch(['double'])
+  await flush()
+  t.is(store.snapshot().db, 8)
+})
+
+test('dispatch > converts arguments to an array if called with an unwrapped string', async t => {
+  const store = reframe.createStore(0)
+  store.registerEventDB('increment', db => db + 1)
+  store.dispatch('increment') // vs [increment]
+  await flush()
+  t.is(store.snapshot().db, 1)
+})
+
+test('snapshot > returns an object containing the current state', async t => {
+  const store = reframe.createStore(0)
+  store.registerEventDB('increment', db => db + 1)
+
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  await flush()
+  const snapshot = store.snapshot() // should be 3
+
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  await flush()
+
+  t.is(snapshot.db, 3)
+  t.is(store.snapshot().db, 6)
+})
+
+test('snapshot > can restore store to snapshotted state', async t => {
+  const store = reframe.createStore(0)
+  store.registerEventDB('increment', db => db + 1)
+  const snapshot = store.snapshot() // should be 3
+
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  store.dispatch(['increment'])
+  await flush()
+
+  t.is(store.snapshot().db, 3)
+  snapshot.restore()
+  t.is(store.snapshot().db, 0)
+})

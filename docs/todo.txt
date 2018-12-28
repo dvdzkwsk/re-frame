@@ -1,6 +1,4 @@
 * make terminology consistenr, e.g. "fx" vs "effects"
-* ??? overload public `dispatch` to support dispatch(string, payload)
-* overload public `regisisterEvent{DB,FX}` to support undefined interceptors
 * implement `path` interceptor
 * implement `debug` interceptor
 * implement `path` interceptor
@@ -8,4 +6,9 @@
 * implement `payload` interceptor (trim-v)
 * implement `after` interceptor
 * implement `on-changes` interceptor
-* rollup for dist
+* more detailed investigation around timing functions for nextTick
+* dispatchSync
+
+---
+
+* should `dispatch` support unwrapped events? e.g. dispatch(string, payload)
