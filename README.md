@@ -1,4 +1,5 @@
 # re-frame
+[![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
 
 JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame). All credit goes to the original authors; thank you for the inspiration.
 
