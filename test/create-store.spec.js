@@ -58,7 +58,7 @@ test('snapshot > returns an object containing the current state', async t => {
 test('snapshot > can restore store to snapshotted state', async t => {
   const store = reframe.createStore(0)
   store.registerEventDB('increment', db => db + 1)
-  const snapshot = store.snapshot() // should be 3
+  const snapshot = store.snapshot()
 
   store.dispatch(['increment'])
   store.dispatch(['increment'])

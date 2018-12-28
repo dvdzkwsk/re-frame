@@ -1,32 +1,72 @@
 # re-frame
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
 
-JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame). All credit goes to the original authors; thank you for the inspiration.
+JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for flux-like state management. All credit goes to the original authors — thank you for the inspiration. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its patterns and terminology.
 
-This package can be used in two ways: as a [singleton](#singleton-mode) or as a [factory](#factory-mode).
+## What is re-frame?
 
-> You should use the factory pattern in most cases. This keeps your store state and event handlers isolated from other libraries that may also be using re-frame.
+First, read through the [re-frame introduction](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) by the library's original authors. Their documentation is superb, so it's the best place to start.
+
+This package can be used in two ways: as a [singleton](#singleton-mode) or as a [factory](#factory-mode). You should use the factory pattern in most cases. This keeps your store's state and event handlers isolated from other libraries that may also be using re-frame.
+
+## re-frame vs redux
+
+1. In re-frame, an "event" can be thought of as nearly the same thing as a redux "action". They do look a bit different, though, since re-frame uses a tuple while redux uses the more traditional object:
+
+```js
+const event  = ['add', 5]                   // re-frame
+const action = { type: 'add', payload: 5 }  // redux
+```
+
+1. In re-frame, an "EventDB handler" can be thought of as nearly the same thing as a redux "reducer".
+
+```js
+// re-frame event handlers
+const store = reframe.createStore(0)
+store.registerEventDB('increment', (db, event) => db + 1)
+store.registerEventDB('decrement', (db, event) => db - 1)
+store.dispatch(['increment'])
+
+// redux reducer
+const reducer = (state = 0, action) => {
+  switch (action.type) {
+    case 'increment':
+      return state + 1
+    case 'decrement':
+      return state - 1
+    default:
+      return state
+  }
+}
+const store = redux.createStore(reducer)
+store.dispatch({ type: 'increment' })
+```
+
+1. When using redux's `combineReducers` function, all combined reducers will be called when an action is dispatched, regardless of whether they care about it. This can be used to implement generic reducers that act on arbitrary actions. This is not possible in re-frame, since an event is sent directly to its corresponding handler. You can achieve a similar effect, though, by using **interceptors**.
 
 ## Singleton Mode
 
 This should be familiar to re-frame users coming from Clojure, where re-frame is packaged as a singleton. In this mode, the store instance lives within the re-frame package, which means it can conveniently be imported anywhere.
 
 ```js
+// any package can directly import the global store
 import {dispatch, registerEventDB} from '@re-frame/core'
 
 // register event handlers
-registerEventDB('init', (db, event) => 1)
-registerEventDB('increment', (db, [id, arg]) => db + arg)
+registerEventDB('init', (db, event) => ({ count: 0 }))
+registerEventDB('add', (db, [id, payload]) => ({
+  ...db,
+  count: db.count + payload,
+})
 
 // dispatch events
-dispatch('init')         // global state = 1
-dispatch('increment', 1) // global state = 2
-dispatch('increment', 2) // global state = 4
-dispatch('increment', 3) // global state = 7
-dispatch('double')       // global state = 14
+dispatch('init')    // global state = 0
+dispatch('add', 1)  // global state = 1
+dispatch('add', 2)  // global state = 3
+dispatch('add', 3)  // global state = 6
 ```
 
-A singletone affords certain conveniences, namely that the store and its methods can be imported directly from the re-frame package. This convenience cannot be understated. In practice, it means the store instance does not have to be threaded throughout the application. React developers may be familiar with using higher-order components such as `@connect` to inject the store, but this only applies to the React tree. If you wish to deal with the store outside of React, you often end up threading it through layers of application code.
+A singleton affords certain conveniences, namely that the store and its methods can be imported directly from the re-frame package. This convenience cannot be understated. In practice, it means the store instance does not have to be threaded throughout the application. React developers may be familiar with using higher-order components such as `@connect` to inject the store, but this only applies to the React tree. If you wish to deal with the store outside of React, you often end up threading it through layers of application code.
 
 There are drawbacks to using a singleton. For example, with server-side rendering it's necessary to pass around a dynamic store reference because multiple stores need to exist in parallel (since multiple requests can be handled concurrently). If all modules directly reference a singleton, it becomes nearly impossible to keep state isolated.
 
@@ -41,21 +81,17 @@ Library authors using re-frame should **exclusively** use factory mode. This avo
 ```js
 import {dispatch, registerEventDB} from '@re-frame/core'
 
-// create your own isolated store instances
-const initialState = { myValue: 1 }
+// create multiple independent stores
+const initialState = { count: 0 }
 const storeA = createStore(initialState)
 const storeB = createStore(initialState)
 
 // register event handlers
-storeA.registerEventDB('double', (db, event) => ({
-  ...db,
-  myValue: db.myValue * 2,
-}))
-storeB.registerEventDB('double', (db, event) => ({
-  ...db,
-  myValue: db.myValue * 2,
-}))
+const increment = db => ({ ...db, count: count + 1 })
+storeA.registerEventDB('increment', increment)
+storeB.registerEventDB('increment', increment)
 
-storeA.dispatch('double') // storeA state = { myValue: 2 }
-                          // storeB state = { myValue: 1 } <-- unchanged
+// events only affect the store they are dispatched to
+storeA.dispatch('increment') // storeA state = { count: 1 }
+                             // storeB state = { count: 0 } <-- unchanged
 ```

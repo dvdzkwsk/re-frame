@@ -1,4 +1,5 @@
-* make terminology consistenr, e.g. "fx" vs "effects"
+* make terminology consistent, e.g. "fx" vs "effects"
+  -- possible to make public API pithier?
 * implement `path` interceptor
 * implement `debug` interceptor
 * implement `path` interceptor
@@ -8,6 +9,13 @@
 * implement `on-changes` interceptor
 * more detailed investigation around timing functions for nextTick
 * dispatchSync
+* should event handlers only take payload (not event vector)?
+  -- vector is consistent with clj re-frame, but I don't see purpose
+* strict mode?
+
+--- docs
+* move redux comparison to separate doc
+* stress that everything is just an interceptor
 
 ---
 
