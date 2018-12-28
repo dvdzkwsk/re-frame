@@ -4,11 +4,11 @@ JavaScript port of the popular [ClojureScript library](https://github.com/Day8/r
 
 This package can be used in two ways: as a [singleton](#singleton-mode) or as a [factory](#factory-mode).
 
-> Which one do I need? If you are distributing your code as a library then use the factory to keep your store isolated. Prototyping an app or need the convenience of a global store? Use singleton mode.
+> You should use the factory pattern in most cases. This keeps your store state and event handlers isolated from other libraries that may also be using re-frame.
 
 ## Singleton Mode
 
-This should be familiar to re-frame users coming from Clojure, where re-frame is packaged as a singleton. In this mode, the store state and registry are global. The re-frame package it a store itself.
+This should be familiar to re-frame users coming from Clojure, where re-frame is packaged as a singleton. In this mode, the store instance lives within the re-frame package, which means it can conveniently be imported anywhere.
 
 ```js
 import {dispatch, registerEventDB} from '@re-frame/core'
@@ -20,9 +20,9 @@ registerEventDB('increment', (db, [id, arg]) => db + arg)
 // dispatch events
 dispatch('init')         // global state = 1
 dispatch('increment', 1) // global state = 2
-dispatch('increment', 3) // global state = 5
-dispatch('increment', 3) // global state = 5
-dispatch('double')       // global state = 10
+dispatch('increment', 2) // global state = 4
+dispatch('increment', 3) // global state = 7
+dispatch('double')       // global state = 14
 ```
 
 A singletone affords certain conveniences, namely that the store and its methods can be imported directly from the re-frame package. This convenience cannot be understated. In practice, it means the store instance does not have to be threaded throughout the application. React developers may be familiar with using higher-order components such as `@connect` to inject the store, but this only applies to the React tree. If you wish to deal with the store outside of React, you often end up threading it through layers of application code.
@@ -56,5 +56,5 @@ storeB.registerEventDB('double', (db, event) => ({
 }))
 
 storeA.dispatch('double') // storeA state = { myValue: 2 }
-                          // storeB state = { myValue: 1 }
+                          // storeB state = { myValue: 1 } <-- unchanged
 ```
