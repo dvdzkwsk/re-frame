@@ -1,15 +1,23 @@
 # re-frame
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
 
-JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for flux-like state management. All credit goes to the original authors — thank you for the inspiration. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its patterns and terminology.
+JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, patterns, and terminology. All design credit goes to the original authors — thank you for the inspiration.
 
 ## What is re-frame?
 
-Re-frame helps make state management predictable, testable, and pragmatic. It's flux-like, meaning its patterns should be familiar to [redux users](./docs/re-frame-vs-redux.md).
+Re-frame helps make state management predictable, testable, and pragmatic. From a high-level, re-frame is flux-like with events and event handlers, which are similar to [redux's actions and reducers](./docs/re-frame-vs-redux.md). Compared to redux, re-frame is more feature complete out of the box, with built-in interceptors and subscriptions. You'll find that you can be productive without needing to reach for third-party middleware.
 
-First, read through the [re-frame introduction](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) by the library's original authors. Their documentation is superb, so it's the best place to start.
+## Installation and Usage
 
-This package can be used in two ways: as a [singleton](#singleton-mode) or as a [factory](#factory-mode). You should use the factory pattern in most cases. This keeps your store's state and event handlers isolated from other libraries that may also be using re-frame.
+```sh
+# npm users
+npm install --save @re-frame/core
+
+# yarn users
+yarn add @re-frame/core
+```
+
+This package can be used in two ways: as a [singleton](#singleton-mode) or as a [factory](#factory-mode). You should use the factory pattern in most cases, since it keeps your store's state and event handlers isolated from other libraries which may also be using re-frame.
 
 ## Singleton Mode
 
