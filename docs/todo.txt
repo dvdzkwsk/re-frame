@@ -1,10 +1,7 @@
 * make terminology consistent, e.g. "fx" vs "effects"
   -- possible to make public API pithier?
-* implement `path` interceptor
 * implement `debug` interceptor
-* implement `path` interceptor
 * implement `enrich` interceptor
-* implement `payload` interceptor (trim-v)
 * implement `after` interceptor
 * implement `on-changes` interceptor
 * more detailed investigation around timing functions for nextTick
@@ -12,6 +9,10 @@
 * should event handlers only take payload (not event vector)?
   -- vector is consistent with clj re-frame, but I don't see purpose
 * strict mode?
+  - validate interceptor is not nil
+  - validate interceptor has been called (is not a function)
+* should not remove nils from interceptors
+* tracing
 
 --- docs
 * move redux comparison to separate doc
