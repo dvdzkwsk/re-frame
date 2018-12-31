@@ -1,22 +1,18 @@
-* make terminology consistent, e.g. "fx" vs "effects"
-  -- possible to make public API pithier?
-* implement `debug` interceptor
-* implement `enrich` interceptor
-* implement `after` interceptor
-* implement `on-changes` interceptor
-* more detailed investigation around timing functions for nextTick
+---- [ Features ] -------------------------------
+* More detailed investigation around timing functions for nextTick
+* Implement `debug` interceptor
+* Implement `enrich` interceptor
+* Implement `after` interceptor
+* Implement `on-changes` interceptor
 * dispatchSync
-* should event handlers only take payload (not event vector)?
-  -- vector is consistent with clj re-frame, but I don't see purpose
-* strict mode?
-  - validate interceptor is not nil
-  - validate interceptor has been called (is not a function)
-* tracing
 
---- docs
-* move redux comparison to separate doc
-* stress that everything is just an interceptor
+---- [ Docs ] -----------------------------------
+* Stress that everything is just an interceptor
 
----
-
-* should `dispatch` support unwrapped events? e.g. dispatch(string, payload)
+---- [ Ergonomics ] -----------------------------
+* Make terminology consistent, e.g. "fx" vs "effects"
+* Possible to make public API pithier?
+* Create dev vs prod bundles?
+* Warn when dispatching variadic with > 2 arguments
+* Validate interceptors
+* Debug tracing
