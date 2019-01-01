@@ -8,6 +8,18 @@ import {
   switchDirections,
 } from '../lib/interceptors.js'
 
+function createContext(context) {
+  return Object.assign(
+    {
+      stack: [],
+      queue: [],
+      effects: {},
+      coeffects: {},
+    },
+    context
+  )
+}
+
 function runAndStripInterceptors(context, direction) {
   context = runInterceptors(context, direction)
   delete context.queue
@@ -16,7 +28,7 @@ function runAndStripInterceptors(context, direction) {
 }
 
 test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx.effects.db', t => {
-  let context = {
+  let context = createContext({
     coeffects: {
       db: 1,
     },
@@ -25,7 +37,7 @@ test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx
         return db * 2
       }),
     ],
-  }
+  })
   context = runAndStripInterceptors(context, 'before')
   t.deepEqual(context, {
     coeffects: {
@@ -38,7 +50,7 @@ test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx
 })
 
 test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to ctx.effects', t => {
-  let context = {
+  let context = createContext({
     coeffects: {
       db: 1,
     },
@@ -51,7 +63,7 @@ test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to c
         }
       }),
     ],
-  }
+  })
   context = runAndStripInterceptors(context, 'before')
   t.deepEqual(context, {
     coeffects: {
@@ -66,8 +78,9 @@ test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to c
 })
 
 test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
-  let context = {
+  let context = createContext({
     queue: [path(['foo', 'bar', 'baz'])],
+    effects: {},
     coeffects: {
       db: {
         foo: {
@@ -77,9 +90,10 @@ test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
         },
       },
     },
-  }
+  })
   context = runAndStripInterceptors(context, 'before')
   t.deepEqual(context, {
+    effects: {},
     coeffects: {
       db: 'bop',
       _originalDB: {
@@ -94,7 +108,7 @@ test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
 })
 
 test('path > applies the updated db value to the original DB at `path`', t => {
-  let context = {
+  let context = createContext({
     queue: [
       path(['foo', 'bar', 'baz']),
       dbHandlerToInterceptor(db => db.toUpperCase()),
@@ -108,7 +122,7 @@ test('path > applies the updated db value to the original DB at `path`', t => {
         },
       },
     },
-  }
+  })
   context = runInterceptors(context, 'before')
   context = switchDirections(context)
   context = runAndStripInterceptors(context, 'after')
@@ -136,14 +150,16 @@ test('path > applies the updated db value to the original DB at `path`', t => {
 })
 
 test('payload > replaces the event tuple with just its payload', t => {
-  let context = {
+  let context = createContext({
     queue: [payload],
+    effects: {},
     coeffects: {
       event: ['add', 5],
     },
-  }
+  })
   context = runAndStripInterceptors(context, 'before')
   t.deepEqual(context, {
+    effects: {},
     coeffects: {
       event: 5,
     },
