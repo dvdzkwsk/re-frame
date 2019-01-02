@@ -1,6 +1,10 @@
 import test from 'ava'
 import EventQueue from '../lib/event-queue.js'
 
+function size(queue) {
+  return queue._queue.length
+}
+
 function makePausedQueue() {
   const queue = new EventQueue()
   queue.pause()
@@ -9,22 +13,22 @@ function makePausedQueue() {
 
 test('initializes with an empty queue', t => {
   const queue = makePausedQueue()
-  t.is(queue.size(), 0)
+  t.is(size(queue), 0)
 })
 
 test('push() adds an event to the queue', t => {
   const queue = makePausedQueue()
 
   queue.push(['foo'])
-  t.is(queue.size(), 1)
+  t.is(size(queue), 1)
 
   queue.push(['bar'])
-  t.is(queue.size(), 2)
+  t.is(size(queue), 2)
 
   queue.push(['baz'])
   queue.push(['qux'])
   queue.push(['moo'])
-  t.is(queue.size(), 5)
+  t.is(size(queue), 5)
 })
 
 test('purge() removes all queued events', t => {
@@ -33,8 +37,8 @@ test('purge() removes all queued events', t => {
   queue.push(['foo'])
   queue.push(['bar'])
   queue.push(['baz'])
-  t.is(queue.size(), 3)
+  t.is(size(queue), 3)
 
   queue.purge()
-  t.is(queue.size(), 0)
+  t.is(size(queue), 0)
 })
