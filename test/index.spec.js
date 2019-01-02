@@ -2,32 +2,41 @@ import test from 'ava'
 import * as reframe from '../lib/index.js'
 import {validateInterceptors} from '../lib/interceptors.js'
 
-test('exports a global store', t => {
-  t.is(typeof reframe.dispatch, 'function', 'reframe.dispatch is a function')
+function isStore(t, store) {
+  t.is(typeof store.dispatch, 'function', 'store.dispatch is a function')
   t.is(
-    typeof reframe.registerEventDB,
+    typeof store.registerEventDB,
     'function',
-    'reframe.registerEventDB is exported as a function'
+    'store.registerEventDB is exported as a function'
   )
   t.is(
-    typeof reframe.registerEventFX,
+    typeof store.registerEventFX,
     'function',
-    'reframe.registerEventFX is exported as a function'
+    'store.registerEventFX is exported as a function'
   )
   t.is(
-    typeof reframe.registerCoeffect,
+    typeof store.registerCoeffect,
     'function',
     'store.registerCoeffect is exported as a function'
   )
   t.is(
-    typeof reframe.snapshot,
+    typeof store.registerEffect,
+    'function',
+    'store.registerEffect is exported as a function'
+  )
+  t.is(
+    typeof store.snapshot,
     'function',
     'store.snapshot is exported as a function'
   )
+}
+
+test('exports a global store', t => {
+  isStore(t, reframe)
 })
 
 test('exports `createStore`', t => {
-  t.is(typeof reframe.createStore, 'function')
+  isStore(t, reframe.createStore())
 })
 
 test('exports `path` interceptor', t => {
