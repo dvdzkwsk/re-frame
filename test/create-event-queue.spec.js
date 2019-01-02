@@ -1,12 +1,12 @@
 import test from 'ava'
-import EventQueue from '../lib/event-queue.js'
+import createEventQueue from '../lib/create-event-queue.js'
 
 function size(queue) {
-  return queue._queue.length
+  return queue.size()
 }
 
 function makePausedQueue() {
-  const queue = new EventQueue()
+  const queue = createEventQueue()
   queue.pause()
   return queue
 }
