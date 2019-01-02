@@ -29,3 +29,19 @@ yarn uglifyjs --compress --mangle --toplevel --output dist/production.js dist/pr
 
 # remove the original bundle, since we just want development and production variants
 rm dist/re-frame.js
+
+# create entrypoint to load correct environment
+printf "export default process.env.NODE_ENV === 'production'\n\
+  ? require('./production.js')\n\
+  : require('./development.js')" > dist/re-frame.js
+
+# ensure that entry point works for both "development" and "production"
+NODE_ENV={development,production} node -r esm -e "require('.')"
+
+# build succeeded, emit stats.json
+printf "{\n\
+  \"development\": $(wc -c < dist/development.js | awk '{print $1}'),\n\
+  \"development_gzip\": $(gzip -c dist/development.js | wc -c | awk '{print $1}'),\n\
+  \"production\": $(wc -c < dist/production.js | awk '{print $1}'),\n\
+  \"production_gzip\": $(gzip -c dist/production.js | wc -c | awk '{print $1}')\n\
+}" > dist/stats.json
