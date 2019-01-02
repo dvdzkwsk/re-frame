@@ -4,7 +4,7 @@
   "description": "JavaScript port of Clojure's popular re-frame library",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
-  "main": "dist/re-frame.js",
+  "main": "dist/development.js",
   "files": [
     "dist",
     "README.md",
@@ -16,7 +16,8 @@
   },
   "ava": {
     "require": [
-      "esm"
+      "esm",
+      "./test/_setup.js"
     ]
   },
   "prettier": {
