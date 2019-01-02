@@ -2,6 +2,7 @@ import test from 'ava'
 import {
   path,
   payload,
+  validateInterceptors,
   dbHandlerToInterceptor,
   fxHandlerToInterceptor,
   runInterceptors,
@@ -163,5 +164,51 @@ test('payload > replaces the event tuple with just its payload', t => {
     coeffects: {
       event: 5,
     },
+  })
+})
+
+test('validateInterceptors > does not throw for valid interceptors', t => {
+  const validInterceptors = [
+    {id: 'foo', before() {}, after() {}},
+    {id: 'foo', before() {}},
+    {id: 'foo', after() {}},
+  ]
+  validInterceptors.forEach(interceptor => {
+    validateInterceptors([interceptor])
+  })
+  t.pass()
+})
+
+test('validateInterceptors > throws for invalid interceptors', t => {
+  const invalidInterceptors = [
+    [
+      null,
+      'Interceptor at index 0 was undefined. Check for spelling mistakes or missing imports.',
+    ],
+    [
+      () => {},
+      'Interceptor at index 0 was a function. This likely means you forgot to call the function in order to create the interceptor.',
+    ],
+    [
+      2,
+      'Interceptor at index 0 was an invalid type. Received number when it should be an object.',
+    ],
+    [{}, 'Interceptor at index 0 was missing an "id" key.'],
+    [
+      {id: 'foo'},
+      'Interceptor with id "foo" was missing a "before" or "after" hook. At least one is required.',
+    ],
+    [
+      {id: 'foo', before: {}},
+      'Interceptor with id "foo" had a "before" hook but its value was not a function.',
+    ],
+    [
+      {id: 'foo', after: {}},
+      'Interceptor with id "foo" had an "after" hook but its value was not a function.',
+    ],
+  ]
+
+  invalidInterceptors.forEach(([interceptor, expectedError]) => {
+    t.throws(() => validateInterceptors([interceptor]), expectedError)
   })
 })
