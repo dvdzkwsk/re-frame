@@ -33,7 +33,7 @@ const makeStore = () => {
     (todos, {description}) =>
       todos.map(todo => {
         return todo.description === description
-          ? assoc(todo, 'completed', !todo.completed)
+          ? assoc(todo, ['completed'], !todo.completed)
           : todo
       })
   )

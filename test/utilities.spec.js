@@ -1,11 +1,5 @@
 import test from 'ava'
-import {
-  flatten,
-  shallowClone,
-  assoc,
-  assocPath,
-  getPath,
-} from '../lib/utilities.js'
+import {flatten, shallowClone, assoc, getPath} from '../lib/utilities.js'
 
 test('flatten > deeply flattens a nested array', t => {
   const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -32,22 +26,7 @@ test('shallowClone > returns a shallow clone of the supplied object', t => {
   t.is(obj.a, cloned.a) // deep objects should not be cloned
 })
 
-test('assoc > returns a new object with the updated key', t => {
-  const obj = {
-    a: 1,
-  }
-  const res = assoc(obj, 'b', 2)
-  t.deepEqual(res, {
-    a: 1,
-    b: 2,
-  })
-  // original object should not be mutated
-  t.deepEqual(obj, {
-    a: 1,
-  })
-})
-
-test('assocPath > returns a new object with the value updated at `path`', t => {
+test('assoc > returns a new object with the value updated at `path`', t => {
   const obj = {
     a: {
       b: {
@@ -55,7 +34,7 @@ test('assocPath > returns a new object with the value updated at `path`', t => {
       },
     },
   }
-  const res = assocPath(obj, ['a', 'b', 'c'], 2)
+  const res = assoc(obj, ['a', 'b', 'c'], 2)
   t.deepEqual(res, {
     a: {
       b: {
@@ -73,9 +52,9 @@ test('assocPath > returns a new object with the value updated at `path`', t => {
   })
 })
 
-test('assocPath > creates new objects as needed while traversing `path`', t => {
+test('assoc > creates new objects as needed while traversing `path`', t => {
   const obj = {}
-  const res = assocPath(obj, ['a', 'b', 'c'], 2)
+  const res = assoc(obj, ['a', 'b', 'c'], 2)
   t.deepEqual(res, {
     a: {
       b: {
