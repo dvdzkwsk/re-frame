@@ -1,6 +1,7 @@
 #!/bin/bash
-# collect files to be published
 version=$1
+
+# collect files to be published
 dist_files=$(ls dist/*.js | xargs basename)
 
 # remove files that are copied over just for publishing
@@ -27,7 +28,7 @@ done
 # verify that all files listed in package.json actually exist
 for file in $(cat package.json | jq -c -r '.files[]'); do
   if [ ! -e $file ]; then
-    echo "Missing file: $file. Did you forget to `yarn build`?"
+    echo "Missing file: $file. Did you forget to 'yarn build'?"
     exit 1
   fi
 done
