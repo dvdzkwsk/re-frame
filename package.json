@@ -28,10 +28,11 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
+    "@ampproject/rollup-plugin-closure-compiler": "^0.8.5",
     "ava": "^1.0.1",
     "esm": "^3.0.84",
     "prettier": "^1.15.3",
     "rollup": "^1.0.0",
-    "uglify-es": "^3.3.9"
+    "rollup-plugin-replace": "^2.1.0"
   }
 }
