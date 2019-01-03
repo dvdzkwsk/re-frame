@@ -35,9 +35,6 @@ printf "export default process.env.NODE_ENV === 'production'\n\
   ? require('./production.js')\n\
   : require('./development.js')" > dist/re-frame.js
 
-# ensure that entry point works for both "development" and "production"
-NODE_ENV={development,production} node -r esm -e "require('.')"
-
 # build succeeded, emit stats.json
 printf "{\n\
   \"development\": $(wc -c < dist/development.js | awk '{print $1}'),\n\

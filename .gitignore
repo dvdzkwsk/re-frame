@@ -2,4 +2,11 @@
 *.log
 .idea
 node_modules
+
+# built files
 dist
+
+# published files
+development.js
+production.js
+re-frame.js
