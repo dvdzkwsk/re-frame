@@ -36,8 +36,9 @@ done
 NODE_ENV={development,production} node -r esm -e "require('.')"
 
 # validation complete, publish to NPM
-npm version $1
+npm version $version
 npm publish
+git push --follow-tags
 
 # publish was successful; clean up
 clean

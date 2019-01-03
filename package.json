@@ -13,7 +13,6 @@
   ],
   "scripts": {
     "build": "./build.sh",
-    "publish": "./publish.sh",
     "test": "ava"
   },
   "ava": {

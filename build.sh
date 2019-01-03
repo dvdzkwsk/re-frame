@@ -18,6 +18,9 @@ clean
 # bundle the library
 yarn rollup lib/index.js --format esm --file dist/re-frame.js
 
+# strip all comments
+sed -i '/^\s*\/\//d' dist/re-frame.js
+
 # create development bundle
 cp dist/re-frame.js dist/development.js
 sed -i 's/__DEV__/true/g' dist/development.js
