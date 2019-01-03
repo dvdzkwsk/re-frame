@@ -7,6 +7,6 @@ node_modules
 dist
 
 # published files
+index.js
 development.js
 production.js
-re-frame.js

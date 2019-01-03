@@ -20,7 +20,7 @@ NODE_ENV=production yarn rollup -c
 sed -i '/^\s*\/\//d' dist/development.js
 
 # create entrypoint to load correct environment
-printf "export default process.env.NODE_ENV === 'production'\n\
+printf "module.exports = process.env.NODE_ENV === 'production'\n\
   ? require('./production.js')\n\
   : require('./development.js')" > dist/index.js
 
