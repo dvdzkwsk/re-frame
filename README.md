@@ -29,9 +29,9 @@ store.registerEventDB('increment', db => ({ ...db, count: count + 1 }))
 store.registerEventDB('add', (db, event) => ({ ...db, count: count + event[1] }))
 
 // dispatch events to your store
-store.dispatch('increment') // store state = { count: 1 }
-store.dispatch('increment') // store state = { count: 2 }
+store.dispatch(['increment']) // store state = { count: 1 }
+store.dispatch(['increment']) // store state = { count: 2 }
 
 // you can also supply a payload with the event
-store.dispatch('add', 3) // store state = { count: 5 }
+store.dispatch(['add', 3])    // store state = { count: 5 }
 ```

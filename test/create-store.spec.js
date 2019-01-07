@@ -28,12 +28,11 @@ test('dispatch > EventDB handler updates DB state', async t => {
   t.is(store.snapshot().db, 8)
 })
 
-test('dispatch > converts arguments to an array if called with an unwrapped string', async t => {
+test('dispatch > throws if called with an unwrapped string', async t => {
   const store = reframe.createStore(0)
-  store.registerEventDB('increment', db => db + 1)
-  store.dispatch('increment') // vs [increment]
-  await flush()
-  t.is(store.snapshot().db, 1)
+  t.throws(() => {
+    store.dispatch('increment')
+  }, 'You dispatched an invalid event. An event is an array that looks like [eventId] or [eventId, payload].')
 })
 
 test('snapshot > returns an object containing the current state', async t => {

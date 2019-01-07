@@ -14,7 +14,7 @@ const action = { type: 'add', payload: 5 }  // redux
 const store = reframe.createStore(0)
 store.registerEventDB('increment', (db, event) => db + 1)
 store.registerEventDB('decrement', (db, event) => db - 1)
-store.dispatch('increment')
+store.dispatch(['increment'])
 
 // redux reducer
 const reducer = (state = 0, action) => {
