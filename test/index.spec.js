@@ -30,6 +30,11 @@ test('exports `createStore`', t => {
     'function',
     'store.snapshot is exported as a function'
   )
+  t.is(
+    typeof store.injectCoeffect,
+    'function',
+    'store.injectCoeffect is exported as a function'
+  )
 })
 
 test('exports `path` interceptor', t => {
