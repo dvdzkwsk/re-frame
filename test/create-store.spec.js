@@ -135,3 +135,14 @@ test('snapshot > can restore store to snapshotted state', async t => {
   snapshot.restore()
   t.is(store.snapshot().db, 0)
 })
+
+test('EventFX > throws if a requested event has not been registered', t => {
+  const store = reframe.createStore()
+  store.registerEventFX('create_effect', () => ({
+    effectThatDoesntExist: true,
+  }))
+
+  t.throws(() => {
+    store.dispatchSync(['create_effect'])
+  }, 'The EventFX handler "create_effect" attempted to create an effect "effectThatDoesntExist", but that effect has not been registered.')
+})
