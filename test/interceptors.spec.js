@@ -209,6 +209,6 @@ test('validateInterceptors > throws for invalid interceptors', t => {
   ]
 
   invalidInterceptors.forEach(([interceptor, expectedError]) => {
-    t.throws(() => validateInterceptors([interceptor]), expectedError)
+    t.throws(() => validateInterceptors([interceptor], ''), expectedError)
   })
 })
