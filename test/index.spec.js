@@ -1,6 +1,6 @@
 import test from 'ava'
 import * as reframe from '../lib/index.js'
-import {validateInterceptors} from '../lib/interceptors.js'
+import {assertValidInterceptors} from '../lib/interceptors.js'
 
 test('exports `createStore`', t => {
   const store = reframe.createStore()
@@ -38,11 +38,11 @@ test('exports `createStore`', t => {
 })
 
 test('exports `path` interceptor', t => {
-  validateInterceptors([reframe.path(['foo'])])
+  assertValidInterceptors([reframe.path(['foo'])])
   t.pass()
 })
 
 test('exports `payload` interceptor', t => {
-  validateInterceptors([reframe.payload])
+  assertValidInterceptors([reframe.payload])
   t.pass()
 })

@@ -4,7 +4,6 @@
 * Implement `enrich` interceptor
 * Implement `after` interceptor
 * Implement `on-changes` interceptor
-* dispatchSync
 
 ---- [ Docs ] -----------------------------------
 * Stress that everything is just an interceptor
@@ -12,7 +11,4 @@
 ---- [ Ergonomics ] -----------------------------
 * Make terminology consistent, e.g. "fx" vs "effects"
 * Possible to make public API pithier?
-* Create dev vs prod bundles?
-* Warn when dispatching variadic with > 2 arguments
-* Validate interceptors
 * Debug tracing

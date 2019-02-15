@@ -2,7 +2,7 @@ import test from 'ava'
 import {
   path,
   payload,
-  validateInterceptors,
+  assertValidInterceptors,
   dbHandlerToInterceptor,
   fxHandlerToInterceptor,
   runInterceptorQueue,
@@ -167,19 +167,19 @@ test('payload > replaces the event tuple with just its payload', t => {
   })
 })
 
-test('validateInterceptors > does not throw for valid interceptors', t => {
+test('assertValidInterceptors > does not throw for valid interceptors', t => {
   const validInterceptors = [
     {id: 'foo', before() {}, after() {}},
     {id: 'foo', before() {}},
     {id: 'foo', after() {}},
   ]
   validInterceptors.forEach(interceptor => {
-    validateInterceptors([interceptor])
+    assertValidInterceptors([interceptor])
   })
   t.pass()
 })
 
-test('validateInterceptors > throws for invalid interceptors', t => {
+test('assertValidInterceptors > throws for invalid interceptors', t => {
   const invalidInterceptors = [
     [
       null,
@@ -209,6 +209,6 @@ test('validateInterceptors > throws for invalid interceptors', t => {
   ]
 
   invalidInterceptors.forEach(([interceptor, expectedError]) => {
-    t.throws(() => validateInterceptors([interceptor], ''), expectedError)
+    t.throws(() => assertValidInterceptors([interceptor], ''), expectedError)
   })
 })
