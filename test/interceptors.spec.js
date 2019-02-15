@@ -5,7 +5,7 @@ import {
   validateInterceptors,
   dbHandlerToInterceptor,
   fxHandlerToInterceptor,
-  runInterceptors,
+  runInterceptorQueue,
   switchDirections,
 } from '../lib/interceptors.js'
 
@@ -22,7 +22,7 @@ function createContext(context) {
 }
 
 function runAndStripInterceptors(context, direction) {
-  context = runInterceptors(context, direction)
+  context = runInterceptorQueue(context, direction)
   delete context.queue
   delete context.stack
   return context
@@ -124,7 +124,7 @@ test('path > applies the updated db value to the original DB at `path`', t => {
       },
     },
   })
-  context = runInterceptors(context, 'before')
+  context = runInterceptorQueue(context, 'before')
   context = switchDirections(context)
   context = runAndStripInterceptors(context, 'after')
   t.deepEqual(context, {
