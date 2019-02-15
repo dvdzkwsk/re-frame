@@ -1,5 +1,5 @@
 import test from 'ava'
-import createAtom from '../lib/create-atom.js'
+import {createAtom} from '../lib/create-atom.js'
 
 test('deref > returns the current value inside the atom', t => {
   const atom = createAtom('hello')

@@ -1,5 +1,5 @@
 import test from 'ava'
-import createEventQueue from '../lib/create-event-queue.js'
+import {createEventQueue} from '../lib/create-event-queue.js'
 
 function size(queue) {
   return queue.size()
