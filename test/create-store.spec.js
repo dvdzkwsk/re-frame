@@ -15,7 +15,7 @@ test("throws if a dispatched event type hasn't been registered with the store", 
   const store = reframe.createStore(0)
   t.throws(() => {
     store.dispatchSync(['unregistered'])
-  }, 'You dispatched an event type that isn\'t registered with the store. Please register "unregistered" with registerEventDB or registerEventFX.')
+  }, 'You dispatched an event that isn\'t registered with the store. Please register "unregistered" with registerEventDB or registerEventFX.')
 })
 
 test('dispatch > EventDB handler updates DB state', async t => {
