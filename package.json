@@ -4,13 +4,10 @@
   "description": "JavaScript port of Clojure's popular re-frame library",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
-  "main": "index.js",
-  "module": "index.js",
+  "main": "re-frame.js",
   "sideEffects": false,
   "files": [
-    "index.js",
-    "development.js",
-    "production.js",
+    "re-frame.js",
     "LICENSE"
   ],
   "scripts": {
@@ -30,7 +27,6 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@ampproject/rollup-plugin-closure-compiler": "^0.8.5",
     "ava": "^1.0.1",
     "esm": "^3.0.84",
     "prettier": "^1.15.3",
