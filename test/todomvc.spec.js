@@ -1,5 +1,5 @@
 import test from 'ava'
-import {createStore, path, payload} from '../lib/index.js'
+import {createStore, path, payload} from '../lib/re-frame.js'
 import {assoc} from '../lib/utilities.js'
 
 const flush = () => new Promise(resolve => setTimeout(resolve))
@@ -48,13 +48,13 @@ test('Can toggle a todo between complete and incomplete', async t => {
   const store = makeStore()
   store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
   await flush()
-  t.true(findTodo(TODO_LEARN_REFRAME).completed)
+  t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
 
   store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
   await flush()
-  t.false(findTodo(TODO_LEARN_REFRAME).completed)
+  t.is(findTodo(TODO_LEARN_REFRAME).completed, false)
 
   store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
   await flush()
-  t.true(findTodo(TODO_LEARN_REFRAME).completed)
+  t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
 })

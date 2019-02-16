@@ -1,5 +1,5 @@
 import test from 'ava'
-import * as reframe from '../lib/index.js'
+import * as reframe from '../lib/re-frame.js'
 import {assertValidInterceptors} from '../lib/interceptors.js'
 
 test('exports `createStore`', t => {

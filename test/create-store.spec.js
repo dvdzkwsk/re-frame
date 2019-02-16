@@ -1,5 +1,5 @@
 import test from 'ava'
-import * as reframe from '../lib/index.js'
+import * as reframe from '../lib/re-frame.js'
 
 function processDispatchedEvents() {
   return new Promise(resolve => setTimeout(resolve))

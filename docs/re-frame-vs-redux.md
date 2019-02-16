@@ -7,7 +7,7 @@ const event  = ['add', 5]                   // re-frame
 const action = { type: 'add', payload: 5 }  // redux
 ```
 
-1. In re-frame, an "EventDB handler" can be thought of as nearly the same thing as a redux "reducer".
+2. In re-frame, an "EventDB handler" can be thought of as nearly the same thing as a redux "reducer".
 
 ```js
 // re-frame event handlers
@@ -31,4 +31,4 @@ const store = redux.createStore(reducer)
 store.dispatch({ type: 'increment' })
 ```
 
-1. When using redux's `combineReducers` function, all combined reducers will be called when an action is dispatched, regardless of whether or not they care about it. This can be used to implement generic reducers that act on arbitrary actions. This is not possible in re-frame, since an event is sent directly to its corresponding handler. You can achieve a similar effect, though, by using **interceptors**.
+3. When using redux's `combineReducers` function, all combined reducers will be called when an action is dispatched, regardless of whether or not they care about it. This can be used to implement generic reducers that act on arbitrary actions. This is not possible in re-frame, since an event is sent directly to its corresponding handler. You can achieve a similar effect, though, by using **interceptors**.

@@ -1,7 +1,7 @@
 import replace from 'rollup-plugin-replace'
 
 const config = {
-  input: 'lib/index.js',
+  input: 'lib/re-frame.js',
   output: {
     file: `dist/re-frame.js`,
     format: 'esm',

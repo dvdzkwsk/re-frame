@@ -4,11 +4,11 @@
 
 JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, patterns, and terminology. All design credit goes to the original authors — thank you for the inspiration.
 
-## What is re-frame?
+## Why re-frame?
 
 Re-frame helps make state management predictable, testable, and pragmatic. From a high-level, re-frame is flux-like with events and event handlers, which are similar to [redux's actions and reducers](./docs/re-frame-vs-redux.md). Compared to redux, re-frame is more feature complete out of the box, with built-in interceptors and subscriptions. You'll find that you can be productive without needing to reach for third-party middleware.
 
-## Installation and Usage
+## Installation
 
 ```sh
 # npm users
@@ -17,6 +17,8 @@ npm install --save @re-frame/core
 # yarn users
 yarn add @re-frame/core
 ```
+
+## Usage
 
 ```js
 import {createStore} from '@re-frame/core'
