@@ -13,4 +13,5 @@ on_error () {
 trap on_error ERR
 
 clean
+yarn tsc
 yarn rollup -c

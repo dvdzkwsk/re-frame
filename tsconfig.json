@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "es2015",
+    "allowJs": true,
+    "checkJs": true,
+    "moduleResolution": "node",
+    "noEmit": true
+  },
+  "include": ["lib"]
+}
