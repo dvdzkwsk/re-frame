@@ -39,7 +39,7 @@ test('dispatch > throws if called with an unwrapped string', async t => {
   const store = reframe.createStore(0)
   t.throws(() => {
     store.dispatch('increment')
-  }, 'You dispatched an invalid event. An event is an array that looks like [eventId] or [eventId, payload].')
+  }, 'You dispatched an invalid event. An event is an array that looks like [id] or [id, payload].')
 })
 
 test('dispatch > does not process the event immediately', async t => {
@@ -152,4 +152,75 @@ test('EventFX > throws if a requested event has not been registered', t => {
   t.throws(() => {
     store.dispatchSync(['create_effect'])
   }, 'The EventFX handler "create_effect" attempted to create an effect "effectThatDoesntExist", but that effect has not been registered.')
+})
+
+test('subscribe > throws if the target subscription has not been registered', t => {
+  const store = reframe.createStore()
+  t.throws(() => {
+    store.subscribe(['unregistered'])
+  }, 'You attempted to subscribe to "unregistered", but no subscription has been registered with that id.')
+})
+
+test('subscribe > returns an atom with the current computed value for the subscription', t => {
+  const store = reframe.createStore({
+    todos: ['foo', 'bar', 'baz'],
+  })
+  store.registerSubscription('todos', (db, query) => {
+    return db.todos
+  })
+  const todos = store.subscribe(['todos'])
+  t.deepEqual(todos.deref(), ['foo', 'bar', 'baz'])
+  todos._dispose()
+})
+
+test('subscribe > provides the query vector to the subscription handler', t => {
+  const store = reframe.createStore({
+    todos: [],
+  })
+  store.registerEventDB('add-todo', (db, event) => ({
+    ...db,
+    todos: db.todos.concat(event[1]),
+  }))
+  store.registerSubscription('todos', (db, query) => {
+    return db.todos.filter(todo => todo.includes(query[1]))
+  })
+  const todos = store.subscribe(['todos', 'baz']) // look for todos that match "baz"
+  t.deepEqual(todos.deref(), [])
+
+  store.dispatchSync(['add-todo', 'foo'])
+  t.deepEqual(todos.deref(), [])
+
+  store.dispatchSync(['add-todo', 'bar'])
+  t.deepEqual(todos.deref(), [])
+
+  store.dispatchSync(['add-todo', 'baz'])
+  t.deepEqual(todos.deref(), ['baz'])
+
+  todos._dispose()
+})
+
+test('subscribe > recomputes the value in the computed atom whenever the store changes', t => {
+  const store = reframe.createStore({
+    todos: [],
+  })
+  store.registerEventDB('add-todo', (db, event) => ({
+    ...db,
+    todos: db.todos.concat(event[1]),
+  }))
+  store.registerSubscription('todos', (db, query) => {
+    return db.todos
+  })
+  const todos = store.subscribe(['todos'])
+  t.deepEqual(todos.deref(), [])
+
+  store.dispatchSync(['add-todo', 'foo'])
+  t.deepEqual(todos.deref(), ['foo'])
+
+  store.dispatchSync(['add-todo', 'bar'])
+  t.deepEqual(todos.deref(), ['foo', 'bar'])
+
+  store.dispatchSync(['add-todo', 'baz'])
+  t.deepEqual(todos.deref(), ['foo', 'bar', 'baz'])
+
+  todos._dispose()
 })
