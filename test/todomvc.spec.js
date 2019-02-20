@@ -42,10 +42,18 @@ const makeStore = () => {
 }
 
 test('Can toggle a todo between complete and incomplete', async t => {
-  const findTodo = todo =>
-    store.snapshot().db.todos.find(td => td.description === todo.description)
-
   const store = makeStore()
+  store.registerSubscription('todo', (db, [id, todo]) => {
+    return db.todos.find(td => td.description === todo.description)
+  })
+
+  const findTodo = todo => {
+    const atom = store.subscribe(['todo', todo])
+    const value = atom.deref()
+    atom._dispose()
+    return value
+  }
+
   store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
   await flush()
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)

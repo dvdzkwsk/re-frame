@@ -8,7 +8,11 @@ function processDispatchedEvents() {
 test('accepts an optional initial state', t => {
   const initialState = {foo: 'bar'}
   const store = reframe.createStore(initialState)
-  t.is(store.snapshot().db, initialState)
+
+  store.registerSubscription('db', db => db)
+  const db = store.subscribe(['db'])
+  t.deepEqual(db.deref(), {foo: 'bar'})
+  db._dispose()
 })
 
 test("throws if a dispatched event type hasn't been registered with the store", t => {
@@ -20,19 +24,24 @@ test("throws if a dispatched event type hasn't been registered with the store", 
 
 test('dispatch > EventDB handler updates DB state', async t => {
   const store = reframe.createStore(1)
+  store.registerSubscription('db', db => db)
+  const db = store.subscribe(['db'])
+
   store.registerEventDB('double', db => db * 2)
 
   store.dispatch(['double'])
   await processDispatchedEvents()
-  t.is(store.snapshot().db, 2)
+  t.is(db.deref(), 2)
 
   store.dispatch(['double'])
   await processDispatchedEvents()
-  t.is(store.snapshot().db, 4)
+  t.is(db.deref(), 4)
 
   store.dispatch(['double'])
   await processDispatchedEvents()
-  t.is(store.snapshot().db, 8)
+  t.is(db.deref(), 8)
+
+  db._dispose()
 })
 
 test('dispatch > throws if called with an unwrapped string', async t => {
@@ -107,40 +116,6 @@ test('dispatchSync > processes an event ahead of the existing queue', async t =>
   t.deepEqual(processedEvents, [['sync']])
   await processDispatchedEvents()
   t.deepEqual(processedEvents, [['sync'], ['async'], ['async'], ['async']])
-})
-
-test('snapshot > returns an object containing the current state', async t => {
-  const store = reframe.createStore(0)
-  store.registerEventDB('increment', db => db + 1)
-
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  await processDispatchedEvents()
-  const snapshot = store.snapshot() // should be 3
-
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  await processDispatchedEvents()
-
-  t.is(snapshot.db, 3)
-  t.is(store.snapshot().db, 6)
-})
-
-test('snapshot > can restore store to snapshotted state', async t => {
-  const store = reframe.createStore(0)
-  store.registerEventDB('increment', db => db + 1)
-  const snapshot = store.snapshot()
-
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  store.dispatch(['increment'])
-  await processDispatchedEvents()
-
-  t.is(store.snapshot().db, 3)
-  snapshot.restore()
-  t.is(store.snapshot().db, 0)
 })
 
 test('EventFX > throws if a requested event has not been registered', t => {

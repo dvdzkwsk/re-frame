@@ -31,11 +31,6 @@ test('exports `createStore`', t => {
     'store.registerSubscription is exported as a function'
   )
   t.is(
-    typeof store.snapshot,
-    'function',
-    'store.snapshot is exported as a function'
-  )
-  t.is(
     typeof store.subscribe,
     'function',
     'store.subscribe is exported as a function'
