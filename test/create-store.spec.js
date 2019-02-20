@@ -5,6 +5,15 @@ function processDispatchedEvents() {
   return new Promise(resolve => setTimeout(resolve))
 }
 
+// Switch to development mode for these tests because we want to test
+// errors and warnings that are disabled in production builds.
+test.beforeEach(() => {
+  process.env.NODE_ENV = 'development'
+})
+test.afterEach(() => {
+  process.env.NODE_ENV = 'test'
+})
+
 test('accepts an optional initial state', t => {
   const initialState = {foo: 'bar'}
   const store = reframe.createStore(initialState)

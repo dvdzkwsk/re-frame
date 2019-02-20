@@ -12,7 +12,7 @@
   ],
   "scripts": {
     "build": "./build.sh",
-    "test": "NODE_ENV=development ava"
+    "test": "ava"
   },
   "ava": {
     "require": [
