@@ -2,7 +2,7 @@ import test from 'ava'
 import {createStore, path, payload} from '../lib/re-frame.js'
 import {assoc} from '../lib/utilities.js'
 
-const flush = () => new Promise(resolve => setTimeout(resolve))
+const flush = ms => new Promise(resolve => setTimeout(resolve))
 
 const makeTodo = description => ({
   description,
@@ -38,10 +38,36 @@ const makeStore = () => {
       })
   )
 
+  store.registerEventDB(
+    'create-todo-success',
+    [path('todos'), payload],
+    (todos, todo) => todos.concat(todo)
+  )
+
+  store.registerEventFX('create-todo', [payload], (cofx, json) => ({
+    http: {
+      method: 'POST',
+      url: '/create-todo',
+      body: json,
+      success: 'create-todo-success',
+    },
+  }))
+
+  store.registerEffect('http', config => {
+    // simulate a network request
+    Promise.resolve().then(() => {
+      switch (config.url) {
+        case '/create-todo':
+          store.dispatchSync([config.success, config.body])
+          break
+      }
+    })
+  })
+
   return store
 }
 
-test('Can toggle a todo between complete and incomplete', async t => {
+test('Can toggle a todo between complete and incomplete', t => {
   const store = makeStore()
   store.registerSubscription('todo', (db, [id, todo]) => {
     return db.todos.find(td => td.description === todo.description)
@@ -54,15 +80,37 @@ test('Can toggle a todo between complete and incomplete', async t => {
     return value
   }
 
-  store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
-  await flush()
+  store.dispatchSync(['toggle-completed', TODO_LEARN_REFRAME])
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
 
-  store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
-  await flush()
+  store.dispatchSync(['toggle-completed', TODO_LEARN_REFRAME])
   t.is(findTodo(TODO_LEARN_REFRAME).completed, false)
 
-  store.dispatch(['toggle-completed', TODO_LEARN_REFRAME])
-  await flush()
+  store.dispatchSync(['toggle-completed', TODO_LEARN_REFRAME])
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
+})
+
+test('Can create a todo', async t => {
+  const store = makeStore()
+
+  store.registerSubscription('todos', db => db.todos)
+  const todos = store.subscribe(['todos'])
+
+  store.dispatchSync([
+    'create-todo',
+    {
+      description: 'Create a new todo',
+      completed: false,
+    },
+  ])
+  await flush()
+  const todo = todos
+    .deref()
+    .find(todo => todo.description === 'Create a new todo')
+
+  t.is(todos.deref().length, 4)
+  t.deepEqual(todo, {
+    description: 'Create a new todo',
+    completed: false,
+  })
 })
