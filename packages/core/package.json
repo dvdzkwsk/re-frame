@@ -1,0 +1,22 @@
+{
+  "name": "@re-frame/core",
+  "version": "0.1.4",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "description": "JavaScript port of Clojure's popular re-frame library",
+  "license": "MIT",
+  "main": "re-frame.js",
+  "sideEffects": false,
+  "files": [
+    "re-frame.js",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "rm -rf dist && tsc && rollup -c && cp {LICENSE,package.json} dist",
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  }
+}

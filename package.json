@@ -1,20 +1,21 @@
 {
-  "name": "@re-frame/core",
+  "name": "@re-frame/workspace",
+  "private": true,
   "version": "0.1.4",
-  "description": "JavaScript port of Clojure's popular re-frame library",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
-  "license": "MIT",
-  "main": "re-frame.js",
-  "sideEffects": false,
-  "files": [
-    "re-frame.js",
-    "LICENSE"
+  "description": "JavaScript port of Clojure's popular re-frame library",
+  "workspaces": [
+    "packages/*"
   ],
+  "license": "MIT",
   "scripts": {
-    "build": "./build.sh",
+    "build": "lerna run build",
     "test": "ava"
   },
   "ava": {
+    "files": [
+      "packages/**/*.spec.js"
+    ],
     "require": [
       "esm"
     ]
@@ -28,6 +29,7 @@
   "devDependencies": {
     "ava": "^1.2.1",
     "esm": "^3.2.5",
+    "lerna": "^3.13.0",
     "prettier": "^1.16.4",
     "rollup": "^1.2.2",
     "typescript": "^3.3.3"

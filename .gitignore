@@ -5,6 +5,3 @@ node_modules
 
 # built files
 dist
-
-# published files
-re-frame.js
