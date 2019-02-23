@@ -11,7 +11,7 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "rm -rf dist && tsc && rollup -c && cp {README.md,LICENSE,package.json} dist",
+    "build": "make",
     "test": "ava"
   },
   "ava": {
