@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/core",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
