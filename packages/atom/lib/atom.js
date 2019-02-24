@@ -3,7 +3,7 @@
  * @param {*} [initialValue]
  * @returns {Atom}
  */
-export function createAtom(initialValue) {
+export function atom(initialValue) {
   var _value = initialValue
   var _watchers = []
 

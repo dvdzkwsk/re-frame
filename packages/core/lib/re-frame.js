@@ -1,5 +1,5 @@
+import {atom} from '@re-frame/atom'
 import {assoc, flatten} from './utilities.js'
-import {createAtom} from './create-atom.js'
 import {createEventQueue} from './create-event-queue.js'
 import {
   assertValidInterceptors,
@@ -61,7 +61,7 @@ import {
  */
 export function createStore(initialState) {
   // APP_DB is an atom that contains the current state of the store.
-  var APP_DB = createAtom(initialState)
+  var APP_DB = atom(initialState)
 
   // --- Event Processing -----------------------------------------------------
   /**
@@ -240,29 +240,29 @@ export function createStore(initialState) {
     if (process.env.NODE_ENV === 'development') {
       validateQuery(query)
     }
-    var atom = createAtom()
-    var reset = atom.reset
-    atom.swap = atom.reset = function() {
+    var subscription = atom()
+    var reset = subscription.reset
+    subscription.swap = subscription.reset = function() {
       throw new Error(
         'Cannot call swap() or reset() on an atom created by subscribe().'
       )
     }
 
-    atom._recompute = function(db) {
+    subscription._recompute = function(db) {
       var handler = getRegistration(SUBSCRIPTION, query[0])
       var nextValue = handler(db, query)
-      if (nextValue !== atom.deref()) {
+      if (nextValue !== subscription.deref()) {
         reset(nextValue)
       }
     }
-    atom._recompute(APP_DB.deref())
-    atom._dispose = function() {
+    subscription._recompute(APP_DB.deref())
+    subscription._dispose = function() {
       ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.filter(function(sub) {
-        return sub !== atom
+        return sub !== subscription
       })
     }
-    ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.concat(atom)
-    return atom
+    ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.concat(subscription)
+    return subscription
   }
 
   function notifySubscriptions(prevDB, nextDB) {
