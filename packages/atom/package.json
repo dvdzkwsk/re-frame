@@ -5,6 +5,9 @@
   "license": "MIT",
   "main": "./lib/atom.js",
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "atom.js",
     "LICENSE",
