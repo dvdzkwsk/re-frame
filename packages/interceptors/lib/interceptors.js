@@ -55,10 +55,10 @@ export var immer = {
   id: 'immer',
   before: function(context) {
     var draft = createDraft(context.coeffects.db)
-    context = assoc(context, ['coeffects', 'db'], draft)
-    return context
+    return assoc(context, ['coeffects', 'db'], draft)
   },
   after: function(context) {
-    return assoc(context, ['effects', 'db'], finishDraft(context.coeffects.db))
+    var db = finishDraft(context.effects.db || context.coeffects.db)
+    return assoc(context, ['effects', 'db'], db)
   },
 }
