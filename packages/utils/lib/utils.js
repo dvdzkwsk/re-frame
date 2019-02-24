@@ -46,20 +46,3 @@ export function assoc(target, path, value) {
   obj[path[path.length - 1]] = value
   return res
 }
-
-// Traverses an array of keys (path) in the target object, returning the value
-// at the last key. If a key does not exist in the object, returns undefined.
-export function getPath(target, path) {
-  for (var i = 0; i < path.length; i++) {
-    if (!target) {
-      return undefined
-    }
-    target = target[path[i]]
-  }
-  return target
-}
-
-var promise = Promise.resolve()
-export function nextTick(fn) {
-  return promise.then(fn)
-}

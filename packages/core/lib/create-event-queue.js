@@ -1,5 +1,3 @@
-import {nextTick} from './utilities.js'
-
 // prettier-ignore
 var STATE_IDLE       = 'IDLE',
     STATE_SCHEDULED  = 'SCHEDULED',
@@ -126,4 +124,9 @@ export function createEventQueue(processEvent) {
       _queue = []
     },
   }
+}
+
+var promise = Promise.resolve()
+function nextTick(fn) {
+  return promise.then(fn)
 }

@@ -1,5 +1,5 @@
 import {atom} from '@re-frame/atom'
-import {assoc, flatten} from './utilities.js'
+import {assoc, flatten} from '@re-frame/utils'
 import {createEventQueue} from './create-event-queue.js'
 import {
   assertValidInterceptors,
@@ -332,6 +332,3 @@ export function createStore(initialState) {
     registerSubscription: registerSubscription,
   }
 }
-
-// --- Exported Interceptors --------------------------------------------------
-export {path, payload} from './interceptors.js'

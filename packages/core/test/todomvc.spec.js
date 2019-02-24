@@ -1,6 +1,6 @@
 import test from 'ava'
-import {createStore, path, payload} from '../lib/re-frame.js'
-import {assoc} from '../lib/utilities.js'
+import {createStore} from '../lib/re-frame.js'
+import {assoc} from '@re-frame/utils'
 
 const flush = ms => new Promise(resolve => setTimeout(resolve))
 
@@ -27,24 +27,21 @@ const makeStore = () => {
     ],
   })
 
-  store.registerEventDB(
-    'toggle-completed',
-    [path('todos'), payload],
-    (todos, {description}) =>
-      todos.map(todo => {
-        return todo.description === description
-          ? assoc(todo, ['completed'], !todo.completed)
-          : todo
-      })
-  )
+  store.registerEventDB('toggle-completed', (db, [_, {description}]) => ({
+    ...db,
+    todos: db.todos.map(todo => {
+      return todo.description === description
+        ? assoc(todo, ['completed'], !todo.completed)
+        : todo
+    }),
+  }))
 
-  store.registerEventDB(
-    'create-todo-success',
-    [path('todos'), payload],
-    (todos, todo) => todos.concat(todo)
-  )
+  store.registerEventDB('create-todo-success', (db, [_, todo]) => ({
+    ...db,
+    todos: db.todos.concat(todo),
+  }))
 
-  store.registerEventFX('create-todo', [payload], (cofx, json) => ({
+  store.registerEventFX('create-todo', (cofx, [_, json]) => ({
     http: {
       method: 'POST',
       url: '/create-todo',

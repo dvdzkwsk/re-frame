@@ -1,5 +1,5 @@
 import test from 'ava'
-import {flatten, shallowClone, assoc, getPath} from '../lib/utilities.js'
+import {flatten, shallowClone, assoc} from '../lib/utils.js'
 
 test('flatten > deeply flattens a nested array', t => {
   const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -62,28 +62,4 @@ test('assoc > creates new objects as needed while traversing `path`', t => {
       },
     },
   })
-})
-
-test('getPath > return the value at `path`', t => {
-  t.is(
-    getPath(
-      {
-        a: {
-          b: {
-            c: 2,
-          },
-        },
-      },
-      ['a', 'b', 'c']
-    ),
-    2
-  )
-})
-
-test('getPath > return undefined if `path` does not exist in the target', t => {
-  t.is(getPath({}, ['a', 'b', 'c']), undefined)
-})
-
-test('getPath > allows undefined input objects', t => {
-  t.is(getPath(null, ['a', 'b', 'c']), undefined)
 })

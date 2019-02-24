@@ -1,12 +1,9 @@
 import test from 'ava'
 import {
-  path,
-  payload,
   assertValidInterceptors,
   dbHandlerToInterceptor,
   fxHandlerToInterceptor,
   runInterceptorQueue,
-  switchDirections,
 } from '../lib/interceptors.js'
 
 function createContext(context) {
@@ -74,95 +71,6 @@ test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to c
       db: 2,
       effectA: 1,
       effectB: 2,
-    },
-  })
-})
-
-test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
-  let context = createContext({
-    queue: [path(['foo', 'bar', 'baz'])],
-    effects: {},
-    coeffects: {
-      db: {
-        foo: {
-          bar: {
-            baz: 'bop',
-          },
-        },
-      },
-    },
-  })
-  context = runAndStripInterceptors(context, 'before')
-  t.deepEqual(context, {
-    effects: {},
-    coeffects: {
-      db: 'bop',
-      _originalDB: {
-        foo: {
-          bar: {
-            baz: 'bop',
-          },
-        },
-      },
-    },
-  })
-})
-
-test('path > applies the updated db value to the original DB at `path`', t => {
-  let context = createContext({
-    queue: [
-      path(['foo', 'bar', 'baz']),
-      dbHandlerToInterceptor(db => db.toUpperCase()),
-    ],
-    coeffects: {
-      db: {
-        foo: {
-          bar: {
-            baz: 'bop',
-          },
-        },
-      },
-    },
-  })
-  context = runInterceptorQueue(context, 'before')
-  context = switchDirections(context)
-  context = runAndStripInterceptors(context, 'after')
-  t.deepEqual(context, {
-    coeffects: {
-      db: 'bop',
-      _originalDB: {
-        foo: {
-          bar: {
-            baz: 'bop',
-          },
-        },
-      },
-    },
-    effects: {
-      db: {
-        foo: {
-          bar: {
-            baz: 'BOP',
-          },
-        },
-      },
-    },
-  })
-})
-
-test('payload > replaces the event tuple with just its payload', t => {
-  let context = createContext({
-    queue: [payload],
-    effects: {},
-    coeffects: {
-      event: ['add', 5],
-    },
-  })
-  context = runAndStripInterceptors(context, 'before')
-  t.deepEqual(context, {
-    effects: {},
-    coeffects: {
-      event: 5,
     },
   })
 })

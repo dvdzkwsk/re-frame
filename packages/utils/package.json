@@ -1,13 +1,12 @@
 {
-  "name": "@re-frame/core",
+  "name": "@re-frame/utils",
   "version": "0.3.1",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
-  "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
-  "main": "./lib/re-frame.js",
+  "main": "./lib/utils.js",
   "sideEffects": false,
   "files": [
-    "re-frame.js",
+    "utils.js",
     "LICENSE",
     "README.md"
   ],
@@ -19,9 +18,5 @@
     "require": [
       "esm"
     ]
-  },
-  "dependencies": {
-    "@re-frame/atom": "^0.3.1",
-    "@re-frame/utils": "^0.3.1"
   }
 }

@@ -7,7 +7,7 @@ clean:
 
 bundle:
 	mkdir -p dist
-	cp lib/atom.js dist
+	cp lib/interceptors.js dist
 
 	@# do not use brace expansion or TravisCI will barf
 	cp LICENSE dist
