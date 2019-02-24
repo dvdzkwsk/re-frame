@@ -8,7 +8,8 @@
   "sideEffects": false,
   "files": [
     "re-frame.js",
-    "LICENSE"
+    "LICENSE",
+    "README.md"
   ],
   "scripts": {
     "build": "make",
