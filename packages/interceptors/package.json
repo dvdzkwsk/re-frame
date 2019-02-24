@@ -20,6 +20,7 @@
     ]
   },
   "dependencies": {
-    "@re-frame/utils": "^0.3.1"
+    "@re-frame/utils": "^0.3.1",
+    "immer": "^2.0.0"
   }
 }

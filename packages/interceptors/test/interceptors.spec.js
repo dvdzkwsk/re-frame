@@ -1,5 +1,5 @@
 import test from 'ava'
-import {path, payload} from '../lib/interceptors.js'
+import {path, payload, immer} from '../lib/interceptors.js'
 import {
   runInterceptorQueue,
   switchDirections,
@@ -118,6 +118,56 @@ test('path > applies the updated db value to the original DB at `path`', t => {
             baz: 'BOP',
           },
         },
+      },
+    },
+  })
+})
+
+test('immer > applies normal-looking mutations to db without actually mutating it', t => {
+  const db = {
+    foo: {
+      bar: {
+        baz: 'original',
+      },
+    },
+  }
+  let context = createContext({
+    queue: [
+      immer,
+      {
+        id: 'uppercase',
+        before(context) {
+          const db = context.coeffects.db
+          db.foo.bar.baz = 'changed'
+          return context
+        },
+      },
+    ],
+    coeffects: {
+      db,
+    },
+  })
+  context = runInterceptorQueue(context, 'before')
+  context = switchDirections(context)
+  context = runInterceptors(context, 'after')
+
+  // object references should be broken
+  t.not(db, context.effects.db)
+
+  // old object should not have been mutatted
+  t.deepEqual(db, {
+    foo: {
+      bar: {
+        baz: 'original',
+      },
+    },
+  })
+
+  // new db should have applied the mutations
+  t.deepEqual(context.effects.db, {
+    foo: {
+      bar: {
+        baz: 'changed',
       },
     },
   })
