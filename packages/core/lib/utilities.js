@@ -59,4 +59,7 @@ export function getPath(target, path) {
   return target
 }
 
-export var nextTick = setTimeout
+var promise = Promise.resolve()
+export function nextTick(fn) {
+  return promise.then(fn)
+}
