@@ -208,3 +208,12 @@ test('subscribe > recomputes the value in the computed atom whenever the store c
 
   todos._dispose()
 })
+
+test('Can be de-referenced', t => {
+  const store = reframe.createStore({
+    todos: [],
+  })
+  t.deepEqual(store.deref(), {
+    todos: [],
+  })
+})

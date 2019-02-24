@@ -40,6 +40,7 @@ test('exports `createStore`', t => {
     'function',
     'store.injectCoeffect is exported as a function'
   )
+  t.is(typeof store.deref, 'function', 'store.deref is exported as a function')
 })
 
 test('exports `path` interceptor', t => {
