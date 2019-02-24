@@ -11,14 +11,14 @@ import {
 
 /**
  * Creates an instance of a re-frame store. Like many flux implementations,
- * you dispatch events to the store, and each event is processed by its
- * registered event handler. Because this function creates an instance of
- * a store, the events you dispatch, and handlers you register, are unique
- * to your store.
+ * you dispatch events to the store; those events are then processed by a
+ * their corresponding event handler. Any handlers you register with this
+ * store are not shared with any other store instance. and the same applies
+ * to dispatched events and subscriptions.
  *
- * So, once an event is dispatched, the store checks its id and uses that
- * to look up its corresponding event handler. In the example below,
- * "double" is the event id.
+ * Once an event is dispatched, the store checks its id and uses that to look
+ * up its corresponding event handler. In the example below, "double" is the
+ * event id.
  *
  * ```js
  * const store = createStore()
@@ -26,16 +26,18 @@ import {
  * store.dispatch(['double'])
  * ```
  *
- * There are two primary flavors of event handlers:
+ * Here we registered an "EventDB" handler. There's another flavor of event
+ * handler, called "EventFX":
  *
  * - EventDB handlers always change the state of the store (called "db").
  * - EventFX handlers trigger one or more side effects. If one of those
  * side effects is named "db", then it also updates state of the store.
  *
- * Given this, you can think of EventDB handlers as EventFX handlers that
- * only ever trigger a "db" side effect. It's a bit more nuanced than this
- * in reality, but for starters it's reasonable to think of these as
- * equivalent:
+ * Given this, you can think of EventDB handlers as EventFX handlers that only
+ * ever trigger a "db" side effect. Or, put another way, EventDB handlers are
+ * a subclass of EventFX handlers. It's a bit more nuanced than this in
+ * reality, but it's a reasonable intuition to have at the start. For example,
+ * the two handlers below are functionally equivalent:
  *
  * ```js
  * store.registerEventDB('double-db', db => db * 2)
@@ -240,13 +242,11 @@ export function createStore(initialState) {
     if (process.env.NODE_ENV === 'development') {
       validateQuery(query)
     }
+
     var subscription = atom()
     var reset = subscription.reset
-    subscription.swap = subscription.reset = function() {
-      throw new Error(
-        'Cannot call swap() or reset() on an atom created by subscribe().'
-      )
-    }
+    delete subscription.reset
+    delete subscription.swap
 
     subscription._recompute = function(db) {
       var handler = getRegistration(SUBSCRIPTION, query[0])
