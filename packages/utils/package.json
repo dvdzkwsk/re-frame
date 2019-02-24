@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/utils",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/utils.js",
