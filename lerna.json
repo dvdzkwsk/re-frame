@@ -1,11 +1,4 @@
 {
-  "packages": [
-    "packages/*"
-  ],
-  "version": "0.4.0",
-  "command": {
-    "publish": {
-      "contents": "dist"
-    }
-  }
+  "packages": ["packages/*"],
+  "version": "0.4.0"
 }

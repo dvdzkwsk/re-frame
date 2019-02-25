@@ -1,6 +1,6 @@
 # re-frame
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
-[![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/core)](https://bundlephobia.com/result?p=@re-frame/core)
+[![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/store)](https://bundlephobia.com/result?p=@re-frame/store)
 
 JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, patterns, and terminology. All design credit goes to the original authors — thank you for the inspiration.
 
@@ -12,16 +12,16 @@ Re-frame helps make state management predictable, testable, and pragmatic. From 
 
 ```sh
 # npm users
-npm install --save @re-frame/core
+npm install --save @re-frame/store
 
 # yarn users
-yarn add @re-frame/core
+yarn add @re-frame/store
 ```
 
 ## Usage
 
 ```js
-import {createStore} from '@re-frame/core'
+import {createStore} from '@re-frame/store'
 
 // you can optionally provide an initial state as the first argument
 const store = createStore({ count: 0 })

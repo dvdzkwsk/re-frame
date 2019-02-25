@@ -1,9 +1,9 @@
 {
-  "name": "@re-frame/utils",
+  "name": "@re-frame/event-queue",
   "version": "0.4.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
-  "main": "./lib/utils.js",
+  "main": "./lib/event-queue.js",
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
@@ -14,7 +14,6 @@
     "README.md"
   ],
   "scripts": {
-    "build": "make",
     "test": "ava"
   },
   "ava": {
