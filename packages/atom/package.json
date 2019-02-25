@@ -9,12 +9,11 @@
     "access": "public"
   },
   "files": [
-    "atom.js",
+    "lib",
     "LICENSE",
     "README.md"
   ],
   "scripts": {
-    "build": "make",
     "test": "ava"
   },
   "ava": {

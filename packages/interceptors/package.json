@@ -6,7 +6,7 @@
   "main": "./lib/interceptors.js",
   "sideEffects": false,
   "files": [
-    "interceptors.js",
+    "lib",
     "LICENSE",
     "README.md"
   ],

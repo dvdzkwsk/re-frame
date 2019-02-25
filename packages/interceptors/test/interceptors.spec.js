@@ -3,7 +3,7 @@ import {path, payload, immer} from '../lib/interceptors.js'
 import {
   runInterceptorQueue,
   switchDirections,
-} from '../../core/lib/interceptors'
+} from '../../store/lib/interceptors'
 
 function createContext(context) {
   return Object.assign(

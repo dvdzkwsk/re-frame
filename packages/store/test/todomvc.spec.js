@@ -1,5 +1,5 @@
 import test from 'ava'
-import {createStore} from '../lib/re-frame.js'
+import {createStore} from '../lib/store.js'
 import {assoc} from '@re-frame/utils'
 
 const flush = ms => new Promise(resolve => setTimeout(resolve))
