@@ -52,6 +52,8 @@ import {createEventQueue} from '@re-frame/event-queue'
  * @property {(string, Function) => void} registerEventFX
  * @property {(string, Function) => void} registerEffect
  * @property {(string, Function) => void} registerSubscription
+ * @property {(Function) => void} addPostEventCallback
+ * @property {(Function) => void} removePostEventCallback
  * @returns {Store}
  */
 export function createStore(initialState) {
@@ -64,6 +66,13 @@ export function createStore(initialState) {
    * own internal scheduler for processing events.
    */
   var EVENT_QUEUE = createEventQueue(processEvent)
+
+  /**
+   * Stores callbacks that should be invoked after an event is processed.
+   * Callbacks are added with "store.addPostEventCallback", and removed
+   * with "store.removePostEventCallback".
+   */
+  var postEventCallbacks = []
 
   function processEvent(event) {
     var interceptors = getRegistration(EVENT, event[0])
@@ -78,6 +87,11 @@ export function createStore(initialState) {
     context = runInterceptorQueue(context, 'before')
     context = switchDirections(context)
     context = runInterceptorQueue(context, 'after')
+    if (postEventCallbacks.length) {
+      for (var i = 0; i < postEventCallbacks.length; i++) {
+        postEventCallbacks[i](event)
+      }
+    }
   }
 
   // --- Registrations --------------------------------------------------------
@@ -311,6 +325,14 @@ export function createStore(initialState) {
     }
   }
 
+  // --- Lifecycle Hooks ------------------------------------------------------
+  function addPostEventCallback(cb) {
+    postEventCallbacks.push(cb)
+  }
+  function removePostEventCallback(cb) {
+    postEventCallbacks.splice(postEventCallbacks.indexOf(cb), 1)
+  }
+
   // --- Public API -----------------------------------------------------------
   return {
     deref: APP_DB.deref,
@@ -323,6 +345,8 @@ export function createStore(initialState) {
     registerEventFX: registerEventFX,
     registerEffect: registerEffect,
     registerSubscription: registerSubscription,
+    addPostEventCallback: addPostEventCallback,
+    removePostEventCallback: removePostEventCallback,
   }
 }
 

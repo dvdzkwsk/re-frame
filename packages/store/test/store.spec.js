@@ -217,3 +217,24 @@ test('subscribe > recomputes the value in the computed atom whenever the store c
 
   todos._dispose()
 })
+
+test('addPostEventCallback > callback is called after an event is processed', t => {
+  t.plan(1)
+  const store = reframe.createStore()
+  store.registerEventDB('noop', () => {})
+  store.addPostEventCallback(event => {
+    t.deepEqual(event, ['noop', 'foobar'])
+  })
+  store.dispatchSync(['noop', 'foobar'])
+})
+
+test('removePostEventCallback > removes the callback from the registry', t => {
+  const store = reframe.createStore()
+  const callback = event => t.fail()
+
+  store.registerEventDB('noop', () => {})
+  store.addPostEventCallback(callback)
+  store.removePostEventCallback(callback)
+  store.dispatchSync(['noop', 'foobar'])
+  t.pass()
+})
