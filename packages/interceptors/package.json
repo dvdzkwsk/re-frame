@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/interceptors",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/interceptors.js",
@@ -23,7 +23,7 @@
     ]
   },
   "dependencies": {
-    "@re-frame/utils": "^0.4.1",
+    "@re-frame/utils": "^0.5.0",
     "immer": "^2.0.0"
   }
 }
