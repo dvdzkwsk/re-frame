@@ -36,7 +36,22 @@ test('payload > replaces the event tuple with just its payload', t => {
   t.deepEqual(context, {
     effects: {},
     coeffects: {
-      event: 5,
+      event: [5],
+    },
+  })
+
+  context = createContext({
+    queue: [payload],
+    effects: {},
+    coeffects: {
+      event: ['add', 5, 6, 7],
+    },
+  })
+  context = runInterceptors(context, 'before')
+  t.deepEqual(context, {
+    effects: {},
+    coeffects: {
+      event: [5, 6, 7],
     },
   })
 })

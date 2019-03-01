@@ -18,7 +18,11 @@ import {createDraft, finishDraft} from 'immer'
 export var payload = {
   id: 'payload',
   before: function(context) {
-    return assoc(context, ['coeffects', 'event'], context.coeffects.event[1])
+    return assoc(
+      context,
+      ['coeffects', 'event'],
+      context.coeffects.event.slice(1)
+    )
   },
 }
 
