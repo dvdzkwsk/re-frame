@@ -1,0 +1,29 @@
+{
+  "name": "@re-frame/standalone",
+  "version": "0.5.0",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "license": "MIT",
+  "main": "./lib/standalone.js",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "dependencies": {
+    "@re-frame/effects": "^0.5.0",
+    "@re-frame/interceptors": "^0.5.0",
+    "@re-frame/store": "^0.5.0"
+  }
+}
