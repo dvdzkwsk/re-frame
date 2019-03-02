@@ -5,6 +5,11 @@
 * Implement `after` interceptor
 * Implement `on-changes` interceptor
 
+---- [ Devtools ] -------------------------------
+* enableTimeTravel should insert items in reverse order so that events
+  past MAX_HISTORY_SIZE can be popped(). Currently the entire array must
+  be shifted when.
+
 ---- [ Docs ] -----------------------------------
 * Stress that everything is just an interceptor
 

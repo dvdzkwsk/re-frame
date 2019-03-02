@@ -9,20 +9,23 @@ export function enableEventLogs(store) {
   store.addPostEventCallback(logEvent)
 }
 
-export function enableTimeTravel(store) {
+export function enableTimeTravel(store, opts) {
+  var MAX_HISTORY_SIZE = (opts && opts.maxHistorySize) || 100
+
   function init(db) {
-    db = assoc(db, ['@re-frame/time-travel'], {
-      history: [{db: db}],
-    })
+    var history = new Array(MAX_HISTORY_SIZE)
+    history[0] = {db: db}
+    db = assoc(db, ['@re-frame/time-travel'], {history: history})
     return db
   }
+
   function recordEvent(db, event) {
-    db = assoc(db, ['@re-frame/time-travel'], {
-      history: db['@re-frame/time-travel'].history.concat({
-        db: db,
-        event: event[1],
-      }),
-    })
+    var history = db['@re-frame/time-travel'].history
+    history = history.concat({db: db, event: event[1]})
+    if (history.length > MAX_HISTORY_SIZE) {
+      history = history.slice(1) // TODO: bad, should pop()
+    }
+    db = assoc(db, ['@re-frame/time-travel'], {history: history})
     return db
   }
   function travel(db, event) {
