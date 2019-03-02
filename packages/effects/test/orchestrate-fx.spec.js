@@ -1,5 +1,5 @@
 import test from 'ava'
-import {orchestrate} from '../lib/effects.js'
+import {orchestrate} from '../lib/orchestrate-fx.js'
 
 function spy(impl) {
   impl = impl || (() => {})
