@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
 [![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/store)](https://bundlephobia.com/result?p=@re-frame/store)
 
-JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, patterns, and terminology. All design credit goes to the original authors — thank you for the inspiration.
+JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, terminology, and patterns. All design credit goes to the original authors — thank you for the inspiration.
 
 ## Why re-frame?
 
