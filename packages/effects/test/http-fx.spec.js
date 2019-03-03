@@ -1,10 +1,6 @@
 import test from 'ava'
 import {http} from '../lib/http-fx.js'
 
-async function settlePromises() {
-  await new Promise(res => setTimeout(res))
-}
-
 function spy(impl) {
   impl = impl || (() => {})
   const fn = (...args) => {
@@ -26,14 +22,14 @@ test('makes a fetch request to config.url', async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
+    ok: true,
     headers: {
       get: spy(),
     },
   }
 
   const fx = http(store, {fetch})
-  fx({url: '/fake-url'})
-  await settlePromises()
+  await fx({url: '/fake-url'})
   t.deepEqual(fetch.calls, [{arguments: ['/fake-url', {url: '/fake-url'}]}])
 })
 
@@ -48,8 +44,7 @@ test('on "not ok" response, dispatches response as last value in "failure" event
   }
 
   const fx = http(store, {fetch})
-  fx({url: '/fake-url', success: ['on-success'], failure: ['on-failure']})
-  await settlePromises()
+  await fx({url: '/fake-url', success: ['on-success'], failure: ['on-failure']})
   t.deepEqual(store.dispatch.calls, [{arguments: [['on-failure', response]]}])
 })
 
@@ -64,8 +59,7 @@ test('on "ok" response, dispatches response as last value in "success" event', a
   }
 
   const fx = http(store, {fetch})
-  fx({url: '/fake-url', success: ['on-success']})
-  await settlePromises()
+  await fx({url: '/fake-url', success: ['on-success']})
   t.deepEqual(store.dispatch.calls, [{arguments: [['on-success', response]]}])
 })
 
@@ -85,9 +79,24 @@ test('automatically parses json body if content-type matches "application/json"'
   }
 
   const fx = http(store, {fetch})
-  fx({url: '/fake-url', success: ['on-success']})
-  await settlePromises()
+  await fx({url: '/fake-url', success: ['on-success']})
   t.deepEqual(store.dispatch.calls, [
     {arguments: [['on-success', {mockJsonObject: true}]]},
   ])
+})
+
+test('if response is not "ok" and config.failure is undefined, bubble the promise rejection', async t => {
+  t.plan(1)
+  const store = makeStore()
+  const fetch = spy(() => Promise.resolve(response))
+  const response = {
+    ok: false,
+  }
+
+  const fx = http(store, {fetch})
+  try {
+    await fx({url: '/fake-url'})
+  } catch (e) {
+    t.is(e, response)
+  }
 })

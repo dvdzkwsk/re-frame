@@ -6,7 +6,7 @@ export function http(store, opts) {
       return config.forEach(http)
     }
 
-    fetch(config.url, config)
+    return fetch(config.url, config)
       .then(function(res) {
         if (!res.ok) {
           throw res
@@ -29,6 +29,8 @@ export function http(store, opts) {
         function(err) {
           if (config.failure) {
             store.dispatch(config.failure.concat(err))
+          } else {
+            throw err
           }
         }
       )
