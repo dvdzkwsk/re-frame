@@ -1,15 +1,15 @@
 // prettier-ignore
-var STATE_IDLE       = 'IDLE',
-    STATE_SCHEDULED  = 'SCHEDULED',
-    STATE_RUNNING    = 'RUNNING',
-    STATE_PAUSED     = 'PAUSED',
+var STATE_IDLE       = "IDLE",
+    STATE_SCHEDULED  = "SCHEDULED",
+    STATE_RUNNING    = "RUNNING",
+    STATE_PAUSED     = "PAUSED",
 
-    EVENT_PAUSE      = 'PAUSE',
-    EVENT_RESUME     = 'RESUME',
-    EVENT_ADD_EVENT  = 'ADD_EVENT',
-    EVENT_RUN_QUEUE  = 'RUN_QUEUE',
-    EVENT_EXCEPTION  = 'EXCEPTION',
-    EVENT_FINISH_RUN = 'FINISH_RUN'
+    EVENT_PAUSE      = "PAUSE",
+    EVENT_RESUME     = "RESUME",
+    EVENT_ADD_EVENT  = "ADD_EVENT",
+    EVENT_RUN_QUEUE  = "RUN_QUEUE",
+    EVENT_EXCEPTION  = "EXCEPTION",
+    EVENT_FINISH_RUN = "FINISH_RUN"
 
 export function createEventQueue(processEvent) {
   var _queue = []
