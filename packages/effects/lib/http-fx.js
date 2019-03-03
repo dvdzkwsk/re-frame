@@ -1,5 +1,5 @@
 export function http(store, opts) {
-  var fetch = (opts && opts.fetch) || fetch
+  var fetch = (opts && opts.fetch) || window.fetch
 
   return function http(config) {
     if (Array.isArray(config)) {
