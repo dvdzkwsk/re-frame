@@ -11,11 +11,11 @@ export function http(store, opts) {
         if (!res.ok) {
           throw res
         }
-        var contentType = res.headers.get('content-type')
+        var contentType = res.headers.get("content-type")
         if (!contentType) {
           return res
         }
-        if (contentType.indexOf('application/json') !== -1) {
+        if (contentType.indexOf("application/json") !== -1) {
           return res.json()
         }
         return res

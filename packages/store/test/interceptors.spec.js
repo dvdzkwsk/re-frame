@@ -1,10 +1,10 @@
-import test from 'ava'
+import test from "ava"
 import {
   assertValidInterceptors,
   dbHandlerToInterceptor,
   fxHandlerToInterceptor,
   runInterceptorQueue,
-} from '../lib/interceptors.js'
+} from "../lib/interceptors.js"
 
 function createContext(context) {
   return Object.assign(
@@ -25,7 +25,7 @@ function runAndStripInterceptors(context, direction) {
   return context
 }
 
-test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx.effects.db', t => {
+test("dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx.effects.db", t => {
   let context = createContext({
     coeffects: {
       db: 1,
@@ -36,7 +36,7 @@ test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx
       }),
     ],
   })
-  context = runAndStripInterceptors(context, 'before')
+  context = runAndStripInterceptors(context, "before")
   t.deepEqual(context, {
     coeffects: {
       db: 1,
@@ -47,7 +47,7 @@ test('dbHandlerToInterceptor > applies the result of `handler(db, event)` to ctx
   })
 })
 
-test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to ctx.effects', t => {
+test("fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to ctx.effects", t => {
   let context = createContext({
     coeffects: {
       db: 1,
@@ -62,7 +62,7 @@ test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to c
       }),
     ],
   })
-  context = runAndStripInterceptors(context, 'before')
+  context = runAndStripInterceptors(context, "before")
   t.deepEqual(context, {
     coeffects: {
       db: 1,
@@ -75,11 +75,11 @@ test('fxHandlerToInterceptor > applies the result of `handler(cofx, event)` to c
   })
 })
 
-test('assertValidInterceptors > does not throw for valid interceptors', t => {
+test("assertValidInterceptors > does not throw for valid interceptors", t => {
   const validInterceptors = [
-    {id: 'foo', before() {}, after() {}},
-    {id: 'foo', before() {}},
-    {id: 'foo', after() {}},
+    {id: "foo", before() {}, after() {}},
+    {id: "foo", before() {}},
+    {id: "foo", after() {}},
   ]
   validInterceptors.forEach(interceptor => {
     assertValidInterceptors([interceptor])
@@ -87,36 +87,36 @@ test('assertValidInterceptors > does not throw for valid interceptors', t => {
   t.pass()
 })
 
-test('assertValidInterceptors > throws for invalid interceptors', t => {
+test("assertValidInterceptors > throws for invalid interceptors", t => {
   const invalidInterceptors = [
     [
       null,
-      'Interceptor at index 0 was undefined. Check for spelling mistakes or missing imports.',
+      "Interceptor at index 0 was undefined. Check for spelling mistakes or missing imports.",
     ],
     [
       () => {},
-      'Interceptor at index 0 was a function. This likely means you forgot to call the function in order to create the interceptor.',
+      "Interceptor at index 0 was a function. This likely means you forgot to call the function in order to create the interceptor.",
     ],
     [
       2,
-      'Interceptor at index 0 was an invalid type. Received number when it should be an object.',
+      "Interceptor at index 0 was an invalid type. Received number when it should be an object.",
     ],
     [{}, 'Interceptor at index 0 was missing an "id" key.'],
     [
-      {id: 'foo'},
+      {id: "foo"},
       'Interceptor with id "foo" was missing a "before" or "after" hook. At least one is required.',
     ],
     [
-      {id: 'foo', before: {}},
+      {id: "foo", before: {}},
       'Interceptor with id "foo" had a "before" hook but its value was not a function.',
     ],
     [
-      {id: 'foo', after: {}},
+      {id: "foo", after: {}},
       'Interceptor with id "foo" had an "after" hook but its value was not a function.',
     ],
   ]
 
   invalidInterceptors.forEach(([interceptor, expectedError]) => {
-    t.throws(() => assertValidInterceptors([interceptor], ''), expectedError)
+    t.throws(() => assertValidInterceptors([interceptor], ""), expectedError)
   })
 })

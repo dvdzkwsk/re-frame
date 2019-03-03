@@ -1,9 +1,9 @@
-import test from 'ava'
-import {path, payload, immer} from '../lib/interceptors.js'
+import test from "ava"
+import {path, payload, immer} from "../lib/interceptors.js"
 import {
   runInterceptorQueue,
   switchDirections,
-} from '../../store/lib/interceptors'
+} from "../../store/lib/interceptors"
 
 function createContext(context) {
   return Object.assign(
@@ -24,15 +24,15 @@ function runInterceptors(context, direction) {
   return context
 }
 
-test('payload > replaces the event tuple with just its payload', t => {
+test("payload > replaces the event tuple with just its payload", t => {
   let context = createContext({
     queue: [payload],
     effects: {},
     coeffects: {
-      event: ['add', 5],
+      event: ["add", 5],
     },
   })
-  context = runInterceptors(context, 'before')
+  context = runInterceptors(context, "before")
   t.deepEqual(context, {
     effects: {},
     coeffects: {
@@ -44,10 +44,10 @@ test('payload > replaces the event tuple with just its payload', t => {
     queue: [payload],
     effects: {},
     coeffects: {
-      event: ['add', 5, 6, 7],
+      event: ["add", 5, 6, 7],
     },
   })
-  context = runInterceptors(context, 'before')
+  context = runInterceptors(context, "before")
   t.deepEqual(context, {
     effects: {},
     coeffects: {
@@ -56,29 +56,29 @@ test('payload > replaces the event tuple with just its payload', t => {
   })
 })
 
-test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
+test("path > updates `coeffects.db` to be the value of `db` at `path`", t => {
   let context = createContext({
-    queue: [path(['foo', 'bar', 'baz'])],
+    queue: [path(["foo", "bar", "baz"])],
     effects: {},
     coeffects: {
       db: {
         foo: {
           bar: {
-            baz: 'bop',
+            baz: "bop",
           },
         },
       },
     },
   })
-  context = runInterceptors(context, 'before')
+  context = runInterceptors(context, "before")
   t.deepEqual(context, {
     effects: {},
     coeffects: {
-      db: 'bop',
+      db: "bop",
       _originalDB: {
         foo: {
           bar: {
-            baz: 'bop',
+            baz: "bop",
           },
         },
       },
@@ -86,12 +86,12 @@ test('path > updates `coeffects.db` to be the value of `db` at `path`', t => {
   })
 })
 
-test('path > applies the updated db value to the original DB at `path`', t => {
+test("path > applies the updated db value to the original DB at `path`", t => {
   let context = createContext({
     queue: [
-      path(['foo', 'bar', 'baz']),
+      path(["foo", "bar", "baz"]),
       {
-        id: 'uppercase',
+        id: "uppercase",
         before(context) {
           return {
             ...context,
@@ -106,22 +106,22 @@ test('path > applies the updated db value to the original DB at `path`', t => {
       db: {
         foo: {
           bar: {
-            baz: 'bop',
+            baz: "bop",
           },
         },
       },
     },
   })
-  context = runInterceptorQueue(context, 'before')
+  context = runInterceptorQueue(context, "before")
   context = switchDirections(context)
-  context = runInterceptors(context, 'after')
+  context = runInterceptors(context, "after")
   t.deepEqual(context, {
     coeffects: {
-      db: 'bop',
+      db: "bop",
       _originalDB: {
         foo: {
           bar: {
-            baz: 'bop',
+            baz: "bop",
           },
         },
       },
@@ -130,7 +130,7 @@ test('path > applies the updated db value to the original DB at `path`', t => {
       db: {
         foo: {
           bar: {
-            baz: 'BOP',
+            baz: "BOP",
           },
         },
       },
@@ -138,11 +138,11 @@ test('path > applies the updated db value to the original DB at `path`', t => {
   })
 })
 
-test('immer > applies normal-looking mutations to db without actually mutating it', t => {
+test("immer > applies normal-looking mutations to db without actually mutating it", t => {
   const db = {
     foo: {
       bar: {
-        baz: 'original',
+        baz: "original",
       },
     },
   }
@@ -150,10 +150,10 @@ test('immer > applies normal-looking mutations to db without actually mutating i
     queue: [
       immer,
       {
-        id: 'uppercase',
+        id: "uppercase",
         before(context) {
           const db = context.coeffects.db
-          db.foo.bar.baz = 'changed'
+          db.foo.bar.baz = "changed"
           return {
             ...context,
             effects: {
@@ -168,9 +168,9 @@ test('immer > applies normal-looking mutations to db without actually mutating i
       db,
     },
   })
-  context = runInterceptorQueue(context, 'before')
+  context = runInterceptorQueue(context, "before")
   context = switchDirections(context)
-  context = runInterceptors(context, 'after')
+  context = runInterceptors(context, "after")
 
   // object references should be broken
   t.not(db, context.effects.db)
@@ -181,7 +181,7 @@ test('immer > applies normal-looking mutations to db without actually mutating i
   t.deepEqual(db, {
     foo: {
       bar: {
-        baz: 'original',
+        baz: "original",
       },
     },
   })
@@ -190,17 +190,17 @@ test('immer > applies normal-looking mutations to db without actually mutating i
   t.deepEqual(context.effects.db, {
     foo: {
       bar: {
-        baz: 'changed',
+        baz: "changed",
       },
     },
   })
 })
 
-test('immer > does not require the db to be returned as an effect', t => {
+test("immer > does not require the db to be returned as an effect", t => {
   const db = {
     foo: {
       bar: {
-        baz: 'original',
+        baz: "original",
       },
     },
   }
@@ -208,10 +208,10 @@ test('immer > does not require the db to be returned as an effect', t => {
     queue: [
       immer,
       {
-        id: 'uppercase',
+        id: "uppercase",
         before(context) {
           const db = context.coeffects.db
-          db.foo.bar.baz = 'changed'
+          db.foo.bar.baz = "changed"
           return {
             ...context,
             effects: {},
@@ -223,15 +223,15 @@ test('immer > does not require the db to be returned as an effect', t => {
       db,
     },
   })
-  context = runInterceptorQueue(context, 'before')
+  context = runInterceptorQueue(context, "before")
   context = switchDirections(context)
-  context = runInterceptors(context, 'after')
+  context = runInterceptors(context, "after")
 
   // new db should have applied the mutations
   t.deepEqual(context.effects.db, {
     foo: {
       bar: {
-        baz: 'changed',
+        baz: "changed",
       },
     },
   })

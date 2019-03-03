@@ -1,49 +1,49 @@
-import test from 'ava'
-import {atom} from '../lib/atom.js'
+import test from "ava"
+import {atom} from "../lib/atom.js"
 
-test('deref > returns the current value inside the atom', t => {
-  const a = atom('hello')
-  t.is(a.deref(), 'hello')
+test("deref > returns the current value inside the atom", t => {
+  const a = atom("hello")
+  t.is(a.deref(), "hello")
 })
 
-test('watch > is called whenever the atom changes', t => {
+test("watch > is called whenever the atom changes", t => {
   const calls = []
-  const a = atom('hello')
+  const a = atom("hello")
   const unwatch = a.watch((...args) => calls.push(args))
 
-  a.reset('world')
-  t.deepEqual(calls, [['hello', 'world']])
+  a.reset("world")
+  t.deepEqual(calls, [["hello", "world"]])
 
   a.swap(val => val.toUpperCase())
-  t.deepEqual(calls, [['hello', 'world'], ['world', 'WORLD']])
+  t.deepEqual(calls, [["hello", "world"], ["world", "WORLD"]])
 
   unwatch()
 })
 
-test('watch > returns a function to remove the watcher', t => {
+test("watch > returns a function to remove the watcher", t => {
   const calls = []
-  const a = atom('hello')
+  const a = atom("hello")
   const unwatch = a.watch((...args) => calls.push(args))
 
-  a.reset('world')
+  a.reset("world")
   t.is(calls.length, 1)
 
   unwatch()
-  a.reset('world')
+  a.reset("world")
   t.is(calls.length, 1)
 })
 
-test('reset > updates the value inside the atom to be the provided value', t => {
-  const a = atom('hello')
+test("reset > updates the value inside the atom to be the provided value", t => {
+  const a = atom("hello")
 
-  t.is(a.deref(), 'hello')
-  a.reset('world')
-  t.is(a.deref(), 'world')
+  t.is(a.deref(), "hello")
+  a.reset("world")
+  t.is(a.deref(), "world")
 })
 
-test('swap > updates the value inside the atom to the result of the swap function', t => {
-  const a = atom('hello')
+test("swap > updates the value inside the atom to the result of the swap function", t => {
+  const a = atom("hello")
 
   a.swap(val => val.toUpperCase())
-  t.is(a.deref(), 'HELLO')
+  t.is(a.deref(), "HELLO")
 })

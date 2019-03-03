@@ -1,12 +1,12 @@
-import test from 'ava'
-import {flatten, shallowClone, assoc} from '../lib/utils.js'
+import test from "ava"
+import {flatten, shallowClone, assoc} from "../lib/utils.js"
 
-test('flatten > deeply flattens a nested array', t => {
+test("flatten > deeply flattens a nested array", t => {
   const expected = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
   t.deepEqual(flatten([1, [2, [3, [4, 5, 6]]], 7, 8, [9, 10]]), expected)
 })
 
-test('flatten > retains falsy values', t => {
+test("flatten > retains falsy values", t => {
   const expected = [0, false, 1, null, 2, undefined, void 0, 3]
   t.deepEqual(
     flatten([0, false, 1, [null, [], 2, [undefined, void 0, 3]]]),
@@ -14,10 +14,10 @@ test('flatten > retains falsy values', t => {
   )
 })
 
-test('shallowClone > returns a shallow clone of the supplied object', t => {
+test("shallowClone > returns a shallow clone of the supplied object", t => {
   const obj = {
     a: {
-      b: 'c',
+      b: "c",
     },
   }
   const cloned = shallowClone(obj)
@@ -26,7 +26,7 @@ test('shallowClone > returns a shallow clone of the supplied object', t => {
   t.is(obj.a, cloned.a) // deep objects should not be cloned
 })
 
-test('assoc > returns a new object with the value updated at `path`', t => {
+test("assoc > returns a new object with the value updated at `path`", t => {
   const obj = {
     a: {
       b: {
@@ -34,7 +34,7 @@ test('assoc > returns a new object with the value updated at `path`', t => {
       },
     },
   }
-  const res = assoc(obj, ['a', 'b', 'c'], 2)
+  const res = assoc(obj, ["a", "b", "c"], 2)
   t.deepEqual(res, {
     a: {
       b: {
@@ -52,9 +52,9 @@ test('assoc > returns a new object with the value updated at `path`', t => {
   })
 })
 
-test('assoc > creates new objects as needed while traversing `path`', t => {
+test("assoc > creates new objects as needed while traversing `path`", t => {
   const obj = {}
-  const res = assoc(obj, ['a', 'b', 'c'], 2)
+  const res = assoc(obj, ["a", "b", "c"], 2)
   t.deepEqual(res, {
     a: {
       b: {

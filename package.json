@@ -21,7 +21,6 @@
   },
   "prettier": {
     "semi": false,
-    "singleQuote": true,
     "bracketSpacing": false,
     "trailingComma": "es5"
   },

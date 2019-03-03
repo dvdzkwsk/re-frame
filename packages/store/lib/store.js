@@ -1,6 +1,6 @@
-import {atom} from '@re-frame/atom'
-import {assoc, flatten, shallowClone} from '@re-frame/utils'
-import {createEventQueue} from '@re-frame/event-queue'
+import {atom} from "@re-frame/atom"
+import {assoc, flatten, shallowClone} from "@re-frame/utils"
+import {createEventQueue} from "@re-frame/event-queue"
 
 /**
  * Creates an instance of a re-frame store. Like many flux implementations,
@@ -84,9 +84,9 @@ export function createStore(initialState) {
         event: event,
       },
     }
-    context = runInterceptorQueue(context, 'before')
+    context = runInterceptorQueue(context, "before")
     context = switchDirections(context)
-    context = runInterceptorQueue(context, 'after')
+    context = runInterceptorQueue(context, "after")
     if (postEventCallbacks.length) {
       for (var i = 0; i < postEventCallbacks.length; i++) {
         postEventCallbacks[i](event)
@@ -95,10 +95,10 @@ export function createStore(initialState) {
   }
 
   // --- Registrations --------------------------------------------------------
-  var EVENT = 'EVENT'
-  var EFFECT = 'EFFECT'
-  var COEFFECT = 'COEFFECT'
-  var SUBSCRIPTION = 'SUBSCRIPTION'
+  var EVENT = "EVENT"
+  var EFFECT = "EFFECT"
+  var COEFFECT = "COEFFECT"
+  var SUBSCRIPTION = "SUBSCRIPTION"
   var REGISTRATIONS = {}
   REGISTRATIONS[EVENT] = {}
   REGISTRATIONS[EFFECT] = {}
@@ -106,12 +106,12 @@ export function createStore(initialState) {
   REGISTRATIONS[SUBSCRIPTION] = {}
 
   function registerEventDB(id, interceptors, handler) {
-    if (typeof interceptors === 'function') {
+    if (typeof interceptors === "function") {
       handler = interceptors
       interceptors = []
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventDB handler "' +
@@ -132,12 +132,12 @@ export function createStore(initialState) {
   }
 
   function registerEventFX(id, interceptors, handler) {
-    if (typeof interceptors === 'function') {
+    if (typeof interceptors === "function") {
       handler = interceptors
       interceptors = []
     }
 
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventFX handler "' +
@@ -175,29 +175,29 @@ export function createStore(initialState) {
 
   // --- Dispatch -------------------------------------------------------------
   function dispatch(event) {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       validateEvent(event)
     }
     EVENT_QUEUE.push(event)
   }
 
   function dispatchSync(event) {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       validateEvent(event)
     }
     processEvent(event)
   }
 
   // --- Built-in Effects -----------------------------------------------------
-  registerEffect('db', function(nextDB) {
+  registerEffect("db", function(nextDB) {
     APP_DB.reset(nextDB)
   })
 
-  registerEffect('dispatch', function(event) {
+  registerEffect("dispatch", function(event) {
     dispatch(event)
   })
 
-  registerEffect('dispatchN', function(events) {
+  registerEffect("dispatchN", function(events) {
     for (var i = 0; i < events.length; i++) {
       dispatch(events[i])
     }
@@ -210,29 +210,29 @@ export function createStore(initialState) {
 
   function injectCoeffect(id) {
     return {
-      id: 'inject-coeffect',
+      id: "inject-coeffect",
       before: function before(context) {
         var handler = getRegistration(COEFFECT, id)
-        return assoc(context, ['coeffects'], handler(context.coeffects))
+        return assoc(context, ["coeffects"], handler(context.coeffects))
       },
     }
   }
 
   // Inserts the current app db into coeffects as "db".
-  registerCoeffect('db', function injectDB(coeffects) {
-    return assoc(coeffects, ['db'], APP_DB.deref())
+  registerCoeffect("db", function injectDB(coeffects) {
+    return assoc(coeffects, ["db"], APP_DB.deref())
   })
 
   // The `db` coeffect is used in all event handlers, so we save a single
   // reference to its interceptor as an optimization.
-  var INJECT_DB = injectCoeffect('db')
+  var INJECT_DB = injectCoeffect("db")
 
   // --- Built-in Interceptors ------------------------------------------------
   var RUN_EFFECTS = {
-    id: 'run-effects',
+    id: "run-effects",
     after: function after(context) {
       for (var effectId in context.effects) {
-        if (process.env.NODE_ENV === 'development') {
+        if (process.env.NODE_ENV === "development") {
           validateEffect(context, effectId)
         }
         var handler = getRegistration(EFFECT, effectId)
@@ -246,7 +246,7 @@ export function createStore(initialState) {
   var ACTIVE_SUBSCRIPTIONS = []
 
   function subscribe(query) {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       validateQuery(query)
     }
 
@@ -284,7 +284,7 @@ export function createStore(initialState) {
   function validateQuery(query) {
     if (!Array.isArray(query)) {
       throw new Error(
-        'You called subscribe() with an invalid query. A query is an array that looks like [id] or [id, ...params].'
+        "You called subscribe() with an invalid query. A query is an array that looks like [id] or [id, ...params]."
       )
     }
     if (!getRegistration(SUBSCRIPTION, query[0])) {
@@ -312,7 +312,7 @@ export function createStore(initialState) {
   function validateEvent(event) {
     if (!Array.isArray(event)) {
       throw new Error(
-        'You dispatched an invalid event. An event is an array that looks like [id] or [id, payload].'
+        "You dispatched an invalid event. An event is an array that looks like [id] or [id, payload]."
       )
     }
     if (!getRegistration(EVENT, event[0])) {
@@ -355,11 +355,11 @@ export function createStore(initialState) {
 // automatically applied to the "db" effect.
 function dbHandlerToInterceptor(handler) {
   return {
-    id: 'db-handler',
+    id: "db-handler",
     before: function before(context) {
       var db = context.coeffects.db
       var event = context.coeffects.event
-      return assoc(context, ['effects', 'db'], handler(db, event))
+      return assoc(context, ["effects", "db"], handler(db, event))
     },
   }
 }
@@ -369,10 +369,10 @@ function dbHandlerToInterceptor(handler) {
 // object. This gives it a chance to do more  than just update the db.
 function fxHandlerToInterceptor(handler) {
   return {
-    id: 'fx-handler',
+    id: "fx-handler",
     before: function before(context) {
       var coeffects = context.coeffects
-      return assoc(context, ['effects'], handler(coeffects, coeffects.event))
+      return assoc(context, ["effects"], handler(coeffects, coeffects.event))
     },
   }
 }
@@ -402,30 +402,30 @@ function assertValidInterceptors(interceptors, errorPrefix) {
     var interceptor = interceptors[i]
     var err // Will read as: Interceptor at index N {{err}}
     if (!interceptor) {
-      err = 'was undefined. Check for spelling mistakes or missing imports.'
-    } else if (typeof interceptor === 'function') {
+      err = "was undefined. Check for spelling mistakes or missing imports."
+    } else if (typeof interceptor === "function") {
       err =
-        'was a function. This likely means you forgot to call the function in order to create the interceptor.'
-    } else if (typeof interceptor !== 'object') {
+        "was a function. This likely means you forgot to call the function in order to create the interceptor."
+    } else if (typeof interceptor !== "object") {
       err =
-        'was an invalid type. Received ' +
+        "was an invalid type. Received " +
         typeof interceptor +
-        ' when it should be an object.'
+        " when it should be an object."
     } else if (!interceptor.id) {
       err = 'was missing an "id" key.'
     } else if (!interceptor.before && !interceptor.after) {
       err = 'was missing a "before" or "after" hook. At least one is required.'
-    } else if (interceptor.before && typeof interceptor.before !== 'function') {
+    } else if (interceptor.before && typeof interceptor.before !== "function") {
       err = 'had a "before" hook but its value was not a function.'
-    } else if (interceptor.after && typeof interceptor.after !== 'function') {
+    } else if (interceptor.after && typeof interceptor.after !== "function") {
       err = 'had an "after" hook but its value was not a function.'
     }
     if (err) {
       var identifier =
         interceptor && interceptor.id
           ? 'Interceptor with id "' + interceptor.id + '"'
-          : 'Interceptor at index ' + i
-      throw new Error(errorPrefix + identifier + ' ' + err)
+          : "Interceptor at index " + i
+      throw new Error(errorPrefix + identifier + " " + err)
     }
   }
 }

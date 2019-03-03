@@ -1,15 +1,15 @@
-import {assoc, shallowClone} from '@re-frame/utils'
+import {assoc, shallowClone} from "@re-frame/utils"
 
 // A DB handler receives the current db and event and return a new db.
 // This interceptor wraps that handler so that its return value is
 // automatically applied to the "db" effect.
 export function dbHandlerToInterceptor(handler) {
   return {
-    id: 'db-handler',
+    id: "db-handler",
     before: function before(context) {
       var db = context.coeffects.db
       var event = context.coeffects.event
-      return assoc(context, ['effects', 'db'], handler(db, event))
+      return assoc(context, ["effects", "db"], handler(db, event))
     },
   }
 }
@@ -19,10 +19,10 @@ export function dbHandlerToInterceptor(handler) {
 // object. This gives it a chance to do more  than just update the db.
 export function fxHandlerToInterceptor(handler) {
   return {
-    id: 'fx-handler',
+    id: "fx-handler",
     before: function before(context) {
       var coeffects = context.coeffects
-      return assoc(context, ['effects'], handler(coeffects, coeffects.event))
+      return assoc(context, ["effects"], handler(coeffects, coeffects.event))
     },
   }
 }
@@ -52,30 +52,30 @@ export function assertValidInterceptors(interceptors, errorPrefix) {
     var interceptor = interceptors[i]
     var err // Will read as: Interceptor at index N {{err}}
     if (!interceptor) {
-      err = 'was undefined. Check for spelling mistakes or missing imports.'
-    } else if (typeof interceptor === 'function') {
+      err = "was undefined. Check for spelling mistakes or missing imports."
+    } else if (typeof interceptor === "function") {
       err =
-        'was a function. This likely means you forgot to call the function in order to create the interceptor.'
-    } else if (typeof interceptor !== 'object') {
+        "was a function. This likely means you forgot to call the function in order to create the interceptor."
+    } else if (typeof interceptor !== "object") {
       err =
-        'was an invalid type. Received ' +
+        "was an invalid type. Received " +
         typeof interceptor +
-        ' when it should be an object.'
+        " when it should be an object."
     } else if (!interceptor.id) {
       err = 'was missing an "id" key.'
     } else if (!interceptor.before && !interceptor.after) {
       err = 'was missing a "before" or "after" hook. At least one is required.'
-    } else if (interceptor.before && typeof interceptor.before !== 'function') {
+    } else if (interceptor.before && typeof interceptor.before !== "function") {
       err = 'had a "before" hook but its value was not a function.'
-    } else if (interceptor.after && typeof interceptor.after !== 'function') {
+    } else if (interceptor.after && typeof interceptor.after !== "function") {
       err = 'had an "after" hook but its value was not a function.'
     }
     if (err) {
       var identifier =
         interceptor && interceptor.id
           ? 'Interceptor with id "' + interceptor.id + '"'
-          : 'Interceptor at index ' + i
-      throw new Error(errorPrefix + identifier + ' ' + err)
+          : "Interceptor at index " + i
+      throw new Error(errorPrefix + identifier + " " + err)
     }
   }
 }

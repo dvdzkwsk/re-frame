@@ -1,5 +1,5 @@
-import test from 'ava'
-import {http} from '../lib/http-fx.js'
+import test from "ava"
+import {http} from "../lib/http-fx.js"
 
 function settlePromises() {
   return new Promise(res => setTimeout(res))
@@ -22,7 +22,7 @@ function makeStore() {
   }
 }
 
-test('makes a fetch request to config.url', async t => {
+test("makes a fetch request to config.url", async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
@@ -33,8 +33,8 @@ test('makes a fetch request to config.url', async t => {
   }
 
   const fx = http(store, {fetch})
-  await fx({url: '/fake-url'})
-  t.deepEqual(fetch.calls, [{arguments: ['/fake-url', {url: '/fake-url'}]}])
+  await fx({url: "/fake-url"})
+  t.deepEqual(fetch.calls, [{arguments: ["/fake-url", {url: "/fake-url"}]}])
 })
 
 test('on "not ok" response, dispatches response as last value in "failure" event', async t => {
@@ -48,8 +48,8 @@ test('on "not ok" response, dispatches response as last value in "failure" event
   }
 
   const fx = http(store, {fetch})
-  await fx({url: '/fake-url', success: ['on-success'], failure: ['on-failure']})
-  t.deepEqual(store.dispatch.calls, [{arguments: [['on-failure', response]]}])
+  await fx({url: "/fake-url", success: ["on-success"], failure: ["on-failure"]})
+  t.deepEqual(store.dispatch.calls, [{arguments: [["on-failure", response]]}])
 })
 
 test('on "ok" response, dispatches response as last value in "success" event', async t => {
@@ -63,8 +63,8 @@ test('on "ok" response, dispatches response as last value in "success" event', a
   }
 
   const fx = http(store, {fetch})
-  await fx({url: '/fake-url', success: ['on-success']})
-  t.deepEqual(store.dispatch.calls, [{arguments: [['on-success', response]]}])
+  await fx({url: "/fake-url", success: ["on-success"]})
+  t.deepEqual(store.dispatch.calls, [{arguments: [["on-success", response]]}])
 })
 
 test('automatically parses json body if content-type matches "application/json"', async t => {
@@ -74,8 +74,8 @@ test('automatically parses json body if content-type matches "application/json"'
     ok: true,
     headers: {
       get: spy(header => {
-        if (header === 'content-type') {
-          return 'application/json; charset=utf-8'
+        if (header === "content-type") {
+          return "application/json; charset=utf-8"
         }
       }),
     },
@@ -83,9 +83,9 @@ test('automatically parses json body if content-type matches "application/json"'
   }
 
   const fx = http(store, {fetch})
-  await fx({url: '/fake-url', success: ['on-success']})
+  await fx({url: "/fake-url", success: ["on-success"]})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [['on-success', {mockJsonObject: true}]]},
+    {arguments: [["on-success", {mockJsonObject: true}]]},
   ])
 })
 
@@ -99,13 +99,13 @@ test('if response is not "ok" and config.failure is undefined, bubble the promis
 
   const fx = http(store, {fetch})
   try {
-    await fx({url: '/fake-url'})
+    await fx({url: "/fake-url"})
   } catch (e) {
     t.is(e, response)
   }
 })
 
-test('when config is an Array, runs all requests in parallel', async t => {
+test("when config is an Array, runs all requests in parallel", async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
@@ -116,15 +116,15 @@ test('when config is an Array, runs all requests in parallel', async t => {
   }
 
   const fx = http(store, {fetch})
-  await fx([{url: '/request-1'}, {url: '/request-2'}, {url: '/request-3'}])
+  await fx([{url: "/request-1"}, {url: "/request-2"}, {url: "/request-3"}])
   t.deepEqual(fetch.calls, [
-    {arguments: ['/request-1', {url: '/request-1'}]},
-    {arguments: ['/request-2', {url: '/request-2'}]},
-    {arguments: ['/request-3', {url: '/request-3'}]},
+    {arguments: ["/request-1", {url: "/request-1"}]},
+    {arguments: ["/request-2", {url: "/request-2"}]},
+    {arguments: ["/request-3", {url: "/request-3"}]},
   ])
 })
 
-test('when config is an Array, returns a promise that resolves when all requests are complete', async t => {
+test("when config is an Array, returns a promise that resolves when all requests are complete", async t => {
   const store = makeStore()
   const firstPromise = new Promise(async resolve => {
     await settlePromises()
@@ -149,7 +149,7 @@ test('when config is an Array, returns a promise that resolves when all requests
   }
   const done = spy()
   const fx = http(store, {fetch})
-  fx([{url: '/request-1'}, {url: '/request-2'}, {url: '/request-3'}]).then(done)
+  fx([{url: "/request-1"}, {url: "/request-2"}, {url: "/request-3"}]).then(done)
   await settlePromises()
 
   t.deepEqual(done.calls, [])
