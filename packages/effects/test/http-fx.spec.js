@@ -33,6 +33,25 @@ test('makes a fetch request to config.url', async t => {
   t.deepEqual(fetch.calls, [{arguments: ['/fake-url', {url: '/fake-url'}]}])
 })
 
+test('runs multiple requests if config is an Array', async t => {
+  const store = makeStore()
+  const fetch = spy(() => Promise.resolve(response))
+  const response = {
+    ok: true,
+    headers: {
+      get: spy(),
+    },
+  }
+
+  const fx = http(store, {fetch})
+  await fx([{url: '/request-1'}, {url: '/request-2'}, {url: '/request-3'}])
+  t.deepEqual(fetch.calls, [
+    {arguments: ['/request-1', {url: '/request-1'}]},
+    {arguments: ['/request-2', {url: '/request-2'}]},
+    {arguments: ['/request-3', {url: '/request-3'}]},
+  ])
+})
+
 test('on "not ok" response, dispatches response as last value in "failure" event', async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
