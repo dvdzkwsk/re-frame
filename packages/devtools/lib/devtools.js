@@ -1,7 +1,7 @@
 import {assoc} from '@re-frame/utils'
 
 export function enableEventLogs(store) {
-  function logEvent() {
+  function logEvent(event) {
     if (event[0].indexOf('@re-frame') !== -1) return
     console.log('Event:', event)
   }
