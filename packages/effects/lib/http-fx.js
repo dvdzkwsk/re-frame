@@ -12,12 +12,13 @@ export function http(store, opts) {
           throw res
         }
         var contentType = res.headers.get('content-type')
-        switch (contentType) {
-          case 'application/json':
-            return res.json()
-          default:
-            return res
+        if (!contentType) {
+          return res
         }
+        if (contentType.indexOf('application/json') !== -1) {
+          return res.json()
+        }
+        return res
       })
       .then(
         function(res) {

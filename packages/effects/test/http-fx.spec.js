@@ -69,7 +69,7 @@ test('on "ok" response, dispatches response as last value in "success" event', a
   t.deepEqual(store.dispatch.calls, [{arguments: [['on-success', response]]}])
 })
 
-test('automatically parses json body if response has json content type', async t => {
+test('automatically parses json body if content-type matches "application/json"', async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
@@ -77,7 +77,7 @@ test('automatically parses json body if response has json content type', async t
     headers: {
       get: spy(header => {
         if (header === 'content-type') {
-          return 'application/json'
+          return 'application/json; charset=utf-8'
         }
       }),
     },
