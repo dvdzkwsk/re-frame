@@ -3,7 +3,7 @@ export function http(store, opts) {
 
   return function http(config) {
     if (Array.isArray(config)) {
-      return config.forEach(http)
+      return Promise.all(config.map(http))
     }
 
     return fetch(config.url, config)
@@ -25,6 +25,7 @@ export function http(store, opts) {
           if (config.success) {
             store.dispatch(config.success.concat(res))
           }
+          return res
         },
         function(err) {
           if (config.failure) {
