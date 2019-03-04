@@ -65,5 +65,7 @@ export function enableTimeTravel(store, opts) {
     travel(-1)
   }
   store.addPostEventCallback(recordEvent)
-  store.registerEventDB(TIME_TRAVEL_EVENT, (db, event) => event[1])
+  store.registerEventDB(TIME_TRAVEL_EVENT, function(db, event) {
+    recordEvent(event)
+  })
 }
