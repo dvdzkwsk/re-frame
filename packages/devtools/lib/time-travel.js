@@ -4,7 +4,7 @@
  */
 export function enableTimeTravel(store, opts) {
   var MAX_HISTORY_SIZE = (opts && opts.maxHistorySize) || 100
-  var TIME_TRAVEL_EVENT = "@re-frame/time-travel"
+  var DO_TIME_TRAVEL = "@re-frame/time-travel"
 
   var id = 0 // auto-incrementing id for each history entry
   var cursor = 0 // where are we in history?
@@ -12,7 +12,7 @@ export function enableTimeTravel(store, opts) {
   history[0] = {db: store.deref(), id: id++}
 
   function recordEvent(event) {
-    if (event[0] === TIME_TRAVEL_EVENT) return
+    if (event[0] === DO_TIME_TRAVEL) return
 
     cursor++
     if (cursor >= MAX_HISTORY_SIZE) {
@@ -55,7 +55,7 @@ export function enableTimeTravel(store, opts) {
     }
 
     cursor = nextCursor
-    store.dispatchSync([TIME_TRAVEL_EVENT, history[cursor].db])
+    store.dispatchSync([DO_TIME_TRAVEL, history[cursor].db])
   }
 
   store.next = function() {
@@ -65,7 +65,7 @@ export function enableTimeTravel(store, opts) {
     travel(-1)
   }
   store.addPostEventCallback(recordEvent)
-  store.registerEventDB(TIME_TRAVEL_EVENT, function(db, event) {
-    recordEvent(event)
+  store.registerEventDB(DO_TIME_TRAVEL, function(db, event) {
+    return event[1]
   })
 }

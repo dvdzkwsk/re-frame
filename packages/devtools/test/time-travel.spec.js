@@ -62,7 +62,7 @@ test("cannot travel beyond history", t => {
   t.deepEqual(store.deref(), {count: 4}) // should not have moved
 })
 
-test.only("respects maxHistorySize", t => {
+test("respects maxHistorySize", t => {
   const store = makeStore({events: 4, maxHistorySize: 5})
   store.dispatchSync(["count"])
   store.dispatchSync(["count"])
