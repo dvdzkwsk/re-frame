@@ -1,5 +1,4 @@
 import {assoc} from "@re-frame/utils"
-import {createDraft, finishDraft} from "immer"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
 // care about the `id` of the event, though, and don't want to deal with
@@ -53,16 +52,4 @@ export function path(path) {
       return assoc(context, ["effects", "db"], db)
     },
   }
-}
-
-export var immer = {
-  id: "immer",
-  before: function(context) {
-    var draft = createDraft(context.coeffects.db)
-    return assoc(context, ["coeffects", "db"], draft)
-  },
-  after: function(context) {
-    var db = finishDraft(context.effects.db || context.coeffects.db)
-    return assoc(context, ["effects", "db"], db)
-  },
 }
