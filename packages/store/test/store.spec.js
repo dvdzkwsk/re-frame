@@ -24,11 +24,11 @@ test("accepts an optional initial state", t => {
   db.dispose()
 })
 
-test("Can be de-referenced", t => {
+test('has a "getState" method that returns the current state', t => {
   const store = reframe.createStore({
     todos: [],
   })
-  t.deepEqual(store.deref(), {
+  t.deepEqual(store.getState(), {
     todos: [],
   })
 })

@@ -16,13 +16,13 @@ function makeStore({events, maxHistorySize}) {
 test("can move backwards through time", t => {
   const store = makeStore({events: 4})
   store.previous()
-  t.deepEqual(store.deref(), {count: 3})
+  t.deepEqual(store.getState(), {count: 3})
   store.previous()
-  t.deepEqual(store.deref(), {count: 2})
+  t.deepEqual(store.getState(), {count: 2})
   store.previous()
-  t.deepEqual(store.deref(), {count: 1})
+  t.deepEqual(store.getState(), {count: 1})
   store.previous()
-  t.deepEqual(store.deref(), {count: 0})
+  t.deepEqual(store.getState(), {count: 0})
 })
 
 test("can move forward through time", t => {
@@ -31,15 +31,15 @@ test("can move forward through time", t => {
   store.previous()
   store.previous()
   store.previous()
-  t.deepEqual(store.deref(), {count: 0})
+  t.deepEqual(store.getState(), {count: 0})
   store.next()
-  t.deepEqual(store.deref(), {count: 1})
+  t.deepEqual(store.getState(), {count: 1})
   store.next()
-  t.deepEqual(store.deref(), {count: 2})
+  t.deepEqual(store.getState(), {count: 2})
   store.next()
-  t.deepEqual(store.deref(), {count: 3})
+  t.deepEqual(store.getState(), {count: 3})
   store.next()
-  t.deepEqual(store.deref(), {count: 4})
+  t.deepEqual(store.getState(), {count: 4})
 })
 
 test("cannot travel beyond history", t => {
@@ -49,17 +49,17 @@ test("cannot travel beyond history", t => {
   store.previous()
   store.previous()
   store.previous()
-  t.deepEqual(store.deref(), {count: 0}) // at earliest entry
+  t.deepEqual(store.getState(), {count: 0}) // at earliest entry
   store.previous()
-  t.deepEqual(store.deref(), {count: 0}) // should not have moved
+  t.deepEqual(store.getState(), {count: 0}) // should not have moved
 
   store.next()
   store.next()
   store.next()
   store.next()
-  t.deepEqual(store.deref(), {count: 4}) // at newest entry
+  t.deepEqual(store.getState(), {count: 4}) // at newest entry
   store.next()
-  t.deepEqual(store.deref(), {count: 4}) // should not have moved
+  t.deepEqual(store.getState(), {count: 4}) // should not have moved
 })
 
 test("respects maxHistorySize", t => {
@@ -69,14 +69,14 @@ test("respects maxHistorySize", t => {
   store.dispatchSync(["count"])
   store.dispatchSync(["count"])
   store.dispatchSync(["count"])
-  t.deepEqual(store.deref(), {count: 9}) // at most recent entry
+  t.deepEqual(store.getState(), {count: 9}) // at most recent entry
   store.next()
-  t.deepEqual(store.deref(), {count: 9}) // cannot move any further forward
+  t.deepEqual(store.getState(), {count: 9}) // cannot move any further forward
   store.previous()
   store.previous()
   store.previous()
   store.previous()
-  t.deepEqual(store.deref(), {count: 5}) // at earliest
+  t.deepEqual(store.getState(), {count: 5}) // at earliest
   store.previous()
-  t.deepEqual(store.deref(), {count: 5}) // cannot move any further back
+  t.deepEqual(store.getState(), {count: 5}) // cannot move any further back
 })

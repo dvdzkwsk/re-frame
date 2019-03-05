@@ -9,7 +9,7 @@ export function enableTimeTravel(store, opts) {
   var id = 0 // auto-incrementing id for each history entry
   var cursor = 0 // where are we in history?
   var history = new Array(MAX_HISTORY_SIZE)
-  history[0] = {db: store.deref(), id: id++}
+  history[0] = {db: store.getState(), id: id++}
 
   function recordEvent(event) {
     if (event[0] === DO_TIME_TRAVEL) return
@@ -18,7 +18,7 @@ export function enableTimeTravel(store, opts) {
     if (cursor >= MAX_HISTORY_SIZE) {
       cursor = 0
     }
-    history[cursor] = {db: store.deref(), event: event, id: id++}
+    history[cursor] = {db: store.getState(), event: event, id: id++}
   }
 
   function travel(distance) {

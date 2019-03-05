@@ -42,7 +42,7 @@ import {createEventQueue} from "@re-frame/event-queue"
  * @param {*} [initialState] - the initial state of the store.
  *
  * @typedef {object} Store
- * @property {() => *} deref
+ * @property {() => *} getState
  * @property {(Event) => void} dispatch
  * @property {(Event) => void} dispatchSync
  * @property {(Query) => object} subscribe
@@ -335,7 +335,7 @@ export function createStore(initialState) {
 
   // --- Public API -----------------------------------------------------------
   return {
-    deref: APP_DB.deref,
+    getState: APP_DB.deref,
     dispatch: dispatch,
     dispatchSync: dispatchSync,
     subscribe: subscribe,
