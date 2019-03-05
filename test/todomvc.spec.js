@@ -1,5 +1,5 @@
 import test from "ava"
-import {createStore} from "../lib/store.js"
+import {createStore} from "@re-frame/store"
 import {assoc} from "@re-frame/utils"
 
 const flush = ms => new Promise(resolve => setTimeout(resolve))
@@ -73,7 +73,7 @@ test("Can toggle a todo between complete and incomplete", t => {
   const findTodo = todo => {
     const atom = store.subscribe(["todo", todo])
     const value = atom.deref()
-    atom._dispose()
+    atom.dispose()
     return value
   }
 

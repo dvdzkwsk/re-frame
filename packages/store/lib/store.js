@@ -263,7 +263,7 @@ export function createStore(initialState) {
       }
     }
     subscription._recompute(APP_DB.deref())
-    subscription._dispose = function() {
+    subscription.dispose = function() {
       ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.filter(function(sub) {
         return sub !== subscription
       })

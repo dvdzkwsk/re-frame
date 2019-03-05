@@ -21,7 +21,7 @@ test("accepts an optional initial state", t => {
   store.registerSubscription("db", db => db)
   const db = store.subscribe(["db"])
   t.deepEqual(db.deref(), {foo: "bar"})
-  db._dispose()
+  db.dispose()
 })
 
 test("Can be de-referenced", t => {
@@ -59,7 +59,7 @@ test("dispatch > EventDB handler updates DB state", async t => {
   await processDispatchedEvents()
   t.is(db.deref(), 8)
 
-  db._dispose()
+  db.dispose()
 })
 
 test("dispatch > throws if called with an unwrapped string", async t => {
@@ -163,7 +163,7 @@ test("subscribe > returns an atom with the current computed value for the subscr
   })
   const todos = store.subscribe(["todos"])
   t.deepEqual(todos.deref(), ["foo", "bar", "baz"])
-  todos._dispose()
+  todos.dispose()
 })
 
 test("subscribe > provides the query vector to the subscription handler", t => {
@@ -189,7 +189,7 @@ test("subscribe > provides the query vector to the subscription handler", t => {
   store.dispatchSync(["add-todo", "baz"])
   t.deepEqual(todos.deref(), ["baz"])
 
-  todos._dispose()
+  todos.dispose()
 })
 
 test("subscribe > recomputes the value in the computed atom whenever the store changes", t => {
@@ -215,7 +215,7 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
   store.dispatchSync(["add-todo", "baz"])
   t.deepEqual(todos.deref(), ["foo", "bar", "baz"])
 
-  todos._dispose()
+  todos.dispose()
 })
 
 test("addPostEventCallback > callback is called after an event is processed", t => {
