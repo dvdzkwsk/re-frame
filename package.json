@@ -1,7 +1,7 @@
 {
   "name": "@re-frame/workspace",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.0.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "description": "JavaScript port of Clojure's popular re-frame library",
   "workspaces": [
