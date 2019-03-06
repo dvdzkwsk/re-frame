@@ -250,13 +250,30 @@ export function createStore(initialState) {
       validateQuery(query)
     }
 
+    var id = query[0]
+    if (!query[1]) {
+      for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
+        var existingSubscription = ACTIVE_SUBSCRIPTIONS[i]
+        if (
+          existingSubscription._args.length === 0 &&
+          existingSubscription.id === id
+        ) {
+          existingSubscription._refs++
+          return existingSubscription
+        }
+      }
+    }
+
     var subscription = atom()
     var reset = subscription.reset
     delete subscription.reset
     delete subscription.swap
 
+    subscription.id = id
+    subscription._refs = 1
+    subscription._args = query.slice(1)
     subscription._recompute = function(db) {
-      var handler = getRegistration(SUBSCRIPTION, query[0])
+      var handler = getRegistration(SUBSCRIPTION, id)
       var nextValue = handler(db, query)
       if (nextValue !== subscription.deref()) {
         reset(nextValue)
@@ -264,17 +281,21 @@ export function createStore(initialState) {
     }
     subscription._recompute(APP_DB.deref())
     subscription.dispose = function() {
-      ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.filter(function(sub) {
-        return sub !== subscription
-      })
+      subscription._refs--
+      if (subscription.refs === 0) {
+        ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.filter(function(sub) {
+          return sub !== subscription
+        })
+      }
     }
     ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.concat(subscription)
     return subscription
   }
 
-  function notifySubscriptions(prevDB, nextDB) {
+  function notifySubscriptions() {
+    const db = APP_DB.deref()
     for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-      ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
+      ACTIVE_SUBSCRIPTIONS[i]._recompute(db)
     }
   }
 

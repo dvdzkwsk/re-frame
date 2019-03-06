@@ -1,3 +1,9 @@
+* Subscription .id and .args is gross. Think more.
+
+---- [ Performance ] ----------------------------
+* Evaluate performance of naive subscriptions implementation. A lookup table would
+  likely be better for tracking subscriptions, but at what point?
+
 ---- [ Features ] -------------------------------
 * More detailed investigation around timing functions for nextTick
 * Implement `debug` interceptor
