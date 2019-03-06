@@ -1,3 +1,5 @@
+var _notifyReactionOfDeref
+
 /**
  * @typedef {object} Atom
  * @param {*} [initialValue]
@@ -15,7 +17,7 @@ export function atom(initialValue) {
     }
   }
 
-  return {
+  var atom = {
     swap: function(fn) {
       setValue(fn(_value))
     },
@@ -23,6 +25,9 @@ export function atom(initialValue) {
       setValue(value)
     },
     deref: function() {
+      if (_notifyReactionOfDeref) {
+        _notifyReactionOfDeref(atom)
+      }
       return _value
     },
     watch: function(watcher) {
@@ -34,4 +39,37 @@ export function atom(initialValue) {
       }
     },
   }
+  return atom
+}
+
+export function reaction(computation) {
+  var watchers = []
+  var ratom = atom()
+
+  function notifyThisReactionOfDeref(atom) {
+    if (watchers.indexOf(atom) === -1) {
+      watchers.push(atom.watch(runReaction))
+    }
+  }
+
+  function runReaction() {
+    disposeWatchers()
+    var notifyPreviousReactionOfDeref = _notifyReactionOfDeref
+    _notifyReactionOfDeref = notifyThisReactionOfDeref
+    ratom.reset(computation())
+    _notifyReactionOfDeref = notifyPreviousReactionOfDeref
+  }
+
+  function disposeWatchers() {
+    if (watchers.length) {
+      for (var i = 0; i < watchers.length; i++) {
+        watchers[i]()
+      }
+      watchers = []
+    }
+  }
+
+  runReaction()
+  ratom.dispose = disposeWatchers
+  return ratom
 }
