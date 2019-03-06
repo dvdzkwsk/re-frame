@@ -250,28 +250,12 @@ export function createStore(initialState) {
       validateQuery(query)
     }
 
-    var id = query[0]
-    if (!query[1]) {
-      for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-        var existingSubscription = ACTIVE_SUBSCRIPTIONS[i]
-        if (
-          existingSubscription._args.length === 0 &&
-          existingSubscription.id === id
-        ) {
-          existingSubscription._refs++
-          return existingSubscription
-        }
-      }
-    }
-
     var subscription = atom()
     var reset = subscription.reset
     delete subscription.reset
     delete subscription.swap
 
-    subscription.id = id
-    subscription._refs = 1
-    subscription._args = query.slice(1)
+    var id = query[0]
     subscription._recompute = function(db) {
       var handler = getRegistration(SUBSCRIPTION, id)
       var nextValue = handler(db, query)
@@ -280,15 +264,7 @@ export function createStore(initialState) {
       }
     }
     subscription._recompute(APP_DB.deref())
-    subscription.dispose = function() {
-      subscription._refs--
-      if (subscription.refs === 0) {
-        ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.filter(function(sub) {
-          return sub !== subscription
-        })
-      }
-    }
-    ACTIVE_SUBSCRIPTIONS = ACTIVE_SUBSCRIPTIONS.concat(subscription)
+    ACTIVE_SUBSCRIPTIONS.push(subscription)
     return subscription
   }
 

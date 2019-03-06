@@ -7,7 +7,7 @@ function makeStore() {
   return store
 }
 
-test("creating a subscription produces a synchronous value", t => {
+test("subscribe() returns an atom with the current value of the subscription", t => {
   const store = makeStore()
   store.registerSubscription("count", db => db.count)
 
@@ -31,16 +31,4 @@ test('a top-level subscription is re-run whenever the "db" changes', t => {
   t.is(sub.deref(), 3)
 
   sub.dispose()
-})
-
-test('"subscribe()" calls to the same query id share the same subscription', t => {
-  const store = makeStore()
-  store.registerSubscription("count", db => db.count)
-
-  const subA = store.subscribe(["count"])
-  const subB = store.subscribe(["count"])
-  t.is(subA, subB)
-
-  subA.dispose()
-  subB.dispose()
 })

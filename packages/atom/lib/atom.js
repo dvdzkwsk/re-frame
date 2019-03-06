@@ -1,4 +1,4 @@
-var _notifyReactionOfDeref
+var _notifyAtomDeref
 
 /**
  * @typedef {object} Atom
@@ -29,8 +29,8 @@ export function atom(initialValue) {
       _value = undefined
     },
     deref: function() {
-      if (_notifyReactionOfDeref) {
-        _notifyReactionOfDeref(atom)
+      if (_notifyAtomDeref) {
+        _notifyAtomDeref(atom)
       }
       return _value
     },
@@ -58,10 +58,10 @@ export function reaction(computation) {
 
   function runReaction() {
     disposeWatchers()
-    var notifyPreviousReactionOfDeref = _notifyReactionOfDeref
-    _notifyReactionOfDeref = notifyThisReactionOfDeref
+    var notifyPreviousReactionOfDeref = _notifyAtomDeref
+    _notifyAtomDeref = notifyThisReactionOfDeref
     ratom.reset(computation())
-    _notifyReactionOfDeref = notifyPreviousReactionOfDeref
+    _notifyAtomDeref = notifyPreviousReactionOfDeref
   }
 
   function disposeWatchers() {
