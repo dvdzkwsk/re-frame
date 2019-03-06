@@ -24,6 +24,10 @@ export function atom(initialValue) {
     reset: function(value) {
       setValue(value)
     },
+    dispose: function() {
+      _watchers = []
+      _value = undefined
+    },
     deref: function() {
       if (_notifyReactionOfDeref) {
         _notifyReactionOfDeref(atom)

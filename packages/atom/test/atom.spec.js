@@ -47,3 +47,18 @@ test("swap > updates the value inside the atom to the result of the swap functio
   a.swap(val => val.toUpperCase())
   t.is(a.deref(), "HELLO")
 })
+
+test("dispose > releases all watchers and the current value", t => {
+  let calls = 0
+  const a = atom("hello")
+  a.watch(() => calls++)
+
+  a.reset(1)
+  t.is(calls, 1)
+
+  calls = 0
+  a.dispose()
+  t.is(a.deref(), undefined)
+  a.reset(1)
+  t.is(calls, 0)
+})
