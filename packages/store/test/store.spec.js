@@ -5,13 +5,19 @@ function processDispatchedEvents() {
   return new Promise(resolve => setTimeout(resolve))
 }
 
-// Switch to development mode for these tests because we want to test
-// errors and warnings that are disabled in production builds.
-test.beforeEach(() => {
-  process.env.NODE_ENV = "development"
-})
-test.afterEach(() => {
-  process.env.NODE_ENV = "test"
+test("can pass opts.mode to force development vs. production mode", t => {
+  const devStore = reframe.createStore({}, {mode: "development"})
+  const prodStore = reframe.createStore({}, {mode: "production"})
+
+  // dev store should throw validation errors
+  t.throws(() => {
+    devStore.registerEventDB("foo", [null], () => {})
+  }, /Invalid interceptor provided/)
+
+  // prod store should skip validation
+  t.notThrows(() => {
+    prodStore.registerEventDB("foo", [null], () => {})
+  }, /Invalid interceptor provided/)
 })
 
 test("accepts an optional initial state", t => {

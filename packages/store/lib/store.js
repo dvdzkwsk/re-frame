@@ -56,7 +56,12 @@ import {createEventQueue} from "@re-frame/event-queue"
  * @property {(Function) => void} removePostEventCallback
  * @returns {Store}
  */
-export function createStore(initialState) {
+export function createStore(initialState, opts) {
+  var __DEV__ = process.env.NODE_ENV !== "production"
+  if (opts && opts.mode) {
+    __DEV__ = opts.mode !== "production"
+  }
+
   // APP_DB is an atom that contains the current state of the store.
   var APP_DB = atom(initialState)
 
@@ -111,7 +116,7 @@ export function createStore(initialState) {
       interceptors = []
     }
 
-    if (process.env.NODE_ENV === "development") {
+    if (__DEV__) {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventDB handler "' +
@@ -137,7 +142,7 @@ export function createStore(initialState) {
       interceptors = []
     }
 
-    if (process.env.NODE_ENV === "development") {
+    if (__DEV__) {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventFX handler "' +
@@ -175,14 +180,14 @@ export function createStore(initialState) {
 
   // --- Dispatch -------------------------------------------------------------
   function dispatch(event) {
-    if (process.env.NODE_ENV === "development") {
+    if (__DEV__) {
       validateEvent(event)
     }
     EVENT_QUEUE.push(event)
   }
 
   function dispatchSync(event) {
-    if (process.env.NODE_ENV === "development") {
+    if (__DEV__) {
       validateEvent(event)
     }
     processEvent(event)
@@ -232,7 +237,7 @@ export function createStore(initialState) {
     id: "run-effects",
     after: function after(context) {
       for (var effectId in context.effects) {
-        if (process.env.NODE_ENV === "development") {
+        if (__DEV__) {
           validateEffect(context, effectId)
         }
         var handler = getRegistration(EFFECT, effectId)
@@ -246,7 +251,7 @@ export function createStore(initialState) {
   var ACTIVE_SUBSCRIPTIONS = []
 
   function subscribe(query) {
-    if (process.env.NODE_ENV === "development") {
+    if (__DEV__) {
       validateQuery(query)
     }
 
