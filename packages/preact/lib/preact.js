@@ -1,4 +1,5 @@
-import {createContext, useContext, useEffects, useState} from "preact/hooks"
+import {createContext} from "preact"
+import {useContext, useEffect, useState} from "preact/hooks"
 import {flatten} from "@re-frame/utils"
 
 export var StoreContext = createContext()
