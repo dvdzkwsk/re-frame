@@ -88,8 +88,8 @@ const ChatList = () => {
 3. Dispatch events to your store.
 
 ```js
-import React from "react"
-import {useDispatch} from "@re-frame/react"
+import {h} from "preact"
+import {useDispatch} from "@re-frame/preact"
 
 // Dispatch will only fire once in this example
 const ChatList = () => {
