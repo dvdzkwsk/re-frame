@@ -1,8 +1,8 @@
 import {createContext, useContext, useEffects, useState} from "preact/hooks"
 import {flatten} from "@re-frame/utils"
 
-export var Context = createContext()
-export var Provider = Context.Provider
+export var StoreContext = createContext()
+export var StoreProvider = StoreContext.Provider
 
 export function useStore() {
   var store = useContext(Store)
@@ -10,7 +10,7 @@ export function useStore() {
 }
 
 export function useDispatch(event) {
-  var store = useContext(Store)
+  var store = useContext(StoreContext)
   if (event) {
     useEffect(function() {
       store.dispatch(event)
@@ -20,7 +20,7 @@ export function useDispatch(event) {
 }
 
 export function useSubscription(query) {
-  var store = useContext(Store)
+  var store = useContext(StoreContext)
   var state = useState()
   var value = state[0]
   var setValue = state[1]
@@ -40,7 +40,7 @@ export function useSubscription(query) {
 }
 
 export function useSubscriptions(queries) {
-  var store = useContext(Store)
+  var store = useContext(StoreContext)
   var state = useState([])
   var value = state[0]
   var setValue = state[1]
