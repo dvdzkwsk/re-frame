@@ -28,9 +28,15 @@ export function useSubscription(query) {
 
   // TODO: is this safe? We need to return a synchronous value on mount.
   // After that we're free to use "useEffect" for side effects involving
-  // a live subscription.
+  // a live subscription. Both initialization branches are guaranteed to
+  // run the same hook in the same order.
+  var state
   var mounted = useRef(false)
-  var state = useState(!mounted.current && store.query(query))
+  if (!mounted.current) {
+    state = useState(store.query(query))
+  } else {
+    state = useState()
+  }
   var value = state[0]
   var setValue = state[1]
 
@@ -38,11 +44,13 @@ export function useSubscription(query) {
     if (!mounted.current) {
       mounted.current = true
     }
-    // TODO: it may be possible (but unlikely) for the subscription value to
-    // change between the first mount and this effect being fired. In that case
-    // we would lose it since we hadn't had a chance to setup a watcher.
-    // This is likely an anti-pattern... warn?
     var subscription = store.subscribe(query)
+
+    // The subscription may have emitted a new value between the start of render
+    // and mount. If so, broadcast that change.
+    if (value !== subscription.deref()) {
+      setValue(subscription.deref())
+    }
     subscription.watch(function(prev, next) {
       setValue(next)
     })
@@ -50,7 +58,6 @@ export function useSubscription(query) {
       subscription.dispose()
     }
   }, query)
-
   return value
 }
 
