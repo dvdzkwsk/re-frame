@@ -17,6 +17,16 @@ test("subscribe() returns an atom with the current value of the subscription", t
   sub.dispose()
 })
 
+test("subscriptions expose their underlying query", t => {
+  const store = makeStore()
+  store.registerSubscription("count", db => db.count)
+
+  const sub = store.subscribe(["count"])
+  t.deepEqual(sub.query, ["count"])
+
+  sub.dispose()
+})
+
 test('a top-level subscription is re-run whenever the "db" changes', t => {
   const store = makeStore()
   store.registerSubscription("count", db => db.count)
@@ -48,4 +58,6 @@ test("subscriptions don't notify watchers if their value didn't change", t => {
   t.deepEqual(calls, [[0, 1]])
   store.dispatchSync(["count"])
   t.deepEqual(calls, [[0, 1], [1, 2]])
+
+  sub.dispose()
 })

@@ -261,6 +261,7 @@ export function createStore(initialState, opts) {
     delete subscription.swap
 
     var id = query[0]
+    subscription.query = query
     subscription._recompute = function(db) {
       var handler = getRegistration(SUBSCRIPTION, id)
       var nextValue = handler(db, query)
@@ -280,7 +281,7 @@ export function createStore(initialState, opts) {
     }
   }
 
-  APP_DB.watch(notifySubscriptions)
+  addPostEventCallback(notifySubscriptions)
 
   // --- Utilities ------------------------------------------------------------
   function validateQuery(query) {
