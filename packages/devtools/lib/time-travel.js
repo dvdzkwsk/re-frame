@@ -58,11 +58,14 @@ export function enableTimeTravel(store, opts) {
     store.dispatchSync([DO_TIME_TRAVEL, history[cursor].db])
   }
 
-  store.next = function() {
-    travel(1)
-  }
-  store.previous = function() {
-    travel(-1)
+  store.devtools = store.devtools || {}
+  store.devtools.timeTravel = {
+    forward: function() {
+      travel(1)
+    },
+    back: function() {
+      travel(-1)
+    },
   }
   store.addPostEventCallback(recordEvent)
   store.registerEventDB(DO_TIME_TRAVEL, function(db, event) {
