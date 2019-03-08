@@ -45,6 +45,7 @@ import {createEventQueue} from "@re-frame/event-queue"
  * @property {() => *} getState
  * @property {(Event) => void} dispatch
  * @property {(Event) => void} dispatchSync
+ * @property {(Query) => *} query
  * @property {(Query) => object} subscribe
  * @property {(string) => object} injectCoeffect
  * @property {(string, Function) => void} registerCoeffect
@@ -250,6 +251,15 @@ export function createStore(initialState, opts) {
   // --- Subscriptions --------------------------------------------------------
   var ACTIVE_SUBSCRIPTIONS = []
 
+  function query(query) {
+    if (__DEV__) {
+      validateQuery(query)
+    }
+
+    var handler = getRegistration(SUBSCRIPTION, query[0])
+    return handler(APP_DB.deref(), query)
+  }
+
   function subscribe(query) {
     if (__DEV__) {
       validateQuery(query)
@@ -341,6 +351,7 @@ export function createStore(initialState, opts) {
     getState: APP_DB.deref,
     dispatch: dispatch,
     dispatchSync: dispatchSync,
+    query: query,
     subscribe: subscribe,
     injectCoeffect: injectCoeffect,
     registerCoeffect: registerCoeffect,

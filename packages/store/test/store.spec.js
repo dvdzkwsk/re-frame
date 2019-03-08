@@ -244,3 +244,9 @@ test("removePostEventCallback > removes the callback from the registry", t => {
   store.dispatchSync(["noop", "foobar"])
   t.pass()
 })
+
+test("Can execute a one-time query without setting up a subscription", t => {
+  const store = reframe.createStore({count: 5})
+  store.registerSubscription("count", db => db.count)
+  t.is(store.query(["count"]), 5)
+})
