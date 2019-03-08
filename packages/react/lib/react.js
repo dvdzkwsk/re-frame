@@ -24,8 +24,12 @@ export function useDispatch(event) {
 }
 
 export function useSubscription(query) {
-  var mounted = useRef(false)
   var store = useContext(StoreContext)
+
+  // TODO: is this safe? We need to return a synchronous value on mount.
+  // After that we're free to use "useEffect" for side effects involving
+  // a live subscription.
+  var mounted = useRef(false)
   var state = useState(!mounted.current && store.query(query))
   var value = state[0]
   var setValue = state[1]
@@ -34,8 +38,11 @@ export function useSubscription(query) {
     if (!mounted.current) {
       mounted.current = true
     }
+    // TODO: it may be possible (but unlikely) for the subscription value to
+    // change between the first mount and this effect being fired. In that case
+    // we would lose it since we hadn't had a chance to setup a watcher.
+    // This is likely an anti-pattern... warn?
     var subscription = store.subscribe(query)
-    setValue(subscription.deref())
     subscription.watch(function(prev, next) {
       setValue(next)
     })
@@ -46,6 +53,7 @@ export function useSubscription(query) {
 
   return value
 }
+
 export function useSubscriptions(queries) {
   var mounted = useRef(false)
   var store = useContext(StoreContext)
