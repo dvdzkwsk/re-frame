@@ -1,6 +1,5 @@
 import {createContext} from "preact"
 import {useContext, useEffect, useState} from "preact/hooks"
-import {flatten} from "@re-frame/utils"
 
 export var StoreContext = createContext()
 export var StoreProvider = StoreContext.Provider
@@ -69,4 +68,9 @@ export function useSubscriptions(queries) {
   }, flatten(queries))
 
   return value
+}
+
+var _concat = [].concat
+function flatten(arr) {
+  return _concat.apply([], arr)
 }

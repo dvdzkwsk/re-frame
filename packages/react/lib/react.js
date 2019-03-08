@@ -1,5 +1,4 @@
 import React from "react"
-import {flatten} from "@re-frame/utils"
 
 var useContext = React.useContext
 var useEffect = React.useEffect
@@ -72,4 +71,9 @@ export function useSubscriptions(queries) {
   }, flatten(queries))
 
   return value
+}
+
+var _concat = [].concat
+function flatten(arr) {
+  return _concat.apply([], arr)
 }
