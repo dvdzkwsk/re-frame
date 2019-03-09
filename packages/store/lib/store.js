@@ -284,14 +284,15 @@ export function createStore(initialState, opts) {
     return subscription
   }
 
-  function notifySubscriptions() {
-    const db = APP_DB.deref()
-    for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-      ACTIVE_SUBSCRIPTIONS[i]._recompute(db)
+  function notifySubscriptions(prevDB, nextDB) {
+    if (prevDB !== nextDB) {
+      for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
+        ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
+      }
     }
   }
 
-  addPostEventCallback(notifySubscriptions)
+  APP_DB.watch(notifySubscriptions)
 
   // --- Utilities ------------------------------------------------------------
   function validateQuery(query) {
