@@ -2,6 +2,8 @@ import test from "ava"
 import {createStore} from "@re-frame/store"
 import {enableTimeTravel} from "../lib/devtools.js"
 
+global.requestAnimationFrame = fn => setTimeout(fn)
+
 function makeStore({events, maxHistorySize}) {
   const store = createStore({count: 0})
   enableTimeTravel(store, {maxHistorySize})

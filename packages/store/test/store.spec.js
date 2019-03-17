@@ -1,8 +1,11 @@
 import test from "ava"
 import * as reframe from "../lib/store.js"
 
-function processDispatchedEvents() {
-  return new Promise(resolve => setTimeout(resolve))
+global.requestAnimationFrame = fn => setTimeout(fn)
+
+async function flush() {
+  await Promise.resolve() // let dispatch run
+  await new Promise(resolve => setTimeout(resolve)) // let subscriptions run
 }
 
 test("can pass opts.mode to force development vs. production mode", t => {
@@ -48,24 +51,19 @@ test("throws if a dispatched event type hasn't been registered with the store", 
 
 test("dispatch > EventDB handler updates DB state", async t => {
   const store = reframe.createStore(1)
-  store.registerSubscription("db", db => db)
-  const db = store.subscribe(["db"])
-
   store.registerEventDB("double", db => db * 2)
 
   store.dispatch(["double"])
-  await processDispatchedEvents()
-  t.is(db.deref(), 2)
+  await flush()
+  t.is(store.getState(), 2)
 
   store.dispatch(["double"])
-  await processDispatchedEvents()
-  t.is(db.deref(), 4)
+  await flush()
+  t.is(store.getState(), 4)
 
   store.dispatch(["double"])
-  await processDispatchedEvents()
-  t.is(db.deref(), 8)
-
-  db.dispose()
+  await flush()
+  t.is(store.getState(), 8)
 })
 
 test("dispatch > throws if called with an unwrapped string", async t => {
@@ -82,7 +80,7 @@ test("dispatch > does not process the event immediately", async t => {
 
   store.dispatch(["a"])
   t.deepEqual(processedEvents, [])
-  await processDispatchedEvents()
+  await flush()
   t.deepEqual(processedEvents, [["a"]])
 })
 
@@ -98,7 +96,7 @@ test("dispatch > processes events dispatched in the same loop as batch", async t
   store.dispatch(["c"])
   t.deepEqual(processedEvents, [])
 
-  await processDispatchedEvents()
+  await flush()
   t.deepEqual(processedEvents, [["a"], ["b"], ["c"]])
 })
 
@@ -113,7 +111,7 @@ test("dispatch > processes events in the order they are dispatched", async t => 
   store.dispatch(["b"])
   store.dispatch(["c"])
 
-  await processDispatchedEvents()
+  await flush()
 
   t.deepEqual(processedEvents, [["a"], ["b"], ["c"]])
 })
@@ -138,7 +136,7 @@ test("dispatchSync > processes an event ahead of the existing queue", async t =>
   store.dispatchSync(["sync"])
 
   t.deepEqual(processedEvents, [["sync"]])
-  await processDispatchedEvents()
+  await flush()
   t.deepEqual(processedEvents, [["sync"], ["async"], ["async"], ["async"]])
 })
 
@@ -172,7 +170,7 @@ test("subscribe > returns an atom with the current computed value for the subscr
   todos.dispose()
 })
 
-test("subscribe > provides the query vector to the subscription handler", t => {
+test("subscribe > provides the query vector to the subscription handler", async t => {
   const store = reframe.createStore({
     todos: [],
   })
@@ -186,19 +184,22 @@ test("subscribe > provides the query vector to the subscription handler", t => {
   const todos = store.subscribe(["todos", "baz"]) // look for todos that match "baz"
   t.deepEqual(todos.deref(), [])
 
-  store.dispatchSync(["add-todo", "foo"])
+  store.dispatch(["add-todo", "foo"])
+  await flush()
   t.deepEqual(todos.deref(), [])
 
-  store.dispatchSync(["add-todo", "bar"])
+  store.dispatch(["add-todo", "bar"])
+  await flush()
   t.deepEqual(todos.deref(), [])
 
-  store.dispatchSync(["add-todo", "baz"])
+  store.dispatch(["add-todo", "baz"])
+  await flush()
   t.deepEqual(todos.deref(), ["baz"])
 
   todos.dispose()
 })
 
-test("subscribe > recomputes the value in the computed atom whenever the store changes", t => {
+test("subscribe > recomputes the value in the computed atom whenever the store changes", async t => {
   const store = reframe.createStore({
     todos: [],
   })
@@ -212,13 +213,16 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
   const todos = store.subscribe(["todos"])
   t.deepEqual(todos.deref(), [])
 
-  store.dispatchSync(["add-todo", "foo"])
+  store.dispatch(["add-todo", "foo"])
+  await flush()
   t.deepEqual(todos.deref(), ["foo"])
 
-  store.dispatchSync(["add-todo", "bar"])
+  store.dispatch(["add-todo", "bar"])
+  await flush()
   t.deepEqual(todos.deref(), ["foo", "bar"])
 
-  store.dispatchSync(["add-todo", "baz"])
+  store.dispatch(["add-todo", "baz"])
+  await flush()
   t.deepEqual(todos.deref(), ["foo", "bar", "baz"])
 
   todos.dispose()

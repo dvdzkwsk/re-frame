@@ -40,22 +40,7 @@ import {createEventQueue} from "@re-frame/event-queue"
  * ```
  *
  * @param {*} [initialState] - the initial state of the store.
- *
- * @typedef {object} Store
- * @property {() => *} getState
- * @property {(Event) => void} dispatch
- * @property {(Event) => void} dispatchSync
- * @property {(Query) => *} query
- * @property {(Query) => object} subscribe
- * @property {(string) => object} injectCoeffect
- * @property {(string, Function) => void} registerCoeffect
- * @property {(string, Function) => void} registerEventDB
- * @property {(string, Function) => void} registerEventFX
- * @property {(string, Function) => void} registerEffect
- * @property {(string, Function) => void} registerSubscription
- * @property {(Function) => void} addPostEventCallback
- * @property {(Function) => void} removePostEventCallback
- * @returns {Store}
+ * @returns {object}
  */
 export function createStore(initialState, opts) {
   var __DEV__ = process.env.NODE_ENV !== "production"
@@ -74,12 +59,20 @@ export function createStore(initialState, opts) {
   var EVENT_QUEUE = createEventQueue(processEvent)
 
   /**
-   * Stores callbacks that should be invoked after an event is processed.
-   * Callbacks are added with "store.addPostEventCallback", and removed
-   * with "store.removePostEventCallback".
+   * The EVENT_QUEUE scheduler calls processEvent each time its scheduler finds
+   * time to process an event. "Processing" means finding the handler that was
+   * registered for the event and running it and its interceptors. After the
+   * event handler is run, additional lifecycle events are triggered:
+   *
+   * 1. Schedule event for processing (this is EVENT_QUEUE)
+   * 2. Some time later: process event <---- we are here
+   * 3. Lookup and run event handler
+   * 4. Notify postEventCallbacks that an event was processed
+   * 5. Notify subscriptions if event handler changed APP_DB
+   *
+   * @param {Event} event - the event to process.
+   * @noreturn
    */
-  var postEventCallbacks = []
-
   function processEvent(event) {
     var interceptors = getRegistration(EVENT, event[0])
     var context = {
@@ -93,11 +86,8 @@ export function createStore(initialState, opts) {
     context = runInterceptorQueue(context, "before")
     context = switchDirections(context)
     context = runInterceptorQueue(context, "after")
-    if (postEventCallbacks.length) {
-      for (var i = 0; i < postEventCallbacks.length; i++) {
-        postEventCallbacks[i](event)
-      }
-    }
+    notifyPostEventCallbacks(event)
+    notifySubscriptions(context)
   }
 
   // --- Registrations --------------------------------------------------------
@@ -284,15 +274,17 @@ export function createStore(initialState, opts) {
     return subscription
   }
 
-  function notifySubscriptions(prevDB, nextDB) {
+  function notifySubscriptions(context) {
+    var prevDB = context.coeffects.db
+    var nextDB = context.effects.db
     if (prevDB !== nextDB) {
-      for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-        ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
-      }
+      requestAnimationFrame(() => {
+        for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
+          ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
+        }
+      })
     }
   }
-
-  APP_DB.watch(notifySubscriptions)
 
   // --- Utilities ------------------------------------------------------------
   function validateQuery(query) {
@@ -340,11 +332,25 @@ export function createStore(initialState, opts) {
   }
 
   // --- Lifecycle Hooks ------------------------------------------------------
+  /**
+   * List of callbacks that should be invoked after an event is processed.
+   * Callbacks are added with "store.addPostEventCallback", and removed
+   * with "store.removePostEventCallback".
+   */
+  var postEventCallbacks = []
+
   function addPostEventCallback(cb) {
     postEventCallbacks.push(cb)
   }
   function removePostEventCallback(cb) {
     postEventCallbacks.splice(postEventCallbacks.indexOf(cb), 1)
+  }
+  function notifyPostEventCallbacks(event) {
+    if (postEventCallbacks.length) {
+      for (var i = 0; i < postEventCallbacks.length; i++) {
+        postEventCallbacks[i](event)
+      }
+    }
   }
 
   // --- Public API -----------------------------------------------------------
