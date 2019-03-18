@@ -4,10 +4,10 @@ import {createEventQueue} from "@re-frame/event-queue"
 
 /**
  * Creates an instance of a re-frame store. Like many flux implementations,
- * you dispatch events to the store; those events are then processed by a
- * their corresponding event handler. Any handlers you register with this
- * store are not shared with any other store instance. and the same applies
- * to dispatched events and subscriptions.
+ * you dispatch events to the store, and those events are then processed by
+ * a registered event handler. All handlers that you register with a store are
+ * not shared with any other store instance; the same applies to subscriptions
+ * and dispatched events.
  *
  * Once an event is dispatched, the store checks its id and uses that to look
  * up its corresponding event handler. In the example below, "double" is the
@@ -19,10 +19,11 @@ import {createEventQueue} from "@re-frame/event-queue"
  * store.dispatch(['double'])
  * ```
  *
- * Here we registered an "EventDB" handler. There's another flavor of event
- * handler, called "EventFX":
+ * Here we registered an "EventDB" handler. There's another, higher-level
+ * flavor of event handlers called "EventFX":
  *
- * - EventDB handlers always change the state of the store (called "db").
+ * - EventDB handlers always trigger precisely one side effect, called "db". The
+ * "db" effect is responsible for updating the state of the store.
  * - EventFX handlers trigger one or more side effects. If one of those
  * side effects is named "db", then it also updates state of the store.
  *
@@ -40,6 +41,9 @@ import {createEventQueue} from "@re-frame/event-queue"
  * ```
  *
  * @param {*} [initialState] - the initial state of the store.
+ * @param {object} [opts] - optional configuration
+ * @param {"development" | "production"} [opts.mode] - runtime validations are
+ * enabled outside of "production" mode. Defaults to process.env.NODE_ENV.
  * @returns {object}
  */
 export function createStore(initialState, opts) {
@@ -118,6 +122,15 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
+      // Flatten interceptors because we allow "interceptors" to be a nested
+      // array. This allows use cases such as:
+      //
+      // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
+      // registerEventDB("foo", [payload, STANDARD_INTERCEPTORS], handler)
+      //
+      // Flattening the interceptors internally makes for a nicer public API,
+      // since users can easily share interceptors — single or multiple —
+      // without having to ensure they are properly flattened.
       flatten([
         INJECT_DB,
         RUN_EFFECTS,
@@ -144,6 +157,15 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
+      // Flatten interceptors because we allow "interceptors" to be a nested
+      // array. This allows use cases such as:
+      //
+      // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
+      // registerEventDB("foo", [payload, STANDARD_INTERCEPTORS], handler)
+      //
+      // Flattening the interceptors internally makes for a nicer public API,
+      // since users can easily share interceptors — single or multiple —
+      // without having to ensure they are properly flattened.
       flatten([
         INJECT_DB,
         RUN_EFFECTS,
@@ -256,21 +278,26 @@ export function createStore(initialState, opts) {
     }
 
     var subscription = atom()
+
+    // A subscription is an atom, but it should be considered read-only out in
+    // userland since its internal value is computed. Remove all public API's
+    // that would allow its value to be improperly modified.
     var reset = subscription.reset
     delete subscription.reset
     delete subscription.swap
 
     var id = query[0]
     subscription.query = query
-    subscription._recompute = function(db) {
+    function recompute(db) {
       var handler = getRegistration(SUBSCRIPTION, id)
+      var prevValue = subscription.deref()
       var nextValue = handler(db, query)
-      if (nextValue !== subscription.deref()) {
+      if (nextValue !== prevValue) {
         reset(nextValue)
       }
     }
-    subscription._recompute(APP_DB.deref())
-    ACTIVE_SUBSCRIPTIONS.push(subscription)
+    recompute(APP_DB.deref())
+    ACTIVE_SUBSCRIPTIONS.push(recompute)
     return subscription
   }
 
@@ -280,7 +307,7 @@ export function createStore(initialState, opts) {
     if (prevDB !== nextDB) {
       requestAnimationFrame(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-          ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
+          ACTIVE_SUBSCRIPTIONS[i](nextDB)
         }
       })
     }
@@ -337,18 +364,18 @@ export function createStore(initialState, opts) {
    * Callbacks are added with "store.addPostEventCallback", and removed
    * with "store.removePostEventCallback".
    */
-  var postEventCallbacks = []
+  var POST_EVENT_CALLBACKS = []
 
   function addPostEventCallback(cb) {
-    postEventCallbacks.push(cb)
+    POST_EVENT_CALLBACKS.push(cb)
   }
   function removePostEventCallback(cb) {
-    postEventCallbacks.splice(postEventCallbacks.indexOf(cb), 1)
+    POST_EVENT_CALLBACKS.splice(POST_EVENT_CALLBACKS.indexOf(cb), 1)
   }
   function notifyPostEventCallbacks(event) {
-    if (postEventCallbacks.length) {
-      for (var i = 0; i < postEventCallbacks.length; i++) {
-        postEventCallbacks[i](event)
+    if (POST_EVENT_CALLBACKS.length) {
+      for (var i = 0; i < POST_EVENT_CALLBACKS.length; i++) {
+        POST_EVENT_CALLBACKS[i](event)
       }
     }
   }

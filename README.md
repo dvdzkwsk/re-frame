@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
 [![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/standalone)](https://bundlephobia.com/result?p=@re-frame/standalone)
 
-JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, terminology, and patterns. All design credit goes to the original authors — thank you for the inspiration.
+Vanilla JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, terminology, and patterns. All design credit goes to the original authors — thank you for the inspiration.
 
 ## Why re-frame?
 
@@ -28,12 +28,18 @@ const store = createStore({count: 0})
 // Register event handlers — these are how you'll change the store's state.
 store.registerEventDB("increment", db => ({...db, count: db.count + 1}))
 
-// Register subscriptions with the store. Whenver the store's state changes,
-// these subscriptions will be automatically recomputed.
+// Register subscriptions with the store. Whenever the store's state changes
+// these subscriptions will automatically recompute their values.
 store.registerSubscription("count", db => db.count)
 
-// Subscriptions are just values! You can work with them just like any other
-// piece of data, and even compose them together.
+// Subscriptions are your means for accessing state inside the store. Calling
+// subscribe() returns a subscription, which itself is a value. You can watch
+// this subscription to observe changes, or pass it around and even compose it
+// with other subscriptions.
+// Most of the time you won't have to go through the trouble of manually watching
+// a subscription. Instead, libraries like @re-frame/react allow you to access
+// their values in your React tree and automatically re-render whenever they
+// change. This pattern should be familiar to MobX users, for example.
 const count = store.subscribe(["count"])
 count.watch((prev, next) => {
   // do something here, maybe?
@@ -46,22 +52,22 @@ store.dispatch(["increment"]) // count will be 2 after this event is processed
 
 ## React Integration
 
-1. Make your store available via React context by using `Provider` from `@re-frame/react` at the top of your application. This will allow you to access subscriptions and dispatch events within the React tree.
+1. Make your store available via React context by using `StoreProvider` from `@re-frame/react` at the root of your application. This will allow you to access subscriptions and dispatch events within the React tree.
 
-> Using Preact? Just use `@re-frame/preact` instead.
+> Using Preact? Use `@re-frame/preact` instead; its API is exactly the same.
 
 ```js
 import React from "react"
 import ReactDOM from "react-dom"
 import {createStore} from "@re-frame/standalone"
-import {Provider} from "@re-frame/react"
+import {StoreProvider} from "@re-frame/react"
 
 const store = createStore()
 
 const App = () => (
-  <Provider store={store}>
+  <StoreProvider value={store}>
     <YourAppGoesHere />
-  </Provider>
+  </StoreProvider>
 )
 
 ReactDOM.render(<App />, document.getElementById("root"))
@@ -91,23 +97,20 @@ const ChatList = () => {
 import React from "react"
 import {useDispatch} from "@re-frame/react"
 
-// Dispatch will only fire once in this example
-const ChatList = () => {
-  useDispatch(["load-chats"])
-  // ... more logic here
-}
-
-// Dispatch will fire every time `filter` changes
-const ChatList = ({filter}) => {
-  useDispatch(["load-chats", filter])
+// useDispatch will dispatch the event you give it. We automatically take care
+// of preventing duplicate dispatches on subsequent renders. If you want to
+// re-dispatch an event, simply change the event id or the data included with
+// it, such as "chatId" in the example below.
+const ChatList = ({ chatId }) => {
+  useDispatch(["load-chats", chatId])
   // ... more logic here
 }
 
 // useDispatch also returns a "dispatch" function
 const ChatList = () => {
-  const dispatch = useDispatch() // does not dispatch anything
+  const dispatch = useDispatch()
   const onClick = () => {
-    dispatch(["some-click-event"])
+    dispatch(["something-happened"])
   }
   // ... more logic here
 }
