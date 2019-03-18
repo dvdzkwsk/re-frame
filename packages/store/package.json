@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/store",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
@@ -23,8 +23,8 @@
     ]
   },
   "dependencies": {
-    "@re-frame/atom": "^0.8.0",
-    "@re-frame/event-queue": "^0.8.0",
-    "@re-frame/utils": "^0.8.0"
+    "@re-frame/atom": "^0.9.0",
+    "@re-frame/event-queue": "^0.9.0",
+    "@re-frame/utils": "^0.9.0"
   }
 }

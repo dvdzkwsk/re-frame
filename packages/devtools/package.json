@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/devtools",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/devtools.js",
@@ -22,6 +22,6 @@
     ]
   },
   "devDependencies": {
-    "@re-frame/store": "^0.8.0"
+    "@re-frame/store": "^0.9.0"
   }
 }
