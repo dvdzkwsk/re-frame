@@ -304,7 +304,7 @@ export function createStore(initialState, opts) {
   function notifySubscriptions(context) {
     var prevDB = context.coeffects.db
     var nextDB = context.effects.db
-    if (prevDB !== nextDB) {
+    if (nextDB && nextDB !== prevDB) {
       requestAnimationFrame(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
           ACTIVE_SUBSCRIPTIONS[i](nextDB)
