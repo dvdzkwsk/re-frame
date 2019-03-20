@@ -122,11 +122,11 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
-      // Flatten interceptors because we allow "interceptors" to be a nested
-      // array. This allows use cases such as:
+      // Flatten interceptors because  "interceptors" can be a nested array.
+      // Deep arrays allow patterns such as:
       //
       // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
-      // registerEventDB("foo", [payload, STANDARD_INTERCEPTORS], handler)
+      // registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
       //
       // Flattening the interceptors internally makes for a nicer public API,
       // since users can easily share interceptors — single or multiple —
@@ -157,11 +157,11 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
-      // Flatten interceptors because we allow "interceptors" to be a nested
-      // array. This allows use cases such as:
+      // Flatten interceptors because  "interceptors" can be a nested array.
+      // Deep arrays allow patterns such as:
       //
       // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
-      // registerEventDB("foo", [payload, STANDARD_INTERCEPTORS], handler)
+      // registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
       //
       // Flattening the interceptors internally makes for a nicer public API,
       // since users can easily share interceptors — single or multiple —
@@ -249,6 +249,17 @@ export function createStore(initialState, opts) {
   var RUN_EFFECTS = {
     id: "run-effects",
     after: function after(context) {
+      if (!context.effects) {
+        if (__DEV__) {
+          var eventId = context.coeffects.event[0]
+          console.warn(
+            'EventFX "' +
+              eventId +
+              '" did not return any effects, which is likely a mistake. To signal that you do not want to run any effects, return an empty object: {}.'
+          )
+        }
+        return context
+      }
       for (var effectId in context.effects) {
         if (__DEV__) {
           validateEffect(context, effectId)
@@ -302,6 +313,8 @@ export function createStore(initialState, opts) {
   }
 
   function notifySubscriptions(context) {
+    if (!context.effects) return
+
     var prevDB = context.coeffects.db
     var nextDB = context.effects.db
     if (nextDB && nextDB !== prevDB) {

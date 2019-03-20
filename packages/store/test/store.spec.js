@@ -151,6 +151,23 @@ test("EventFX > throws if a requested event has not been registered", t => {
   }, 'The EventFX handler "create_effect" attempted to create an effect "effectThatDoesntExist", but that effect has not been registered.')
 })
 
+test("EventFX > does not throw if no effects were returned", t => {
+  const store = reframe.createStore(null, {mode: "development"})
+  const warn = console.warn
+  const warnings = []
+  console.warn = msg => warnings.push(msg)
+
+  store.registerEventFX("event-fx", () => {})
+  t.notThrows(() => {
+    store.dispatchSync(["event-fx"])
+  })
+  t.is(
+    warnings[0],
+    'EventFX "event-fx" did not return any effects, which is likely a mistake. To signal that you do not want to run any effects, return an empty object: {}.'
+  )
+  console.warn = warn
+})
+
 test("subscribe > throws if the target subscription has not been registered", t => {
   const store = reframe.createStore()
   t.throws(() => {
