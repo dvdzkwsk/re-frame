@@ -101,7 +101,7 @@ import {useDispatch} from "@re-frame/react"
 // of preventing duplicate dispatches on subsequent renders. If you want to
 // re-dispatch an event, simply change the event id or the data included with
 // it, such as "chatId" in the example below.
-const ChatList = ({ chatId }) => {
+const ChatList = ({chatId}) => {
   useDispatch(["load-chats", chatId])
   // ... more logic here
 }

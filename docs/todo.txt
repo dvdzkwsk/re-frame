@@ -18,3 +18,4 @@
 * Make terminology consistent, e.g. "fx" vs "effects"
 * Possible to make public API pithier?
 * Debug tracing
+* Should store not take an initialState?

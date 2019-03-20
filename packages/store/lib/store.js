@@ -40,7 +40,6 @@ import {createEventQueue} from "@re-frame/event-queue"
  * }))
  * ```
  *
- * @param {*} [initialState] - the initial state of the store.
  * @param {object} [opts] - optional configuration
  * @param {"development" | "production"} [opts.mode] - runtime validations are
  * enabled outside of "production" mode. Defaults to process.env.NODE_ENV.
@@ -307,7 +306,10 @@ export function createStore(initialState, opts) {
         reset(nextValue)
       }
     }
-    recompute(APP_DB.deref())
+    var db = APP_DB.deref()
+    if (db) {
+      recompute(db)
+    }
     ACTIVE_SUBSCRIPTIONS.push(recompute)
     return subscription
   }
