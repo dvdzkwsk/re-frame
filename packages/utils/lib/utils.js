@@ -13,24 +13,6 @@ export function shallowClone(target) {
   return clone
 }
 
-// Deeply flattens an array.
-export function flatten(arr) {
-  var flattened = []
-
-  for (var i = 0; i < arr.length; i++) {
-    var elem = arr[i]
-    if (Array.isArray(elem)) {
-      elem = flatten(elem)
-      for (var j = 0; j < elem.length; j++) {
-        flattened[flattened.length] = elem[j]
-      }
-    } else {
-      flattened[flattened.length] = elem
-    }
-  }
-  return flattened
-}
-
 // Writes a value to a path inside an object. All objects along the way
 // are shallowly cloned. Note that the recursive implementation has been
 // intentionally unrolled into a loop for performance.

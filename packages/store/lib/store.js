@@ -1,5 +1,5 @@
 import {atom} from "@re-frame/atom"
-import {assoc, flatten, shallowClone} from "@re-frame/utils"
+import {assoc, shallowClone} from "@re-frame/utils"
 import {createEventQueue} from "@re-frame/event-queue"
 
 /**
@@ -121,16 +121,7 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
-      // Flatten interceptors because  "interceptors" can be a nested array.
-      // Deep arrays allow patterns such as:
-      //
-      // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
-      // registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
-      //
-      // Flattening the interceptors internally makes for a nicer public API,
-      // since users can easily share interceptors — single or multiple —
-      // without having to ensure they are properly flattened.
-      flatten([
+      flattenInterceptors([
         INJECT_DB,
         RUN_EFFECTS,
         interceptors,
@@ -156,16 +147,7 @@ export function createStore(initialState, opts) {
     register(
       EVENT,
       id,
-      // Flatten interceptors because  "interceptors" can be a nested array.
-      // Deep arrays allow patterns such as:
-      //
-      // var STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
-      // registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
-      //
-      // Flattening the interceptors internally makes for a nicer public API,
-      // since users can easily share interceptors — single or multiple —
-      // without having to ensure they are properly flattened.
-      flatten([
+      flattenInterceptors([
         INJECT_DB,
         RUN_EFFECTS,
         interceptors,
@@ -458,6 +440,37 @@ function switchDirections(context) {
   context.queue = context.stack
   context.stack = []
   return context
+}
+
+/**
+ * Flattens an array interceptors because "interceptors" can be an arbitrarily
+ * deep array. Deep arrays allow patterns such as:
+ *
+ * const STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
+ * registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
+ *
+ * Flattening the interceptors internally makes for a nicer public API,
+ * since users can easily share interceptors — single or multiple —
+ * without having to ensure they are properly flattened.
+ *
+ * @param {object[]} interceptors - arbitrarily nested array of interceptors
+ * @returns {object[]} flattened interceptors
+ */
+function flattenInterceptors(interceptors) {
+  var flattened = []
+
+  for (var i = 0; i < interceptors.length; i++) {
+    var entry = interceptors[i]
+    if (Array.isArray(entry)) {
+      entry = flattenInterceptors(entry)
+      for (var j = 0; j < entry.length; j++) {
+        flattened[flattened.length] = entry[j]
+      }
+    } else {
+      flattened[flattened.length] = entry
+    }
+  }
+  return flattened
 }
 
 function assertValidInterceptors(interceptors, errorPrefix) {
