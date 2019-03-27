@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/atom",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/atom.js",
