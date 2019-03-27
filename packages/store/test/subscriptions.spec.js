@@ -9,8 +9,10 @@ async function flush() {
 }
 
 function makeStore() {
-  const store = createStore({count: 0})
+  const store = createStore()
+  store.registerEventDB("init", () => ({count: 0}))
   store.registerEventDB("count", db => ({count: db.count + 1}))
+  store.dispatchSync(["init"])
   return store
 }
 

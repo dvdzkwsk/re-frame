@@ -5,7 +5,10 @@ import {enableTimeTravel} from "../lib/devtools.js"
 global.requestAnimationFrame = fn => setTimeout(fn)
 
 function makeStore({events, maxHistorySize}) {
-  const store = createStore({count: 0})
+  const store = createStore()
+  store.registerEventDB("init", () => ({count: 0}))
+  store.dispatchSync(["init"])
+
   enableTimeTravel(store, {maxHistorySize})
 
   store.registerEventDB("count", db => ({count: db.count + 1}))

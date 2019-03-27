@@ -23,9 +23,10 @@ yarn add @re-frame/standalone
 import {createStore} from "@re-frame/standalone"
 
 // You can optionally provide an initial value when creating a store.
-const store = createStore({count: 0})
+const store = createStore()
 
 // Register event handlers — these are how you'll change the store's state.
+store.registerEventDB("init", () => ({count: 0}))
 store.registerEventDB("increment", db => ({...db, count: db.count + 1}))
 
 // Register subscriptions with the store. Whenever the store's state changes
@@ -46,6 +47,7 @@ count.watch((prev, next) => {
 })
 
 // Dispatch events to the store.
+store.dispatch(["init"])
 store.dispatch(["increment"])
 store.dispatch(["increment"]) // count will be 2 after this event is processed
 ```

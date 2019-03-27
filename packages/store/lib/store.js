@@ -45,14 +45,14 @@ import {createEventQueue} from "@re-frame/event-queue"
  * enabled outside of "production" mode. Defaults to process.env.NODE_ENV.
  * @returns {object}
  */
-export function createStore(initialState, opts) {
+export function createStore(opts) {
   var __DEV__ = process.env.NODE_ENV !== "production"
   if (opts && opts.mode) {
     __DEV__ = opts.mode !== "production"
   }
 
   // APP_DB is an atom that contains the current state of the store.
-  var APP_DB = atom(initialState)
+  var APP_DB = atom()
 
   // --- Event Processing -----------------------------------------------------
   /**

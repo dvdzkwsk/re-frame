@@ -1,5 +1,5 @@
 import test from "ava"
-import * as reframe from "../lib/store.js"
+import {createStore} from "../lib/store.js"
 
 global.requestAnimationFrame = fn => setTimeout(fn)
 
@@ -8,9 +8,16 @@ async function flush() {
   await new Promise(resolve => setTimeout(resolve)) // let subscriptions run
 }
 
+function createStoreWithState(state, opts) {
+  const store = createStore(opts)
+  store.registerEventDB("init", () => state)
+  store.dispatchSync(["init"])
+  return store
+}
+
 test("can pass opts.mode to force development vs. production mode", t => {
-  const devStore = reframe.createStore({}, {mode: "development"})
-  const prodStore = reframe.createStore({}, {mode: "production"})
+  const devStore = createStore({mode: "development"})
+  const prodStore = createStore({mode: "production"})
 
   // dev store should throw validation errors
   t.throws(() => {
@@ -25,7 +32,7 @@ test("can pass opts.mode to force development vs. production mode", t => {
 
 test("accepts an optional initial state", t => {
   const initialState = {foo: "bar"}
-  const store = reframe.createStore(initialState)
+  const store = createStoreWithState(initialState)
 
   store.registerSubscription("db", db => db)
   const db = store.subscribe(["db"])
@@ -34,7 +41,7 @@ test("accepts an optional initial state", t => {
 })
 
 test('has a "getState" method that returns the current state', t => {
-  const store = reframe.createStore({
+  const store = createStoreWithState({
     todos: [],
   })
   t.deepEqual(store.getState(), {
@@ -43,14 +50,14 @@ test('has a "getState" method that returns the current state', t => {
 })
 
 test("throws if a dispatched event type hasn't been registered with the store", t => {
-  const store = reframe.createStore(0)
+  const store = createStoreWithState(0)
   t.throws(() => {
     store.dispatchSync(["unregistered"])
   }, 'You dispatched an event that isn\'t registered with the store. Please register "unregistered" with registerEventDB or registerEventFX.')
 })
 
 test("dispatch > EventDB handler updates DB state", async t => {
-  const store = reframe.createStore(1)
+  const store = createStoreWithState(1)
   store.registerEventDB("double", db => db * 2)
 
   store.dispatch(["double"])
@@ -67,7 +74,7 @@ test("dispatch > EventDB handler updates DB state", async t => {
 })
 
 test("dispatch > throws if called with an unwrapped string", async t => {
-  const store = reframe.createStore(0)
+  const store = createStoreWithState(0)
   t.throws(() => {
     store.dispatch("increment")
   }, "You dispatched an invalid event. An event is an array that looks like [id] or [id, payload].")
@@ -75,7 +82,7 @@ test("dispatch > throws if called with an unwrapped string", async t => {
 
 test("dispatch > does not process the event immediately", async t => {
   const processedEvents = []
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("a", (db, event) => processedEvents.push(event))
 
   store.dispatch(["a"])
@@ -86,7 +93,7 @@ test("dispatch > does not process the event immediately", async t => {
 
 test("dispatch > processes events dispatched in the same loop as batch", async t => {
   const processedEvents = []
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("a", (db, event) => processedEvents.push(event))
   store.registerEventDB("b", (db, event) => processedEvents.push(event))
   store.registerEventDB("c", (db, event) => processedEvents.push(event))
@@ -102,7 +109,7 @@ test("dispatch > processes events dispatched in the same loop as batch", async t
 
 test("dispatch > processes events in the order they are dispatched", async t => {
   const processedEvents = []
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("a", (db, event) => processedEvents.push(event))
   store.registerEventDB("b", (db, event) => processedEvents.push(event))
   store.registerEventDB("c", (db, event) => processedEvents.push(event))
@@ -118,7 +125,7 @@ test("dispatch > processes events in the order they are dispatched", async t => 
 
 test("dispatchSync > processes an event synchronously", t => {
   const processedEvents = []
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("a", (db, event) => processedEvents.push(event))
   store.dispatchSync(["a"])
   t.deepEqual(processedEvents, [["a"]])
@@ -126,7 +133,7 @@ test("dispatchSync > processes an event synchronously", t => {
 
 test("dispatchSync > processes an event ahead of the existing queue", async t => {
   const processedEvents = []
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("async", (db, event) => processedEvents.push(event))
   store.registerEventDB("sync", (db, event) => processedEvents.push(event))
 
@@ -141,7 +148,7 @@ test("dispatchSync > processes an event ahead of the existing queue", async t =>
 })
 
 test("EventFX > throws if a requested event has not been registered", t => {
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventFX("create_effect", () => ({
     effectThatDoesntExist: true,
   }))
@@ -152,7 +159,7 @@ test("EventFX > throws if a requested event has not been registered", t => {
 })
 
 test("EventFX > does not throw if no effects were returned", t => {
-  const store = reframe.createStore(null, {mode: "development"})
+  const store = createStore({mode: "development"})
   const warn = console.warn
   const warnings = []
   console.warn = msg => warnings.push(msg)
@@ -169,14 +176,14 @@ test("EventFX > does not throw if no effects were returned", t => {
 })
 
 test("subscribe > throws if the target subscription has not been registered", t => {
-  const store = reframe.createStore()
+  const store = createStore()
   t.throws(() => {
     store.subscribe(["unregistered"])
   }, 'You attempted to subscribe to "unregistered", but no subscription has been registered with that id.')
 })
 
 test("subscribe > returns an atom with the current computed value for the subscription", t => {
-  const store = reframe.createStore({
+  const store = createStoreWithState({
     todos: ["foo", "bar", "baz"],
   })
   store.registerSubscription("todos", (db, query) => {
@@ -188,7 +195,7 @@ test("subscribe > returns an atom with the current computed value for the subscr
 })
 
 test("subscribe > provides the query vector to the subscription handler", async t => {
-  const store = reframe.createStore({
+  const store = createStoreWithState({
     todos: [],
   })
   store.registerEventDB("add-todo", (db, event) => ({
@@ -217,7 +224,7 @@ test("subscribe > provides the query vector to the subscription handler", async 
 })
 
 test("subscribe > recomputes the value in the computed atom whenever the store changes", async t => {
-  const store = reframe.createStore({
+  const store = createStoreWithState({
     todos: [],
   })
   store.registerEventDB("add-todo", (db, event) => ({
@@ -247,7 +254,7 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
 
 test("addPostEventCallback > callback is called after an event is processed", t => {
   t.plan(1)
-  const store = reframe.createStore()
+  const store = createStore()
   store.registerEventDB("noop", () => {})
   store.addPostEventCallback(event => {
     t.deepEqual(event, ["noop", "foobar"])
@@ -256,7 +263,7 @@ test("addPostEventCallback > callback is called after an event is processed", t 
 })
 
 test("removePostEventCallback > removes the callback from the registry", t => {
-  const store = reframe.createStore()
+  const store = createStore()
   const callback = event => t.fail()
 
   store.registerEventDB("noop", () => {})
@@ -267,7 +274,7 @@ test("removePostEventCallback > removes the callback from the registry", t => {
 })
 
 test("Can execute a one-time query without setting up a subscription", t => {
-  const store = reframe.createStore({count: 5})
+  const store = createStoreWithState({count: 5})
   store.registerSubscription("count", db => db.count)
   t.is(store.query(["count"]), 5)
 })
