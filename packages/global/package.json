@@ -1,0 +1,29 @@
+{
+  "name": "@re-frame/global",
+  "version": "0.10.0",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "license": "MIT",
+  "main": "./lib/global.js",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "dependencies": {
+    "@re-frame/atom": "^0.10.0",
+    "@re-frame/event-queue": "^0.10.0",
+    "@re-frame/utils": "^0.10.0"
+  }
+}
