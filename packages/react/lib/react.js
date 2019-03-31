@@ -7,6 +7,7 @@ var useRef = React.useRef
 
 export var StoreContext = React.createContext()
 export var StoreProvider = StoreContext.Provider
+StoreProvider.displayName = "@re-frame/StoreProvider"
 
 export function useStore() {
   var store = useContext(StoreContext)

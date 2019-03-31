@@ -3,6 +3,7 @@ import {useContext, useEffect, useRef, useState} from "preact/hooks"
 
 export var StoreContext = createContext()
 export var StoreProvider = StoreContext.Provider
+StoreProvider.displayName = "@re-frame/StoreProvider"
 
 export function useStore() {
   var store = useContext(Store)
