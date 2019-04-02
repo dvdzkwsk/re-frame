@@ -86,9 +86,7 @@ export function createStore(opts) {
         event: event,
       },
     }
-    context = runInterceptorQueue(context, "before")
-    context = switchDirections(context)
-    context = runInterceptorQueue(context, "after")
+    context = runInterceptors(context)
     notifyPostEventCallbacks(event)
     notifySubscriptions(context)
   }
@@ -420,6 +418,13 @@ function fxHandlerToInterceptor(handler) {
       return assoc(context, ["effects"], handler(coeffects, coeffects.event))
     },
   }
+}
+
+function runInterceptors(context) {
+  context = runInterceptorQueue(context, "before")
+  context = switchDirections(context)
+  context = runInterceptorQueue(context, "after")
+  return context
 }
 
 function runInterceptorQueue(context, direction) {

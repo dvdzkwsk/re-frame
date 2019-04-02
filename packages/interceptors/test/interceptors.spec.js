@@ -1,26 +1,42 @@
 import test from "ava"
 import {path, payload} from "../lib/interceptors.js"
-import {
-  runInterceptorQueue,
-  switchDirections,
-} from "../../store/lib/interceptors"
 
 function createContext(context) {
-  return Object.assign(
-    {
-      stack: [],
-      queue: [],
-      effects: {},
-      coeffects: {},
-    },
-    context
-  )
+  return {
+    stack: [],
+    queue: [],
+    effects: {},
+    coeffects: {},
+    ...context,
+  }
 }
 
-function runInterceptors(context, direction) {
-  context = runInterceptorQueue(context, direction)
+function runInterceptors(context) {
+  context = runInterceptorQueue(context, "before")
+  context = switchDirections(context)
+  context = runInterceptorQueue(context, "after")
   delete context.queue
   delete context.stack
+  return context
+}
+
+function runInterceptorQueue(context, direction) {
+  while (context.queue.length) {
+    var interceptor = context.queue[0]
+    context = {...context}
+    context.queue = context.queue.slice(1)
+    context.stack = [interceptor].concat(context.stack)
+    if (interceptor[direction]) {
+      context = interceptor[direction](context)
+    }
+  }
+  return context
+}
+
+function switchDirections(context) {
+  context = {...context}
+  context.queue = context.stack
+  context.stack = []
   return context
 }
 
@@ -32,7 +48,7 @@ test("payload > replaces the event tuple with just its payload", t => {
       event: ["add", 5],
     },
   })
-  context = runInterceptors(context, "before")
+  context = runInterceptors(context)
   t.deepEqual(context, {
     effects: {},
     coeffects: {
@@ -47,7 +63,7 @@ test("payload > replaces the event tuple with just its payload", t => {
       event: ["add", 5, 6, 7],
     },
   })
-  context = runInterceptors(context, "before")
+  context = runInterceptors(context)
   t.deepEqual(context, {
     effects: {},
     coeffects: {
@@ -64,26 +80,14 @@ test("path > updates `coeffects.db` to be the value of `db` at `path`", t => {
       db: {
         foo: {
           bar: {
-            baz: "bop",
+            baz: "value-at-path",
           },
         },
       },
     },
   })
-  context = runInterceptors(context, "before")
-  t.deepEqual(context, {
-    effects: {},
-    coeffects: {
-      db: "bop",
-      _originalDB: {
-        foo: {
-          bar: {
-            baz: "bop",
-          },
-        },
-      },
-    },
-  })
+  context = runInterceptors(context)
+  t.is(context.coeffects.db, "value-at-path")
 })
 
 test("path > applies the updated db value to the original DB at `path`", t => {
@@ -92,7 +96,7 @@ test("path > applies the updated db value to the original DB at `path`", t => {
       path(["foo", "bar", "baz"]),
       {
         id: "uppercase",
-        before(context) {
+        after(context) {
           return {
             ...context,
             effects: {
@@ -106,22 +110,20 @@ test("path > applies the updated db value to the original DB at `path`", t => {
       db: {
         foo: {
           bar: {
-            baz: "bop",
+            baz: "value-at-path",
           },
         },
       },
     },
   })
-  context = runInterceptorQueue(context, "before")
-  context = switchDirections(context)
-  context = runInterceptors(context, "after")
+  context = runInterceptors(context)
   t.deepEqual(context, {
     coeffects: {
-      db: "bop",
+      db: "value-at-path",
       _originalDB: {
         foo: {
           bar: {
-            baz: "bop",
+            baz: "value-at-path",
           },
         },
       },
@@ -130,7 +132,7 @@ test("path > applies the updated db value to the original DB at `path`", t => {
       db: {
         foo: {
           bar: {
-            baz: "BOP",
+            baz: "VALUE-AT-PATH",
           },
         },
       },
