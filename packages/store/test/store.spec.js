@@ -1,6 +1,7 @@
 import test from "ava"
 import {createStore} from "../lib/store.js"
 
+process.env.NODE_ENV === "development"
 global.requestAnimationFrame = fn => setTimeout(fn)
 
 async function flush() {
@@ -15,19 +16,22 @@ function createStoreWithState(state, opts) {
   return store
 }
 
-test("can pass opts.mode to force development vs. production mode", t => {
-  const devStore = createStore({mode: "development"})
-  const prodStore = createStore({mode: "production"})
-
+test("runtime checks are only enabled in development mode", t => {
   // dev store should throw validation errors
+  process.env.NODE_ENV = "development"
   t.throws(() => {
-    devStore.registerEventDB("foo", [null], () => {})
+    const store = createStore()
+    store.registerEventDB("foo", [null], () => {})
   }, /Invalid interceptor provided/)
 
   // prod store should skip validation
+  process.env.NODE_ENV = "production"
   t.notThrows(() => {
-    prodStore.registerEventDB("foo", [null], () => {})
-  }, /Invalid interceptor provided/)
+    const store = createStore()
+    store.registerEventDB("foo", [null], () => {})
+  })
+
+  process.env.NODE_ENV = "development"
 })
 
 test("accepts an optional initial state", t => {
@@ -159,7 +163,7 @@ test("EventFX > throws if a requested event has not been registered", t => {
 })
 
 test("EventFX > does not throw if no effects were returned", t => {
-  const store = createStore({mode: "development"})
+  const store = createStore()
   const warn = console.warn
   const warnings = []
   console.warn = msg => warnings.push(msg)

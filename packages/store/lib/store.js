@@ -46,11 +46,6 @@ import {createEventQueue} from "@re-frame/event-queue"
  * @returns {object}
  */
 export function createStore(opts) {
-  var __DEV__ = process.env.NODE_ENV !== "production"
-  if (opts && opts.mode) {
-    __DEV__ = opts.mode !== "production"
-  }
-
   // APP_DB is an atom that contains the current state of the store.
   var APP_DB = atom()
 
@@ -108,7 +103,7 @@ export function createStore(opts) {
       interceptors = []
     }
 
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventDB handler "' +
@@ -134,7 +129,7 @@ export function createStore(opts) {
       interceptors = []
     }
 
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       assertValidInterceptors(
         interceptors,
         'Invalid interceptor provided when registering EventFX handler "' +
@@ -172,14 +167,14 @@ export function createStore(opts) {
 
   // --- Dispatch -------------------------------------------------------------
   function dispatch(event) {
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       validateEvent(event)
     }
     EVENT_QUEUE.push(event)
   }
 
   function dispatchSync(event) {
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       validateEvent(event)
     }
     processEvent(event)
@@ -229,7 +224,7 @@ export function createStore(opts) {
     id: "run-effects",
     after: function after(context) {
       if (!context.effects) {
-        if (__DEV__) {
+        if (process.env.NODE_ENV === "development") {
           var eventId = context.coeffects.event[0]
           console.warn(
             'EventFX "' +
@@ -240,7 +235,7 @@ export function createStore(opts) {
         return context
       }
       for (var effectId in context.effects) {
-        if (__DEV__) {
+        if (process.env.NODE_ENV === "development") {
           validateEffect(context, effectId)
         }
         var handler = getRegistration(EFFECT, effectId)
@@ -254,7 +249,7 @@ export function createStore(opts) {
   var ACTIVE_SUBSCRIPTIONS = []
 
   function query(query) {
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       validateQuery(query)
     }
 
@@ -263,7 +258,7 @@ export function createStore(opts) {
   }
 
   function subscribe(query) {
-    if (__DEV__) {
+    if (process.env.NODE_ENV === "development") {
       validateQuery(query)
     }
 
