@@ -53,3 +53,28 @@ export function path(path) {
     },
   }
 }
+
+export function validateDB(predicate) {
+  return {
+    id: "validate-db",
+    after: function(context) {
+      if (context.effects.db) {
+        if (!predicate(context.effects.db)) {
+          var eventId = context.coeffects.event[0]
+          console.error(
+            'Event "' +
+              eventId +
+              '" produced an invalid value for "db". Compare "before" and "after" for details.',
+            {
+              before: context.coeffects.db,
+              after: context.effects.db,
+            }
+          )
+          context = assoc(context, ["effects"], {})
+          return context
+        }
+      }
+      return context
+    },
+  }
+}

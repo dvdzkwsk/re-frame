@@ -1,5 +1,5 @@
 import test from "ava"
-import {path, payload} from "../lib/interceptors.js"
+import {path, payload, validateDB} from "../lib/interceptors.js"
 
 function createContext(context) {
   return {
@@ -138,4 +138,37 @@ test("path > applies the updated db value to the original DB at `path`", t => {
       },
     },
   })
+})
+
+test("validateDB > when the predicate fails, all effects are discarded", t => {
+  const error = console.error
+  let errors = []
+  console.error = (...args) => errors.push(args)
+
+  let context = createContext({
+    queue: [validateDB(db => typeof db.count === "number")],
+    coeffects: {
+      event: ["bad-event"],
+      db: {
+        count: 1,
+      },
+    },
+    effects: {
+      db: {
+        count: undefined,
+      },
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(errors, [
+    [
+      'Event "bad-event" produced an invalid value for "db". Compare "before" and "after" for details.',
+      {
+        before: {count: 1},
+        after: {count: undefined},
+      },
+    ],
+  ])
+  t.deepEqual(context.effects, {})
+  console.error = error
 })
