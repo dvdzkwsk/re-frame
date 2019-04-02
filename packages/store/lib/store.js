@@ -41,13 +41,18 @@ import {createEventQueue} from "@re-frame/event-queue"
  * ```
  *
  * @param {object} [opts] - optional configuration
- * @param {"development" | "production"} [opts.mode] - runtime validations are
- * enabled outside of "production" mode. Defaults to process.env.NODE_ENV.
+ * @param {(object) => boolean} [opts.validateDB] - predicate that checks if a
+ * "db" is valid. Called each time a "db" effect occurs. If the predicate
+ * returns false, an error is logged and all effects in the event are ignored
+ * (i.e. APP_DB does not get updated).
  * @returns {object}
  */
 export function createStore(opts) {
   // APP_DB is an atom that contains the current state of the store.
   var APP_DB = atom()
+
+  // Optional predicate that checks whether the value inside APP_DB is valid.
+  var DB_VALIDATOR = opts && "validateDB" in opts && opts.validateDB
 
   // --- Event Processing -----------------------------------------------------
   /**
@@ -117,6 +122,7 @@ export function createStore(opts) {
       flattenInterceptors([
         INJECT_DB,
         RUN_EFFECTS,
+        VALIDATE_DB,
         interceptors,
         dbHandlerToInterceptor(handler),
       ])
@@ -143,6 +149,7 @@ export function createStore(opts) {
       flattenInterceptors([
         INJECT_DB,
         RUN_EFFECTS,
+        VALIDATE_DB,
         interceptors,
         fxHandlerToInterceptor(handler),
       ])
@@ -220,6 +227,30 @@ export function createStore(opts) {
   var INJECT_DB = injectCoeffect("db")
 
   // --- Built-in Interceptors ------------------------------------------------
+  const VALIDATE_DB = DB_VALIDATOR && {
+    id: "validate-db",
+    after: function(context) {
+      if (context.effects.db) {
+        if (!DB_VALIDATOR(context.effects.db)) {
+          var eventId = context.coeffects.event[0]
+          console.error(
+            'Event "' +
+              eventId +
+              '" produced an invalid value for "db". Compare "before" and "after" for details.',
+            {
+              before: context.coeffects.db,
+              after: context.effects.db,
+            }
+          )
+          context = shallowClone(context)
+          context.effects = {}
+          return context
+        }
+      }
+      return context
+    },
+  }
+
   var RUN_EFFECTS = {
     id: "run-effects",
     after: function after(context) {
@@ -461,6 +492,9 @@ function flattenInterceptors(interceptors) {
 
   for (var i = 0; i < interceptors.length; i++) {
     var entry = interceptors[i]
+    if (!entry) {
+      continue
+    }
     if (Array.isArray(entry)) {
       entry = flattenInterceptors(entry)
       for (var j = 0; j < entry.length; j++) {

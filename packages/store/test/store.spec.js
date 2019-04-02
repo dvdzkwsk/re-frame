@@ -34,16 +34,6 @@ test("runtime checks are only enabled in development mode", t => {
   process.env.NODE_ENV = "development"
 })
 
-test("accepts an optional initial state", t => {
-  const initialState = {foo: "bar"}
-  const store = createStoreWithState(initialState)
-
-  store.registerSubscription("db", db => db)
-  const db = store.subscribe(["db"])
-  t.deepEqual(db.deref(), {foo: "bar"})
-  db.dispose()
-})
-
 test('has a "getState" method that returns the current state', t => {
   const store = createStoreWithState({
     todos: [],
@@ -281,4 +271,70 @@ test("Can execute a one-time query without setting up a subscription", t => {
   const store = createStoreWithState({count: 5})
   store.registerSubscription("count", db => db.count)
   t.is(store.query(["count"]), 5)
+})
+
+test('Accepts a "validateDB" predicate. When it fails, no effects are run', t => {
+  const error = console.error
+  let errors = []
+  let effects = []
+  console.error = (...args) => errors.push(args)
+
+  let store = createStoreWithState(
+    {count: 0},
+    {
+      validateDB: db => typeof db.count === "number",
+    }
+  )
+  store.registerEventFX("good-increment", cofx => ({
+    db: {
+      count: cofx.db.count + 1,
+    },
+    http: true,
+  }))
+  store.registerEventFX("bad-increment", cofx => ({
+    db: {count: undefined},
+    http: true,
+  }))
+  store.registerEffect("http", () => effects.push("http"))
+
+  store.dispatchSync(["good-increment"])
+  t.deepEqual(errors, [])
+  t.deepEqual(effects, ["http"])
+
+  effects = []
+  store.dispatchSync(["bad-increment"])
+  t.deepEqual(store.getState(), {count: 1})
+  t.deepEqual(effects, [])
+  t.deepEqual(errors, [
+    [
+      'Event "bad-increment" produced an invalid value for "db". Compare "before" and "after" for details.',
+      {
+        before: {count: 1},
+        after: {count: undefined},
+      },
+    ],
+  ])
+
+  // A store without the validator accepts all db values
+  store = createStoreWithState({count: 0})
+  errors = []
+  effects = []
+  store.registerEventFX("good-increment", cofx => ({
+    db: {
+      count: cofx.db.count + 1,
+    },
+    http: true,
+  }))
+  store.registerEventFX("bad-increment", cofx => ({
+    db: {count: undefined},
+    http: true,
+  }))
+  store.registerEffect("http", () => effects.push("http"))
+
+  store.dispatchSync(["bad-increment"])
+  t.deepEqual(errors, [])
+  t.deepEqual(effects, ["http"])
+  t.deepEqual(store.getState(), {count: undefined})
+
+  console.error = error
 })
