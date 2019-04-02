@@ -22,7 +22,6 @@ yarn add @re-frame/standalone
 ```js
 import {createStore} from "@re-frame/standalone"
 
-// You can optionally provide an initial value when creating a store.
 const store = createStore()
 
 // Register event handlers — these are how you'll change the store's state.
