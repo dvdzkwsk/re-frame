@@ -1,6 +1,6 @@
-import {atom} from "@re-frame/atom"
 import {assoc, shallowClone} from "@re-frame/utils"
-import {createEventQueue} from "@re-frame/event-queue"
+import {atom} from "./atom"
+import {createEventQueue} from "./event-queue"
 
 /**
  * Creates an instance of a re-frame store. Like many flux implementations,

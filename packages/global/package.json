@@ -22,8 +22,8 @@
     ]
   },
   "dependencies": {
-    "@re-frame/atom": "^0.10.0",
-    "@re-frame/event-queue": "^0.10.0",
-    "@re-frame/utils": "^0.10.0"
+    "@re-frame/interceptors": "^0.10.0",
+    "@re-frame/effects": "^0.10.0",
+    "@re-frame/store": "^0.10.0"
   }
 }
