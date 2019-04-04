@@ -6,10 +6,12 @@ export function enableTimeTravel(store, opts) {
   var MAX_HISTORY_SIZE = (opts && opts.maxHistorySize) || 100
   var DO_TIME_TRAVEL = "@re-frame/time-travel"
 
+  store.registerSubscription("@re-frame/db", db => db)
+
   var id = 0 // auto-incrementing id for each history entry
   var cursor = 0 // where are we in history?
   var history = new Array(MAX_HISTORY_SIZE)
-  history[0] = {db: store.getState(), id: id++}
+  history[0] = {db: store.query(["@re-frame/db"]), id: id++}
 
   function recordEvent(event) {
     if (event[0] === DO_TIME_TRAVEL) return
@@ -18,7 +20,11 @@ export function enableTimeTravel(store, opts) {
     if (cursor >= MAX_HISTORY_SIZE) {
       cursor = 0
     }
-    history[cursor] = {db: store.getState(), event: event, id: id++}
+    history[cursor] = {
+      db: store.query(["@re-frame/db"]),
+      event: event,
+      id: id++,
+    }
   }
 
   function travel(distance) {

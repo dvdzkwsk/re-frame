@@ -4,7 +4,6 @@ export * from "@re-frame/effects"
 
 var store = createStore()
 
-export var getState = store.getState
 export var dispatch = store.dispatch
 export var dispatchSync = store.dispatchSync
 export var query = store.query

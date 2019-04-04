@@ -378,7 +378,6 @@ export function createStore(opts) {
 
   // --- Public API -----------------------------------------------------------
   return {
-    getState: APP_DB.deref,
     dispatch: dispatch,
     dispatchSync: dispatchSync,
     query: query,

@@ -7,6 +7,7 @@ global.requestAnimationFrame = fn => setTimeout(fn)
 function makeStore({events, maxHistorySize}) {
   const store = createStore()
   store.registerEventDB("init", () => ({count: 0}))
+  store.registerSubscription("db", db => db)
   store.dispatchSync(["init"])
 
   enableTimeTravel(store, {maxHistorySize})
@@ -21,13 +22,13 @@ function makeStore({events, maxHistorySize}) {
 test("can move backwards through time", t => {
   const store = makeStore({events: 4})
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 3})
+  t.deepEqual(store.query(["db"]), {count: 3})
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 2})
+  t.deepEqual(store.query(["db"]), {count: 2})
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 1})
+  t.deepEqual(store.query(["db"]), {count: 1})
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 0})
+  t.deepEqual(store.query(["db"]), {count: 0})
 })
 
 test("can move forward through time", t => {
@@ -37,15 +38,15 @@ test("can move forward through time", t => {
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 0})
+  t.deepEqual(store.query(["db"]), {count: 0})
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 1})
+  t.deepEqual(store.query(["db"]), {count: 1})
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 2})
+  t.deepEqual(store.query(["db"]), {count: 2})
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 3})
+  t.deepEqual(store.query(["db"]), {count: 3})
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 4})
+  t.deepEqual(store.query(["db"]), {count: 4})
 })
 
 test("cannot travel beyond history", t => {
@@ -55,17 +56,17 @@ test("cannot travel beyond history", t => {
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 0}) // at earliest entry
+  t.deepEqual(store.query(["db"]), {count: 0}) // at earliest entry
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 0}) // should not have moved
+  t.deepEqual(store.query(["db"]), {count: 0}) // should not have moved
 
   store.devtools.timeTravel.forward()
   store.devtools.timeTravel.forward()
   store.devtools.timeTravel.forward()
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 4}) // at newest entry
+  t.deepEqual(store.query(["db"]), {count: 4}) // at newest entry
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 4}) // should not have moved
+  t.deepEqual(store.query(["db"]), {count: 4}) // should not have moved
 })
 
 test("respects maxHistorySize", t => {
@@ -75,14 +76,14 @@ test("respects maxHistorySize", t => {
   store.dispatchSync(["count"])
   store.dispatchSync(["count"])
   store.dispatchSync(["count"])
-  t.deepEqual(store.getState(), {count: 9}) // at most recent entry
+  t.deepEqual(store.query(["db"]), {count: 9}) // at most recent entry
   store.devtools.timeTravel.forward()
-  t.deepEqual(store.getState(), {count: 9}) // cannot move any further forward
+  t.deepEqual(store.query(["db"]), {count: 9}) // cannot move any further forward
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 5}) // at earliest
+  t.deepEqual(store.query(["db"]), {count: 5}) // at earliest
   store.devtools.timeTravel.back()
-  t.deepEqual(store.getState(), {count: 5}) // cannot move any further back
+  t.deepEqual(store.query(["db"]), {count: 5}) // cannot move any further back
 })

@@ -34,15 +34,6 @@ test("runtime checks are only enabled in development mode", t => {
   process.env.NODE_ENV = "development"
 })
 
-test('has a "getState" method that returns the current state', t => {
-  const store = createStoreWithState({
-    todos: [],
-  })
-  t.deepEqual(store.getState(), {
-    todos: [],
-  })
-})
-
 test("throws if a dispatched event type hasn't been registered with the store", t => {
   const store = createStoreWithState(0)
   t.throws(() => {
@@ -53,18 +44,19 @@ test("throws if a dispatched event type hasn't been registered with the store", 
 test("dispatch > EventDB handler updates DB state", async t => {
   const store = createStoreWithState(1)
   store.registerEventDB("double", db => db * 2)
+  const value = store.registerSubscription("db", db => db)
 
   store.dispatch(["double"])
   await flush()
-  t.is(store.getState(), 2)
+  t.is(store.query(["db"]), 2)
 
   store.dispatch(["double"])
   await flush()
-  t.is(store.getState(), 4)
+  t.is(store.query(["db"]), 4)
 
   store.dispatch(["double"])
   await flush()
-  t.is(store.getState(), 8)
+  t.is(store.query(["db"]), 8)
 })
 
 test("dispatch > throws if called with an unwrapped string", async t => {
