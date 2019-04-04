@@ -17,11 +17,19 @@ import {get, shallowClone, assoc} from "@re-frame/utils"
 export var payload = {
   id: "payload",
   before: function(context) {
-    return assoc(
-      context,
-      ["coeffects", "event"],
-      context.coeffects.event.slice(1)
-    )
+    var event = context.coeffects.event
+
+    context = shallowClone(context)
+    context.coeffects = shallowClone(context.coeffects)
+    context.coeffects.event = event.slice(1)
+    context.coeffects._originalEvent = event
+    return context
+  },
+  after: function(context) {
+    context = shallowClone(context)
+    context.coeffects = shallowClone(context.coeffects)
+    context.coeffects.event = context.coeffects._originalEvent
+    return context
   },
 }
 

@@ -40,36 +40,52 @@ function switchDirections(context) {
   return context
 }
 
-test("payload > replaces the event tuple with just its payload", t => {
+test("payload > strips 'id' from the event", t => {
+  let beforeContext
+  const contextSpy = {
+    id: "context-spy",
+    before(context) {
+      beforeContext = context
+      return context
+    },
+  }
+
   let context = createContext({
-    queue: [payload],
+    queue: [payload, contextSpy],
+    effects: {},
+    coeffects: {
+      event: ["add", 5, 6, 7],
+    },
+  })
+  runInterceptors(context)
+  t.deepEqual(beforeContext.coeffects.event, [5, 6, 7])
+})
+
+test("payload > restores the original event in its 'after' phase", t => {
+  let beforeContext
+  let afterContext
+  const contextSpy = {
+    id: "context-spy",
+    before(context) {
+      beforeContext = context
+      return context
+    },
+    after(context) {
+      afterContext = context
+      return context
+    },
+  }
+
+  let context = createContext({
+    queue: [contextSpy, payload],
     effects: {},
     coeffects: {
       event: ["add", 5],
     },
   })
   context = runInterceptors(context)
-  t.deepEqual(context, {
-    effects: {},
-    coeffects: {
-      event: [5],
-    },
-  })
-
-  context = createContext({
-    queue: [payload],
-    effects: {},
-    coeffects: {
-      event: ["add", 5, 6, 7],
-    },
-  })
-  context = runInterceptors(context)
-  t.deepEqual(context, {
-    effects: {},
-    coeffects: {
-      event: [5, 6, 7],
-    },
-  })
+  t.deepEqual(beforeContext.coeffects.event, ["add", 5])
+  t.deepEqual(afterContext.coeffects.event, ["add", 5])
 })
 
 test("path > updates `coeffects.db` to be the value of `db` at `path`", t => {
