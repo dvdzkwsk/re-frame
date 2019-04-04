@@ -255,6 +255,7 @@ export function createStore(opts) {
   var ACTIVE_SUBSCRIPTIONS = []
 
   function query(query) {
+    query = normalizeQuery(query)
     if (process.env.NODE_ENV === "development") {
       validateQuery(query)
     }
@@ -264,6 +265,7 @@ export function createStore(opts) {
   }
 
   function subscribe(query) {
+    query = normalizeQuery(query)
     if (process.env.NODE_ENV === "development") {
       validateQuery(query)
     }
@@ -310,6 +312,13 @@ export function createStore(opts) {
   }
 
   // --- Utilities ------------------------------------------------------------
+  function normalizeQuery(query) {
+    if (typeof query === "string") {
+      return [query]
+    }
+    return query
+  }
+
   function validateQuery(query) {
     if (!Array.isArray(query)) {
       throw new Error(

@@ -78,3 +78,20 @@ test("subscriptions don't notify watchers if their value didn't change", async t
 
   sub.dispose()
 })
+
+test("subscribe() accepts a simple string as sugar", t => {
+  const store = makeStore()
+  store.registerSubscription("count", db => db.count)
+
+  const sub = store.subscribe("count")
+  t.is(sub.deref(), 0)
+
+  sub.dispose()
+})
+
+test("query() accepts a simple string as sugar", t => {
+  const store = makeStore()
+  store.registerSubscription("count", db => db.count)
+
+  t.is(store.query("count"), 0)
+})
