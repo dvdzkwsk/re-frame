@@ -140,6 +140,46 @@ test("path > applies the updated db value to the original DB at `path`", t => {
   })
 })
 
+test("path > does not apply path to produce 'db' effect if no other interceptor affected 'db'", t => {
+  let context = createContext({
+    queue: [
+      path(["foo", "bar", "baz"]),
+      {
+        id: "uppercase",
+        after(context) {
+          return {
+            ...context,
+            effects: {}, // no "db" effect
+          }
+        },
+      },
+    ],
+    coeffects: {
+      db: {
+        foo: {
+          bar: {
+            baz: "value-at-path",
+          },
+        },
+      },
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(context, {
+    coeffects: {
+      db: "value-at-path",
+      _originalDB: {
+        foo: {
+          bar: {
+            baz: "value-at-path",
+          },
+        },
+      },
+    },
+    effects: {},
+  })
+})
+
 test("validateDB > when the predicate fails, all effects are discarded", t => {
   const error = console.error
   let errors = []

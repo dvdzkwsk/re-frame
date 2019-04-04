@@ -89,15 +89,17 @@ export function createStore(opts) {
   }
 
   // --- Registrations --------------------------------------------------------
+
   var EVENT = "EVENT"
   var EFFECT = "EFFECT"
   var COEFFECT = "COEFFECT"
   var SUBSCRIPTION = "SUBSCRIPTION"
-  var REGISTRATIONS = {}
-  REGISTRATIONS[EVENT] = {}
-  REGISTRATIONS[EFFECT] = {}
-  REGISTRATIONS[COEFFECT] = {}
-  REGISTRATIONS[SUBSCRIPTION] = {}
+  var EMPTY = {}
+  var REGISTRATIONS = EMPTY
+  REGISTRATIONS[EVENT] = EMPTY
+  REGISTRATIONS[EFFECT] = EMPTY
+  REGISTRATIONS[COEFFECT] = EMPTY
+  REGISTRATIONS[SUBSCRIPTION] = EMPTY
 
   function registerEventDB(id, interceptors, handler) {
     if (typeof interceptors === "function") {

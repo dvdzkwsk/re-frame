@@ -1,4 +1,4 @@
-import {assoc} from "@re-frame/utils"
+import {get, shallowClone, assoc} from "@re-frame/utils"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
 // care about the `id` of the event, though, and don't want to deal with
@@ -26,30 +26,25 @@ export var payload = {
 }
 
 export function path(path) {
-  path = [].concat(path)
   return {
     id: "path",
     before: function(context) {
-      // Preserve the original db so we can restore it after diving into `path`.
+      // Preserve the original db so it can be restored after diving into "path".
       var db = context.coeffects.db
-      context = assoc(context, ["coeffects", "_originalDB"], db)
-
-      // `db` for all future interceptors is the value at `path`.
-      let valueAtPath = db
-      for (var i = 0; i < path.length; i++) {
-        if (!valueAtPath) {
-          valueAtPath = undefined
-          break
-        }
-        valueAtPath = valueAtPath[path[i]]
-      }
-      context = assoc(context, ["coeffects", "db"], valueAtPath)
+      context = shallowClone(context)
+      context.coeffects = shallowClone(context.coeffects)
+      context.coeffects._originalDB = db
+      context.coeffects.db = get(db, path)
       return context
     },
     after: function(context) {
-      // Restore the original db and update its value at `path`.
-      var db = assoc(context.coeffects._originalDB, path, context.effects.db)
-      return assoc(context, ["effects", "db"], db)
+      if (!("db" in context.effects)) {
+        return context
+      }
+
+      var origDB = context.coeffects._originalDB
+      var nextDB = assoc(origDB, path, context.effects.db)
+      return assoc(context, ["effects", "db"], nextDB)
     },
   }
 }

@@ -1,30 +1,51 @@
 var _hasOwnProperty = Object.prototype.hasOwnProperty
 
-// Shallowly clones the supplied object. Like `Object.assign`, it
-// only copies over the object's "ownProperties".
+/**
+ *  Shallowly clones the supplied object. Equivalent to `Object.assign`.
+ */
 export function shallowClone(target) {
-  var clone = {}
-
+  var res = {}
   for (var key in target) {
     if (_hasOwnProperty.call(target, key)) {
-      clone[key] = target[key]
+      res[key] = target[key]
     }
   }
-  return clone
+  return res
 }
 
-// Writes a value to a path inside an object. All objects along the way
-// are shallowly cloned. Note that the recursive implementation has been
-// intentionally unrolled into a loop for performance.
+/**
+ * Immutably writes a value to a path inside an object.
+ */
 export function assoc(target, path, value) {
-  var res = shallowClone(target)
-  var obj = res
+  if (typeof path === "string" || typeof path === "number") {
+    path = [path]
+  }
 
+  var res = shallowClone(target)
+  var curr = res
   for (var i = 0; i < path.length - 1; i++) {
     var key = path[i]
-    obj[key] = shallowClone(obj[key])
-    obj = obj[key]
+    curr[key] = shallowClone(curr[key])
+    curr = curr[key]
   }
-  obj[path[path.length - 1]] = value
+  curr[path[i]] = value
   return res
+}
+
+/**
+ * Returns the value at `path` in `target`. Returns undefined if an
+ * intermediate key does not exist.
+ */
+export function get(target, path) {
+  if (typeof path === "string" || typeof path === "number") {
+    path = [path]
+  }
+
+  for (var i = 0; i < path.length - 1; i++) {
+    target = target[path[i]]
+    if (!target) {
+      break
+    }
+  }
+  return target ? target[path[i]] : undefined
 }
