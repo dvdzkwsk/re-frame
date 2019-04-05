@@ -1,17 +1,17 @@
 import {get, shallowClone, assoc} from "@re-frame/utils"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
-// care about the `id` of the event, though, and don't want to deal with
-// unwrapping the event just to use the payload.
+// care about the `id` of the event. The payload interceptors strips the id
+// out of the tuple to create more convenient event handlers.
 //
-// This interceptor makes most event handlers more aesthetically pleasing
-// by replacing the event tuple with just its payload.
+// The original event is restored in the "after" phase so earlier interceptors
+// receive the original, unstripped event.
 //
-// registerEventDB('add', (db, [_, arg]) => db + arg)
+// registerEventDB('add', (db, [id, arg]) => db + arg)
 //
 // Becomes:
 //
-// registerEventDB('add', [payload], (db, arg) => db + arg)
+// registerEventDB('add', [payload], (db, [arg]) => db + arg)
 //                            |
 //                            └────── interceptor
 export var payload = {
