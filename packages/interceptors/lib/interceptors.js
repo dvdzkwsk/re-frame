@@ -107,3 +107,26 @@ export function after(fn) {
     },
   }
 }
+
+export var debug = {
+  id: "debug",
+  before: function(context) {
+    console.log("@re-frame: handling event: ", context.coeffects.event)
+    return context
+  },
+  after: function(context) {
+    var event = context.coeffects.event
+    var origDB = context.coeffects.db
+    var nextDB = context.effects.db
+
+    if (!("db" in context.effects) || nextDB === origDB) {
+      console.log("@re-frame: no db change caused by event: ", event)
+      return context
+    }
+    console.group("@re-frame: db change caused by event: ", event)
+    console.log("@re-frame: before: ", origDB)
+    console.log("@re-frame: after: ", nextDB)
+    console.groupEnd()
+    return context
+  },
+}
