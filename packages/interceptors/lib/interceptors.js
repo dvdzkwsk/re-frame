@@ -81,3 +81,16 @@ export function validateDB(predicate) {
     },
   }
 }
+
+export function enrich(fn) {
+  return {
+    id: "enrich",
+    after: function(context) {
+      if (!("db" in context.effects)) {
+        return context
+      }
+      var db = fn(context.effects.db, context.coeffects.event)
+      return assoc(context, ["effects", "db"], db)
+    },
+  }
+}

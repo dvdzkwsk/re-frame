@@ -1,5 +1,5 @@
 import test from "ava"
-import {path, payload, validateDB} from "../lib/interceptors.js"
+import {path, payload, enrich, validateDB} from "../lib/interceptors.js"
 
 function createContext(context) {
   return {
@@ -227,4 +227,38 @@ test("validateDB > when the predicate fails, all effects are discarded", t => {
   ])
   t.deepEqual(context.effects, {})
   console.error = error
+})
+
+test('enrich > applies "fn" to "db" effect', t => {
+  let context = createContext({
+    queue: [enrich(db => ({count: db.count * 2}))],
+    effects: {
+      db: {
+        count: 1,
+      },
+    },
+    coeffects: {
+      event: ["noop"],
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(context.effects, {
+    db: {
+      count: 2,
+    },
+  })
+})
+
+test('enrich > is ignored if "db" effect does not exist', t => {
+  let context = createContext({
+    queue: [enrich(db => db.count * 2)],
+    coeffects: {
+      db: {
+        count: 1,
+      },
+      event: ["noop"],
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(context.effects, {})
 })
