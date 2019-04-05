@@ -1,5 +1,5 @@
 import test from "ava"
-import {path, payload, enrich, validateDB} from "../lib/interceptors.js"
+import {after, path, payload, enrich, validateDB} from "../lib/interceptors.js"
 
 function createContext(context) {
   return {
@@ -261,4 +261,36 @@ test('enrich > is ignored if "db" effect does not exist', t => {
   })
   context = runInterceptors(context)
   t.deepEqual(context.effects, {})
+})
+
+test('after > runs "fn" as a side-effect against "db" effect', t => {
+  const calls = []
+  const fn = (...args) => calls.push(args)
+  let context = createContext({
+    queue: [after(fn)],
+    effects: {
+      db: {
+        count: 1,
+      },
+    },
+    coeffects: {
+      event: ["noop"],
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(calls, [[{count: 1}, ["noop"]]])
+})
+
+test('after > is ignored if "db" effect does not exist', t => {
+  const calls = []
+  const fn = (...args) => calls.push(args)
+  let context = createContext({
+    queue: [after(fn)],
+    effects: {},
+    coeffects: {
+      event: ["noop"],
+    },
+  })
+  context = runInterceptors(context)
+  t.deepEqual(calls, [])
 })

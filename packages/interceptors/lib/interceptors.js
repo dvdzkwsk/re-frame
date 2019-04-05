@@ -94,3 +94,16 @@ export function enrich(fn) {
     },
   }
 }
+
+export function after(fn) {
+  return {
+    id: "after",
+    after: function(context) {
+      if (!("db" in context.effects)) {
+        return context
+      }
+      fn(context.effects.db, context.coeffects.event)
+      return context
+    },
+  }
+}
