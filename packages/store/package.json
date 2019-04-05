@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/store",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
@@ -23,6 +23,6 @@
     ]
   },
   "dependencies": {
-    "@re-frame/utils": "^0.10.0"
+    "@re-frame/utils": "^0.11.0"
   }
 }
