@@ -1,0 +1,35 @@
+{
+  "name": "@re-frame/extension",
+  "version": "0.11.0",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "license": "MIT",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "ava",
+    "build": "webpack",
+    "start": "webpack --watch"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "devDependencies": {
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1"
+  },
+  "dependencies": {
+    "htm": "^2.1.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-json-tree": "^0.11.2"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "re-frame devtools",
+  "version": "1.0",
+  "description": "Developer tools for the @re-frame library",
+  "manifest_version": 2,
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'; style-src * 'unsafe-inline'; img-src 'self' data:;",
+  "devtools_page": "panel/panel.html",
+  "icons": {
+    "96": "images/re-frame-logo.png"
+  },
+  "web_accessible_resources": [
+    "src/content-script/re-frame.content-script.js",
+    "dist/re-frame.page-script.js"
+  ],
+  "externally_connectable": {
+    "ids": ["*"]
+  },
+  "background": {
+    "scripts": ["re-frame.background.js"]
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_globs": ["https://www.google*"],
+      "js": ["re-frame.content-script.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ],
+  "permissions": [
+    "declarativeContent",
+    "notifications",
+    "contextMenus",
+    "tabs",
+    "storage",
+    "<all_urls>"
+  ]
+}
