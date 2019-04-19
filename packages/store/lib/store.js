@@ -303,7 +303,7 @@ export function createStore(opts) {
     subscription._handler = getRegistration(SUBSCRIPTION, query[0])
     var db = APP_DB.deref()
     if (db) {
-      subscription._reset(subscription._handler(db))
+      subscription._reset(subscription._handler(db, query))
     }
     ACTIVE_SUBSCRIPTIONS.push(subscription)
     return subscription

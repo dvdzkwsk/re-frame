@@ -27,6 +27,15 @@ test("subscribe() returns an atom with the current value of the subscription", a
   sub.dispose()
 })
 
+test("subscribe() returns an atom with the current value of the subscription for complex queries", async t => {
+  const store = await makeStore()
+  store.registerSubscription("key", (db, query) => db[query[1]])
+  const sub = store.subscribe(["key", "count"])
+  t.is(sub.deref(), 0)
+
+  sub.dispose()
+})
+
 test('a top-level subscription is re-run whenever the "db" changes', async t => {
   const store = await makeStore()
   store.registerSubscription("count", db => db.count)
