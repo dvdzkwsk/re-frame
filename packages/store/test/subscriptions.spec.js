@@ -8,16 +8,17 @@ async function flush() {
   await new Promise(resolve => setTimeout(resolve)) // let subscriptions run
 }
 
-function makeStore() {
+async function makeStore() {
   const store = createStore()
   store.registerEventDB("init", () => ({count: 0}))
   store.registerEventDB("count", db => ({count: db.count + 1}))
-  store.dispatchSync(["init"])
+  store.dispatch(["init"])
+  await flush()
   return store
 }
 
-test("subscribe() returns an atom with the current value of the subscription", t => {
-  const store = makeStore()
+test("subscribe() returns an atom with the current value of the subscription", async t => {
+  const store = await makeStore()
   store.registerSubscription("count", db => db.count)
 
   const sub = store.subscribe(["count"])
@@ -26,18 +27,8 @@ test("subscribe() returns an atom with the current value of the subscription", t
   sub.dispose()
 })
 
-test("subscriptions expose their underlying query", t => {
-  const store = makeStore()
-  store.registerSubscription("count", db => db.count)
-
-  const sub = store.subscribe(["count"])
-  t.deepEqual(sub.query, ["count"])
-
-  sub.dispose()
-})
-
 test('a top-level subscription is re-run whenever the "db" changes', async t => {
-  const store = makeStore()
+  const store = await makeStore()
   store.registerSubscription("count", db => db.count)
   const sub = store.subscribe(["count"])
 
@@ -58,7 +49,7 @@ test('a top-level subscription is re-run whenever the "db" changes', async t => 
 
 test("subscriptions don't notify watchers if their value didn't change", async t => {
   const calls = []
-  const store = makeStore()
+  const store = await makeStore()
   store.registerSubscription("count", db => db.count)
   store.registerEventDB("noop", db => db)
 
@@ -79,8 +70,92 @@ test("subscriptions don't notify watchers if their value didn't change", async t
   sub.dispose()
 })
 
-test("subscribe() accepts a simple string as sugar", t => {
-  const store = makeStore()
+test("simple (no query args) subscriptions are de-duplicated", async t => {
+  const store = await makeStore()
+
+  let calls = 0
+  store.registerEventDB("double", db => ({count: db.count * 2}))
+  store.registerSubscription("count", db => {
+    calls++
+    return db.count
+  })
+  // All subscriptions should be the same
+  const sub1 = store.subscribe(["count"])
+  const sub2 = store.subscribe(["count"])
+  const sub3 = store.subscribe(["count"])
+  t.is(sub1, sub2)
+  t.is(sub1, sub3)
+  t.is(calls, 1) // subscription handler should only be called once
+
+  store.dispatch(["double"])
+  await flush()
+  t.is(calls, 2) // subscription handler should only be called one more time
+
+  sub1.dispose()
+  sub2.dispose()
+  sub3.dispose()
+})
+
+test("complex (1 or more query args) subscriptions are de-duplicated", async t => {
+  const store = await makeStore()
+
+  let calls = 0
+  store.registerEventDB("double", db => ({count: db.count * 2}))
+  store.registerSubscription("count", db => {
+    calls++
+    return db.count
+  })
+  const sub1 = store.subscribe(["count", 1])
+
+  // These two subscriptions should be the same
+  const sub2 = store.subscribe(["count", 2])
+  const sub3 = store.subscribe(["count", 2])
+  t.not(sub1, sub2)
+  t.is(sub2, sub3)
+  t.is(calls, 2) // once for each unique subscription
+
+  store.dispatch(["double"])
+  await flush()
+  t.is(calls, 4) // and again for each unique subscription
+
+  sub1.dispose()
+  sub2.dispose()
+  sub3.dispose()
+})
+
+test("disposing of a shared subscription only closes the subscription if no more watchers exit", async t => {
+  const store = await makeStore()
+
+  let calls = 0
+  store.registerEventDB("double", db => ({count: db.count * 2}))
+  store.registerSubscription("count", db => {
+    calls++
+    return db.count
+  })
+  const sub1 = store.subscribe(["count", 2])
+  const sub2 = store.subscribe(["count", 2])
+  const sub3 = store.subscribe(["count", 2])
+  t.is(calls, 1)
+
+  sub1.dispose()
+  store.dispatch(["double"])
+  await flush()
+  t.is(calls, 2)
+
+  sub2.dispose()
+  store.dispatch(["double"])
+  await flush()
+  t.is(calls, 3)
+
+  // Subscription should be inactive after sub3 disposes.
+  sub3.dispose()
+  store.dispatch(["double"])
+  await flush()
+  t.is(calls, 3) // unchanged from previous test
+})
+
+test("subscribe() accepts a simple string as sugar", async t => {
+  const store = await makeStore()
   store.registerSubscription("count", db => db.count)
 
   const sub = store.subscribe("count")
@@ -89,8 +164,8 @@ test("subscribe() accepts a simple string as sugar", t => {
   sub.dispose()
 })
 
-test("query() accepts a simple string as sugar", t => {
-  const store = makeStore()
+test("query() accepts a simple string as sugar", async t => {
+  const store = await makeStore()
   store.registerSubscription("count", db => db.count)
 
   t.is(store.query("count"), 0)

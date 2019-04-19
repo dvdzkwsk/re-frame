@@ -270,31 +270,70 @@ export function createStore(opts) {
       validateQuery(query)
     }
 
-    var subscription = atom()
+    var subscription = findCachedSubscription(query)
+    if (subscription) {
+      subscription._refs++
+      return subscription
+    }
+
+    subscription = atom()
+    subscription._refs = 1
 
     // A subscription is an atom, but it should be considered read-only out in
     // userland since its internal value is computed. Remove all public API's
     // that would allow its value to be improperly modified.
     var reset = subscription.reset
+    var dispose = subscription.dispose
     delete subscription.reset
     delete subscription.swap
 
-    var id = query[0]
-    subscription.query = query
-    function recompute(db) {
-      var handler = getRegistration(SUBSCRIPTION, id)
+    subscription.dispose = function() {
+      subscription._refs--
+      if (subscription._refs === 0) {
+        ACTIVE_SUBSCRIPTIONS.splice(
+          ACTIVE_SUBSCRIPTIONS.indexOf(subscription),
+          1
+        )
+        dispose()
+      }
+    }
+
+    subscription._query = query
+    subscription._handler = getRegistration(SUBSCRIPTION, query[0])
+    subscription._recompute = function recompute(db) {
       var prevValue = subscription.deref()
-      var nextValue = handler(db, query)
+      var nextValue = subscription._handler(db, query)
       if (nextValue !== prevValue) {
         reset(nextValue)
       }
     }
     var db = APP_DB.deref()
     if (db) {
-      recompute(db)
+      subscription._recompute(db)
     }
-    ACTIVE_SUBSCRIPTIONS.push(recompute)
+    ACTIVE_SUBSCRIPTIONS.push(subscription)
     return subscription
+  }
+
+  function findCachedSubscription(query) {
+    var id = query[0]
+
+    for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
+      var subscription = ACTIVE_SUBSCRIPTIONS[i]
+      if (subscription._query[0] !== id) {
+        continue
+      }
+      var matched = true
+      for (var j = 1; j < subscription._query.length; j++) {
+        if (query[j] !== subscription._query[j]) {
+          matched = false
+          break
+        }
+      }
+      if (matched) {
+        return subscription
+      }
+    }
   }
 
   function notifySubscriptions(context) {
@@ -305,7 +344,7 @@ export function createStore(opts) {
     if (nextDB && nextDB !== prevDB) {
       requestAnimationFrame(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-          ACTIVE_SUBSCRIPTIONS[i](nextDB)
+          ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
         }
       })
     }
