@@ -298,18 +298,12 @@ export function createStore(opts) {
       }
     }
 
+    subscription._reset = reset
     subscription._query = query
     subscription._handler = getRegistration(SUBSCRIPTION, query[0])
-    subscription._recompute = function recompute(db) {
-      var prevValue = subscription.deref()
-      var nextValue = subscription._handler(db, query)
-      if (nextValue !== prevValue) {
-        reset(nextValue)
-      }
-    }
     var db = APP_DB.deref()
     if (db) {
-      subscription._recompute(db)
+      subscription._reset(subscription._handler(db))
     }
     ACTIVE_SUBSCRIPTIONS.push(subscription)
     return subscription
@@ -344,7 +338,12 @@ export function createStore(opts) {
     if (nextDB && nextDB !== prevDB) {
       requestAnimationFrame(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-          ACTIVE_SUBSCRIPTIONS[i]._recompute(nextDB)
+          var subscription = ACTIVE_SUBSCRIPTIONS[i]
+          var prevValue = subscription.deref()
+          var nextValue = subscription._handler(nextDB, subscription._query)
+          if (nextValue !== prevValue) {
+            subscription._reset(nextValue)
+          }
         }
       })
     }
