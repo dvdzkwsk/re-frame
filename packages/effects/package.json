@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/effects",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/effects.js",
