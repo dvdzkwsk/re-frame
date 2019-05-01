@@ -424,7 +424,7 @@ export function createStore(opts) {
   }
 
   // --- Public API -----------------------------------------------------------
-  return {
+  var store = {
     dispatch: dispatch,
     dispatchSync: dispatchSync,
     query: query,
@@ -433,11 +433,14 @@ export function createStore(opts) {
     registerCoeffect: registerCoeffect,
     registerEventDB: registerEventDB,
     registerEventFX: registerEventFX,
-    registerEffect: registerEffect,
+    registerEffect: function(id, factory) {
+      return registerEffect(id, factory(store))
+    },
     registerSubscription: registerSubscription,
     addPostEventCallback: addPostEventCallback,
     removePostEventCallback: removePostEventCallback,
   }
+  return store
 }
 
 // A DB handler receives the current db and event and return a new db.
