@@ -440,6 +440,14 @@ export function createStore(opts) {
     addPostEventCallback: addPostEventCallback,
     removePostEventCallback: removePostEventCallback,
   }
+
+  // --- Experimental API -----------------------------------------------------
+  store.event = registerEventDB
+  store.event.fx = registerEventFX
+  store.effect = store.registerEffect
+  store.context = registerCoeffect
+  store.inject = injectCoeffect
+  store.computed = registerSubscription
   return store
 }
 

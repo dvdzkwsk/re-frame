@@ -17,5 +17,14 @@
 ---- [ Ergonomics ] -----------------------------
 * Make terminology consistent, e.g. "fx" vs "effects"
 * Possible to make public API pithier?
+  * "coeffects" -> "context"
+  * "registerCoeffect" -> "context"
+  * "injectCoeffect" -> "inject"
+  * "registerEventDB" -> "event" ???
+  * "registerEventFX" -> "event.fx" ???
+  * "registerSubscription" -> "???"
+
 * Debug tracing
 * Should store not take an initialState?
+
+
