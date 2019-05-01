@@ -264,3 +264,34 @@ test("Can execute a one-time query without setting up a subscription", t => {
   store.registerSubscription("count", db => db.count)
   t.is(store.query(["count"]), 5)
 })
+
+test("Can register and execute custom effects", t => {
+  t.plan(2)
+
+  const store = createStore()
+  store.registerEventFX("test-effects", (cofx, event) => ({
+    http: {url: "/test-url"},
+    wait: {ms: 5000, dispatch: ["delayed"]},
+  }))
+  store.registerEffect("http", store => config => {
+    t.deepEqual(config, {url: "/test-url"})
+  })
+  store.registerEffect("wait", store => config => {
+    t.deepEqual(config, {ms: 5000, dispatch: ["delayed"]})
+  })
+  store.dispatchSync(["test-effects"])
+})
+
+test("Custom effect factories receive the store", t => {
+  t.plan(1)
+
+  const store = createStore()
+  store.registerEventFX("test-effects", (cofx, event) => ({
+    http: {url: "/test-url"},
+  }))
+  store.registerEffect("http", _store => {
+    t.is(_store, store)
+    return () => {}
+  })
+  store.dispatchSync(["test-effects"])
+})
