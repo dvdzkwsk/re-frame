@@ -20,27 +20,13 @@ export function useDispatch(event) {
   return store.dispatch
 }
 
-export function useSubscription(query) {
+export function useLazySubscription(query) {
   var store = useContext(StoreContext)
-
-  // TODO: is this safe? We need to return a synchronous value on mount.
-  // After that we're free to use "useEffect" for side effects involving
-  // a live subscription. Both initialization branches are guaranteed to
-  // run the same hook in the same order.
-  var state
-  var mounted = useRef(false)
-  if (!mounted.current) {
-    state = useState(store.query(query))
-  } else {
-    state = useState()
-  }
+  var state = useState()
   var value = state[0]
   var setValue = state[1]
 
   useEffect(function() {
-    if (!mounted.current) {
-      mounted.current = true
-    }
     var subscription = store.subscribe(query)
 
     // The subscription may have emitted a new value between the start of render
@@ -56,6 +42,24 @@ export function useSubscription(query) {
     }
   }, query)
   return value
+}
+
+export function useSubscription(query) {
+  var store = useContext(StoreContext)
+  var mounted = useRef(false)
+  var initialValue
+
+  if (!mounted.current) {
+    initialValue = store.query(query)
+  }
+
+  var lazyValue = useLazySubscription(query)
+  if (!mounted.current) {
+    mounted.current = true
+    return initialValue
+  } else {
+    return lazyValue
+  }
 }
 
 export function useSubscriptions(queries) {
