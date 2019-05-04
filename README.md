@@ -25,30 +25,85 @@ import {createStore} from "@re-frame/standalone"
 const store = createStore()
 
 // Register event handlers — these are how you'll change the store's state.
-store.registerEventDB("init", () => ({count: 0}))
-store.registerEventDB("increment", db => ({...db, count: db.count + 1}))
-
-// Register subscriptions with the store. Whenever the store's state changes
-// these subscriptions will automatically recompute their values.
-store.registerSubscription("count", db => db.count)
-
-// Subscriptions are your means for accessing state inside the store. Calling
-// subscribe() returns a subscription, which itself is a value. You can watch
-// this subscription to observe changes, or pass it around and even compose it
-// with other subscriptions.
-// Most of the time you won't have to go through the trouble of manually watching
-// a subscription. Instead, libraries like @re-frame/react allow you to access
-// their values in your React tree and automatically re-render whenever they
-// change. This pattern should be familiar to MobX users, for example.
-const count = store.subscribe(["count"])
-count.watch((prev, next) => {
-  // do something here, maybe?
+store.event("init", (db, event) => ({count: 0}))
+store.event("increment", (db, event) => ({...db, count: db.count + 1}))
+store.event("add", (db, event) => {
+  const [id, amount] = event
+  return {...db, count: db.count + amount}
 })
 
+// Register computed values with the store. These will be recomputed whenever
+// the state changes.
+store.computed("count", db => db.count)
+
+// You can subscribe to computed values (subscriptions) with store.subscribe:
+const count = store.subscribe("count")
+count.watch((prev, next) => /* ... */)
+
 // Dispatch events to the store.
-store.dispatch(["init"])
-store.dispatch(["increment"])
-store.dispatch(["increment"]) // count will be 2 after this event is processed
+store.dispatch(["init"])      // => count: 0
+store.dispatch(["increment"]) // => count: 1
+store.dispatch(["add", 4])    // => count: 5
+```
+
+Updating the store's state ("db") is just one part of re-frame. You can declaratively trigger any number of effects using `event.fx`:
+
+```js
+import {http} from "@re-frame/effects"
+
+store.effect("http", http)
+store.event.fx("load-chats", (ctx, event) => ({
+  db: {
+    ...ctx.db,
+    loadingChats: true,
+  },
+  http: {
+    url: "/api/chats",
+    method: "GET",
+    success: ["load-chats-success"],
+    failure: ["load-chats-failure"],
+  },
+}))
+store.event("load-chats-success", (db, event) => {
+  const [id, response] = event
+  return {
+    ...db,
+    loadingChats: false,
+    chats: response,
+  }
+})
+store.event("load-chats-failure", (db, event) => {
+  const [id, error] = event
+  return {
+    ...db,
+    loadingChats: false,
+    loadChatsError: error,
+  }
+})
+```
+
+Defining your own effects is easy:
+
+```js
+store.effect("wait", store => config => {
+  setTimeout(() => {
+    store.dispatch(config.dispatch)
+  }, config.ms)
+})
+store.event.fx("transition", (ctx, event) => ({
+  db: {
+    ...ctx.db,
+    transitioning: true,
+  },
+  wait: {
+    ms: 1000,
+    dispatch: ["finish-transition"],
+  },
+})
+store.event("finish-transition", (db, event) => ({
+  ...db,
+  transitioning: false,
+}))
 ```
 
 ## React Integration
