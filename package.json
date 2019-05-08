@@ -10,6 +10,7 @@
   "license": "MIT",
   "scripts": {
     "test": "ava",
+    "start:extension": "cd packages/extension && yarn start",
     "format": "prettier '**/*.js' --write"
   },
   "ava": {
