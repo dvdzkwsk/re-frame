@@ -1,7 +1,5 @@
 import {enableTimeTravel} from "./lib/time-travel.js"
 
-const DEVTOOLS = (window.__RE_FRAME_DEVTOOLS__ = {})
-
 /**
  * This script is injected into the main window via re-frame.content-script.js
  * and has access to the primary window context. Its purpose is to pass
@@ -9,17 +7,27 @@ const DEVTOOLS = (window.__RE_FRAME_DEVTOOLS__ = {})
  */
 window.__RE_FRAME_ENABLE_STORE_DEVTOOLS__ = store => {
   sendMessageToDevtools("connected")
-  Object.assign(DEVTOOLS, enableTimeTravel(store, sendMessageToDevtools))
+  const TimeTravel = enableTimeTravel(store, sendMessageToDevtools)
 
   function handleMessage(msg) {
-    if (!isMessageFromDevtools(msg)) {
-      return
-    }
+    if (!isMessageFromDevtools(msg)) return
 
     const {event, payload} = msg.data
     switch (event) {
       case "time-travel":
-        DEVTOOLS.travelToId(payload)
+        TimeTravel.travelToId(payload)
+        break
+      case "time-travel:forward":
+        TimeTravel.forward()
+        break
+      case "time-travel:back":
+        TimeTravel.back()
+        break
+      case "time-travel:stop":
+        TimeTravel.unfreeze()
+        break
+      case "time-travel:clear-history":
+        TimeTravel.clearHistory()
         break
       case "sync-db":
         sendMessageToDevtools("sync-db", store.query(["@re-frame/db"]))

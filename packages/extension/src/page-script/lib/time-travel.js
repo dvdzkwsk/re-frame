@@ -3,11 +3,21 @@
  * @param {Function} sendMessage
  */
 export function enableTimeTravel(store, sendMessage) {
-  const unfrozenDispatch = store.dispatch
-  const unfrozenDispatchSync = store.dispatchSync
   let cursor = 0 // where are we in history?
   let history = [] // all recorded history
   let IS_STORE_FROZEN = false // is the store ignoring events?
+
+  const unfrozenDispatch = store.dispatch
+  const unfrozenDispatchSync = store.dispatchSync
+
+  store.dispatch = event => {
+    if (IS_STORE_FROZEN) return
+    return unfrozenDispatch(event)
+  }
+  store.dispatchSync = event => {
+    if (IS_STORE_FROZEN) return
+    return unfrozenDispatchSync(event)
+  }
 
   function init() {
     store.computed("@re-frame/db", db => db)
@@ -48,15 +58,18 @@ export function enableTimeTravel(store, sendMessage) {
     const entry = history[index]
     if (!entry) return
 
-    if (!IS_STORE_FROZEN) {
-      IS_STORE_FROZEN = true
-      freeze()
+    freeze()
+    if (entry.event) {
+      console.info("@re-frame: travel to event %s", entry.event[0], {
+        event: entry.event,
+      })
     }
     cursor = index
-    if (entry.event) {
-      console.info("@re-frame/time-travel to %s", entry.event[0])
-    }
-    store.dispatchSync(["@re-frame/time-travel", entry.db])
+    unfrozenDispatchSync(["@re-frame/time-travel", entry.db])
+  }
+
+  function clearHistory() {
+    history = []
   }
 
   /**
@@ -88,11 +101,7 @@ export function enableTimeTravel(store, sendMessage) {
    * jump around history without causing further state changes.
    */
   function freeze() {
-    store.dispatch = store.dispatchSync = event => {
-      if (event[0] === "@re-frame/time-travel") {
-        unfrozenDispatchSync(event)
-      }
-    }
+    IS_STORE_FROZEN = true
   }
 
   /**
@@ -101,8 +110,6 @@ export function enableTimeTravel(store, sendMessage) {
    */
   function unfreeze() {
     IS_STORE_FROZEN = false
-    store.dispatch = unfrozenDispatch
-    store.dispatchSync = unfrozenDispatchSync
   }
 
   async function play(ms) {
@@ -114,7 +121,7 @@ export function enableTimeTravel(store, sendMessage) {
   }
 
   init()
-  return {travelToId, unfreeze, forward, back, first, last, play}
+  return {travelToId, forward, back, first, last, play, unfreeze, clearHistory}
 }
 
 let id = 0

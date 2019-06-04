@@ -5,6 +5,13 @@ import {store} from "./store.js"
 
 function main() {
   store.dispatchSync(["init"])
+  chrome.runtime.onConnect.addListener(port => {
+    if (port.name === "@re-frame/page->devtools") {
+      port.onMessage.addListener(msg => {
+        store.dispatch([msg.event, msg.payload && JSON.parse(msg.payload)])
+      })
+    }
+  })
   mount()
 }
 

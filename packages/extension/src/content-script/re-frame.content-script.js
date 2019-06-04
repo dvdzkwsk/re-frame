@@ -27,11 +27,9 @@ function forwardPageMessagesToDevtools() {
 
 function forwardDevtoolsMessagesToPage() {
   chrome.runtime.onMessage.addListener(msg => {
-    switch (msg.event) {
-      case "sync-db":
-      case "time-travel":
-        const {event, payload} = msg
-        window.postMessage({type: "@re-frame/devtools->page", event, payload})
+    if (msg.reframeDevtoolsToPage) {
+      const {event, payload} = msg
+      window.postMessage({type: "@re-frame/devtools->page", event, payload})
     }
   })
 }
