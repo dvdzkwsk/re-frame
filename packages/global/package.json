@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/global",
-  "version": "0.14.0",
+  "version": "0.15.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/global.js",
@@ -22,8 +22,8 @@
     ]
   },
   "dependencies": {
-    "@re-frame/effects": "^0.14.0",
-    "@re-frame/interceptors": "^0.14.0",
-    "@re-frame/store": "^0.14.0"
+    "@re-frame/effects": "^0.15.0",
+    "@re-frame/interceptors": "^0.15.0",
+    "@re-frame/store": "^0.15.0"
   }
 }
