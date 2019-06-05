@@ -5,17 +5,22 @@ test("synchronously runs the computation and returns an atom containing the resu
   const a = atom("hello")
   const r = reaction(() => a.deref())
   t.is(r.deref(), "hello")
+
+  r.dispose()
 })
 
 test("re-runs the computation when a tracked atom is changed", t => {
   const a = atom(1)
   const r = reaction(() => a.deref())
+
   t.is(r.deref(), 1)
   a.reset(2)
   t.is(r.deref(), 2)
+
+  r.dispose()
 })
 
-test("stops watching atoms that were, but are no longer, used in the computation", t => {
+test("stops watching atoms that are no longer used in the computation", t => {
   let reactions = 0
   const a = atom()
   const b = atom()
@@ -52,6 +57,8 @@ test("stops watching atoms that were, but are no longer, used in the computation
   b.reset("b!")
   t.is(reactions, 4)
   t.is(r.deref(), "b!")
+
+  r.dispose()
 })
 
 // TODO: do we even support this? What's the use case?
@@ -85,4 +92,21 @@ test("nested reactions track atom derefs independently", t => {
   b.reset("b")
   t.is(r1Reactions, 1)
   t.is(r2Reactions, 1)
+
+  r1.dispose()
+})
+
+test("If an atom is .deref()'d more than once in a reaction, a change to that atom only results in one recomputation", t => {
+  let reactions = 0
+
+  const a = atom()
+  const r = reaction(() => {
+    a.deref()
+    a.deref()
+    reactions++
+  })
+  t.is(reactions, 1)
+  a.reset("a")
+  t.is(reactions, 2)
+  r.dispose()
 })

@@ -65,31 +65,34 @@ export function atom(initialValue) {
  * @returns {Atom}
  */
 export function reaction(computation) {
+  var atoms = []
   var watchers = []
   var ratom = atom()
 
   function trackAtomInThisReaction(atom) {
-    watchers.push(atom.watch(runReaction))
+    if (atoms.indexOf(atom) === -1) {
+      atoms.push(atom)
+      watchers.push(atom.watch(runReaction))
+    }
   }
 
   function runReaction() {
-    disposeWatchers()
+    disposeReaction()
     var previousTracker = _trackAtomInCurrentReaction
     _trackAtomInCurrentReaction = trackAtomInThisReaction
     ratom.reset(computation())
     _trackAtomInCurrentReaction = previousTracker
   }
 
-  function disposeWatchers() {
-    if (watchers.length) {
-      for (var i = 0; i < watchers.length; i++) {
-        watchers[i]()
-      }
-      watchers = []
+  function disposeReaction() {
+    for (var i = 0; i < watchers.length; i++) {
+      watchers[i]()
     }
+    watchers = []
+    atoms = []
   }
 
   runReaction()
-  ratom.dispose = disposeWatchers
+  ratom.dispose = disposeReaction
   return ratom
 }
