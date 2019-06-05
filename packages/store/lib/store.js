@@ -1,5 +1,5 @@
 import {assoc, shallowClone} from "@re-frame/utils"
-import {atom} from "./atom"
+import {atom} from "@re-frame/atom"
 import {createEventQueue} from "./event-queue"
 
 /**

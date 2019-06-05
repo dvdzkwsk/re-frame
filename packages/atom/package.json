@@ -1,19 +1,18 @@
 {
-  "name": "@re-frame/store",
+  "name": "@re-frame/atom",
   "version": "0.14.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
-  "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
-  "main": "./lib/store.js",
+  "main": "./lib/atom.js",
   "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "files": [
     "lib",
     "LICENSE",
     "README.md"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "test": "ava"
   },
@@ -21,9 +20,5 @@
     "require": [
       "esm"
     ]
-  },
-  "dependencies": {
-    "@re-frame/atom": "^0.14.0",
-    "@re-frame/utils": "^0.14.0"
   }
 }
