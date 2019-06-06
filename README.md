@@ -20,11 +20,12 @@ yarn add @re-frame/standalone
 ## Usage
 
 ```js
-import {createStore} from "@re-frame/standalone"
+import {createStore, http} from "@re-frame/standalone"
 
 const store = createStore()
 
-// Register event handlers — these are how you'll change the store's state.
+// Register event handlers — these are how you'll change the store's state. In
+// re-frame, the state of the store is called "db" (it's your in-memory database).
 store.event("init", (db, event) => ({count: 0}))
 store.event("increment", (db, event) => ({...db, count: db.count + 1}))
 store.event("add", (db, event) => {
@@ -40,49 +41,34 @@ store.computed("count", db => db.count)
 const count = store.subscribe("count")
 count.watch((prev, next) => /* ... */)
 
+// Most events will simply update the store's state. In re-frame, updating the
+// state (or "db") is done by triggering a "db" effect. For regular events, this
+// is done automatically. However, you can step up a level and use "event.fx"
+// to trigger any number of effects.
+import {http} from "@re-frame/effects"
+store.effect("http", http)
+store.event.fx("load-data", (ctx, event) => ({
+  db: {
+    ...ctx.db,
+    loadingData: true,
+  },
+  http: {
+    url: "my.api.com/endpoint",
+    method: "GET",
+    success: ["load-data-success"], // you will need to register these events as well
+    failure: ["load-data-failure"],
+  },
+}))
+
 // Dispatch events to the store.
 store.dispatch(["init"])      // => count: 0
 store.dispatch(["increment"]) // => count: 1
 store.dispatch(["add", 4])    // => count: 5
+store.dispatch(["load-data"]) // this will start an HTTP request
 ```
 
-Updating the store's state ("db") is just one part of re-frame. You can declaratively trigger any number of effects using `event.fx`:
-
-```js
-import {http} from "@re-frame/effects"
-
-store.effect("http", http)
-store.event.fx("load-chats", (ctx, event) => ({
-  db: {
-    ...ctx.db,
-    loadingChats: true,
-  },
-  http: {
-    url: "/api/chats",
-    method: "GET",
-    success: ["load-chats-success"],
-    failure: ["load-chats-failure"],
-  },
-}))
-store.event("load-chats-success", (db, event) => {
-  const [id, response] = event
-  return {
-    ...db,
-    loadingChats: false,
-    chats: response,
-  }
-})
-store.event("load-chats-failure", (db, event) => {
-  const [id, error] = event
-  return {
-    ...db,
-    loadingChats: false,
-    loadChatsError: error,
-  }
-})
-```
-
-Defining your own effects is easy:
+While @re-frame/effects provides numerous built-in effects for you, it's also
+easy to define your own effects:
 
 ```js
 store.effect("wait", store => config => {
