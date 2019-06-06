@@ -2,6 +2,8 @@ import test from "ava"
 import {createStore} from "@re-frame/store"
 import {assoc} from "@re-frame/utils"
 
+global.requestAnimationFrame = fn => setTimeout(fn)
+
 const flush = ms => new Promise(resolve => setTimeout(resolve))
 
 const makeTodo = description => ({
@@ -19,15 +21,17 @@ const [
 ]
 
 const makeStore = () => {
-  const store = createStore({
+  const store = createStore()
+  store.event("init", () => ({
     todos: [
       TODO_LEARN_REFRAME,
       TODO_WRITE_FIRST_REFRAME_APPLICATION,
       TODO_TAKE_A_BREAK,
     ],
-  })
+  }))
+  store.dispatchSync(["init"])
 
-  store.registerEventDB("toggle-completed", (db, [_, {description}]) => ({
+  store.event("toggle-completed", (db, [_, {description}]) => ({
     ...db,
     todos: db.todos.map(todo => {
       return todo.description === description
@@ -36,12 +40,12 @@ const makeStore = () => {
     }),
   }))
 
-  store.registerEventDB("create-todo-success", (db, [_, todo]) => ({
+  store.event("create-todo-success", (db, [_, todo]) => ({
     ...db,
     todos: db.todos.concat(todo),
   }))
 
-  store.registerEventFX("create-todo", (cofx, [_, json]) => ({
+  store.event.fx("create-todo", (cofx, [_, json]) => ({
     http: {
       method: "POST",
       url: "/create-todo",
@@ -50,7 +54,7 @@ const makeStore = () => {
     },
   }))
 
-  store.registerEffect("http", config => {
+  store.effect("http", store => config => {
     // simulate a network request
     Promise.resolve().then(() => {
       switch (config.url) {
@@ -66,16 +70,11 @@ const makeStore = () => {
 
 test("Can toggle a todo between complete and incomplete", t => {
   const store = makeStore()
-  store.registerSubscription("todo", (db, [id, todo]) => {
+  store.computed("todo", (db, [id, todo]) => {
     return db.todos.find(td => td.description === todo.description)
   })
 
-  const findTodo = todo => {
-    const atom = store.subscribe(["todo", todo])
-    const value = atom.deref()
-    atom.dispose()
-    return value
-  }
+  const findTodo = todo => store.query(["todo", todo])
 
   store.dispatchSync(["toggle-completed", TODO_LEARN_REFRAME])
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
@@ -90,7 +89,7 @@ test("Can toggle a todo between complete and incomplete", t => {
 test("Can create a todo", async t => {
   const store = makeStore()
 
-  store.registerSubscription("todos", db => db.todos)
+  store.computed("todos", db => db.todos)
   const todos = store.subscribe(["todos"])
 
   store.dispatchSync([

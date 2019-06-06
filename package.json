@@ -15,6 +15,7 @@
   },
   "ava": {
     "files": [
+      "test/**/*.spec.js",
       "packages/**/*.spec.js"
     ],
     "require": [
