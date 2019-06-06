@@ -17,6 +17,18 @@ The quickest way to get started is by installing `@re-frame/standalone`, which b
 yarn add @re-frame/standalone
 ```
 
+Once you've become familiar with re-frame, feel free to install only the packages you need to cut down on install size. You'll need @re-frame/store to create a store, but everything else is optional.
+
+| Package                | Description                                                |
+|------------------------|------------------------------------------------------------|
+| @re-frame/store        | Creates an instance of a re-fraem store                    |
+| @re-frame/effects      | Useful effects for most web apps (HTTP, orchestrate, etc.) |
+| @re-frame/interceptors | Common interceptors (path, payload, debug, etc.)           |
+| @re-frame/immer        | An interceptor to write more convenient event handlers     |
+| @re-frame/react        | React bindings (useDispatch, useSubscription)              |
+| @re-frame/preact       | Preact bindings (useDispatch, useSubscription)             |
+| @re-frame/global       | A global re-frame store instance                           |
+
 ## Usage
 
 ```js
