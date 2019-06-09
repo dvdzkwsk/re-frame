@@ -396,7 +396,7 @@ export function createStore(opts) {
         "You dispatched an event that isn't registered with the store. " +
           'Please register "' +
           event[0] +
-          '" with registerEventDB or registerEventFX.'
+          '" with store.event() or store.event.fx().'
       )
     }
   }
@@ -429,25 +429,18 @@ export function createStore(opts) {
     dispatchSync: dispatchSync,
     query: query,
     subscribe: subscribe,
-    injectCoeffect: injectCoeffect,
-    registerCoeffect: registerCoeffect,
-    registerEventDB: registerEventDB,
-    registerEventFX: registerEventFX,
-    registerEffect: function(id, factory) {
+    event: registerEventDB,
+    effect: function(id, factory) {
       return registerEffect(id, factory(store))
     },
-    registerSubscription: registerSubscription,
+    context: registerCoeffect,
+    inject: injectCoeffect,
+    computed: registerSubscription,
     addPostEventCallback: addPostEventCallback,
     removePostEventCallback: removePostEventCallback,
   }
-
-  // --- Experimental API -----------------------------------------------------
-  store.event = registerEventDB
   store.event.fx = registerEventFX
-  store.effect = store.registerEffect
-  store.context = registerCoeffect
-  store.inject = injectCoeffect
-  store.computed = registerSubscription
+
   return store
 }
 

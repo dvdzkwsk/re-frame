@@ -10,8 +10,8 @@ async function flush() {
 
 async function makeStore() {
   const store = createStore()
-  store.registerEventDB("init", () => ({count: 0}))
-  store.registerEventDB("count", db => ({count: db.count + 1}))
+  store.event("init", () => ({count: 0}))
+  store.event("count", db => ({count: db.count + 1}))
   store.dispatch(["init"])
   await flush()
   return store
@@ -19,7 +19,7 @@ async function makeStore() {
 
 test("subscribe() returns an atom with the current value of the subscription", async t => {
   const store = await makeStore()
-  store.registerSubscription("count", db => db.count)
+  store.computed("count", db => db.count)
 
   const sub = store.subscribe(["count"])
   t.is(sub.deref(), 0)
@@ -29,7 +29,7 @@ test("subscribe() returns an atom with the current value of the subscription", a
 
 test("subscribe() returns an atom with the current value of the subscription for complex queries", async t => {
   const store = await makeStore()
-  store.registerSubscription("key", (db, query) => db[query[1]])
+  store.computed("key", (db, query) => db[query[1]])
   const sub = store.subscribe(["key", "count"])
   t.is(sub.deref(), 0)
 
@@ -38,7 +38,7 @@ test("subscribe() returns an atom with the current value of the subscription for
 
 test('a top-level subscription is re-run whenever the "db" changes', async t => {
   const store = await makeStore()
-  store.registerSubscription("count", db => db.count)
+  store.computed("count", db => db.count)
   const sub = store.subscribe(["count"])
 
   store.dispatch(["count"])
@@ -59,8 +59,8 @@ test('a top-level subscription is re-run whenever the "db" changes', async t => 
 test("subscriptions don't notify watchers if their value didn't change", async t => {
   const calls = []
   const store = await makeStore()
-  store.registerSubscription("count", db => db.count)
-  store.registerEventDB("noop", db => db)
+  store.computed("count", db => db.count)
+  store.event("noop", db => db)
 
   const sub = store.subscribe(["count"])
   sub.watch((...args) => calls.push(args))
@@ -83,8 +83,8 @@ test("simple (no query args) subscriptions are de-duplicated", async t => {
   const store = await makeStore()
 
   let calls = 0
-  store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.registerSubscription("count", db => {
+  store.event("double", db => ({count: db.count * 2}))
+  store.computed("count", db => {
     calls++
     return db.count
   })
@@ -109,8 +109,8 @@ test("complex (1 or more query args) subscriptions are de-duplicated", async t =
   const store = await makeStore()
 
   let calls = 0
-  store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.registerSubscription("count", db => {
+  store.event("double", db => ({count: db.count * 2}))
+  store.computed("count", db => {
     calls++
     return db.count
   })
@@ -136,8 +136,8 @@ test("disposing of a shared subscription only closes the subscription if no more
   const store = await makeStore()
 
   let calls = 0
-  store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.registerSubscription("count", db => {
+  store.event("double", db => ({count: db.count * 2}))
+  store.computed("count", db => {
     calls++
     return db.count
   })
@@ -165,7 +165,7 @@ test("disposing of a shared subscription only closes the subscription if no more
 
 test("subscribe() accepts a simple string as sugar", async t => {
   const store = await makeStore()
-  store.registerSubscription("count", db => db.count)
+  store.computed("count", db => db.count)
 
   const sub = store.subscribe("count")
   t.is(sub.deref(), 0)
@@ -175,7 +175,7 @@ test("subscribe() accepts a simple string as sugar", async t => {
 
 test("query() accepts a simple string as sugar", async t => {
   const store = await makeStore()
-  store.registerSubscription("count", db => db.count)
+  store.computed("count", db => db.count)
 
   t.is(store.query("count"), 0)
 })

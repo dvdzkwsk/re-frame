@@ -11,7 +11,7 @@ async function flush() {
 
 function createStoreWithState(state, opts) {
   const store = createStore(opts)
-  store.registerEventDB("init", () => state)
+  store.event("init", () => state)
   store.dispatchSync(["init"])
   return store
 }
@@ -21,14 +21,14 @@ test("runtime checks are only enabled in development mode", t => {
   process.env.NODE_ENV = "development"
   t.throws(() => {
     const store = createStore()
-    store.registerEventDB("foo", [null], () => {})
+    store.event("foo", [null], () => {})
   }, /Invalid interceptor provided/)
 
   // prod store should skip validation
   process.env.NODE_ENV = "production"
   t.notThrows(() => {
     const store = createStore()
-    store.registerEventDB("foo", [null], () => {})
+    store.event("foo", [null], () => {})
   })
 
   process.env.NODE_ENV = "development"
@@ -38,13 +38,13 @@ test("throws if a dispatched event type hasn't been registered with the store", 
   const store = createStoreWithState(0)
   t.throws(() => {
     store.dispatchSync(["unregistered"])
-  }, 'You dispatched an event that isn\'t registered with the store. Please register "unregistered" with registerEventDB or registerEventFX.')
+  }, 'You dispatched an event that isn\'t registered with the store. Please register "unregistered" with store.event() or store.event.fx().')
 })
 
 test("dispatch > EventDB handler updates DB state", async t => {
   const store = createStoreWithState(1)
-  store.registerEventDB("double", db => db * 2)
-  const value = store.registerSubscription("db", db => db)
+  store.event("double", db => db * 2)
+  const value = store.computed("db", db => db)
 
   store.dispatch(["double"])
   await flush()
@@ -69,7 +69,7 @@ test("dispatch > throws if called with an unwrapped string", async t => {
 test("dispatch > does not process the event immediately", async t => {
   const processedEvents = []
   const store = createStore()
-  store.registerEventDB("a", (db, event) => processedEvents.push(event))
+  store.event("a", (db, event) => processedEvents.push(event))
 
   store.dispatch(["a"])
   t.deepEqual(processedEvents, [])
@@ -80,9 +80,9 @@ test("dispatch > does not process the event immediately", async t => {
 test("dispatch > processes events dispatched in the same loop as batch", async t => {
   const processedEvents = []
   const store = createStore()
-  store.registerEventDB("a", (db, event) => processedEvents.push(event))
-  store.registerEventDB("b", (db, event) => processedEvents.push(event))
-  store.registerEventDB("c", (db, event) => processedEvents.push(event))
+  store.event("a", (db, event) => processedEvents.push(event))
+  store.event("b", (db, event) => processedEvents.push(event))
+  store.event("c", (db, event) => processedEvents.push(event))
 
   store.dispatch(["a"])
   store.dispatch(["b"])
@@ -96,9 +96,9 @@ test("dispatch > processes events dispatched in the same loop as batch", async t
 test("dispatch > processes events in the order they are dispatched", async t => {
   const processedEvents = []
   const store = createStore()
-  store.registerEventDB("a", (db, event) => processedEvents.push(event))
-  store.registerEventDB("b", (db, event) => processedEvents.push(event))
-  store.registerEventDB("c", (db, event) => processedEvents.push(event))
+  store.event("a", (db, event) => processedEvents.push(event))
+  store.event("b", (db, event) => processedEvents.push(event))
+  store.event("c", (db, event) => processedEvents.push(event))
 
   store.dispatch(["a"])
   store.dispatch(["b"])
@@ -112,7 +112,7 @@ test("dispatch > processes events in the order they are dispatched", async t => 
 test("dispatchSync > processes an event synchronously", t => {
   const processedEvents = []
   const store = createStore()
-  store.registerEventDB("a", (db, event) => processedEvents.push(event))
+  store.event("a", (db, event) => processedEvents.push(event))
   store.dispatchSync(["a"])
   t.deepEqual(processedEvents, [["a"]])
 })
@@ -120,8 +120,8 @@ test("dispatchSync > processes an event synchronously", t => {
 test("dispatchSync > processes an event ahead of the existing queue", async t => {
   const processedEvents = []
   const store = createStore()
-  store.registerEventDB("async", (db, event) => processedEvents.push(event))
-  store.registerEventDB("sync", (db, event) => processedEvents.push(event))
+  store.event("async", (db, event) => processedEvents.push(event))
+  store.event("sync", (db, event) => processedEvents.push(event))
 
   store.dispatch(["async"])
   store.dispatch(["async"])
@@ -135,7 +135,7 @@ test("dispatchSync > processes an event ahead of the existing queue", async t =>
 
 test("EventFX > throws if a requested event has not been registered", t => {
   const store = createStore()
-  store.registerEventFX("create_effect", () => ({
+  store.event.fx("create_effect", () => ({
     effectThatDoesntExist: true,
   }))
 
@@ -150,7 +150,7 @@ test("EventFX > does not throw if no effects were returned", t => {
   const warnings = []
   console.warn = msg => warnings.push(msg)
 
-  store.registerEventFX("event-fx", () => {})
+  store.event.fx("event-fx", () => {})
   t.notThrows(() => {
     store.dispatchSync(["event-fx"])
   })
@@ -172,7 +172,7 @@ test("subscribe > returns an atom with the current computed value for the subscr
   const store = createStoreWithState({
     todos: ["foo", "bar", "baz"],
   })
-  store.registerSubscription("todos", (db, query) => {
+  store.computed("todos", (db, query) => {
     return db.todos
   })
   const todos = store.subscribe(["todos"])
@@ -184,11 +184,11 @@ test("subscribe > provides the query vector to the subscription handler", async 
   const store = createStoreWithState({
     todos: [],
   })
-  store.registerEventDB("add-todo", (db, event) => ({
+  store.event("add-todo", (db, event) => ({
     ...db,
     todos: db.todos.concat(event[1]),
   }))
-  store.registerSubscription("todos", (db, query) => {
+  store.computed("todos", (db, query) => {
     return db.todos.filter(todo => todo.includes(query[1]))
   })
   const todos = store.subscribe(["todos", "baz"]) // look for todos that match "baz"
@@ -213,11 +213,11 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
   const store = createStoreWithState({
     todos: [],
   })
-  store.registerEventDB("add-todo", (db, event) => ({
+  store.event("add-todo", (db, event) => ({
     ...db,
     todos: db.todos.concat(event[1]),
   }))
-  store.registerSubscription("todos", (db, query) => {
+  store.computed("todos", (db, query) => {
     return db.todos
   })
   const todos = store.subscribe(["todos"])
@@ -241,7 +241,7 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
 test("addPostEventCallback > callback is called after an event is processed", t => {
   t.plan(1)
   const store = createStore()
-  store.registerEventDB("noop", () => {})
+  store.event("noop", () => {})
   store.addPostEventCallback(event => {
     t.deepEqual(event, ["noop", "foobar"])
   })
@@ -252,7 +252,7 @@ test("removePostEventCallback > removes the callback from the registry", t => {
   const store = createStore()
   const callback = event => t.fail()
 
-  store.registerEventDB("noop", () => {})
+  store.event("noop", () => {})
   store.addPostEventCallback(callback)
   store.removePostEventCallback(callback)
   store.dispatchSync(["noop", "foobar"])
@@ -261,7 +261,7 @@ test("removePostEventCallback > removes the callback from the registry", t => {
 
 test("Can execute a one-time query without setting up a subscription", t => {
   const store = createStoreWithState({count: 5})
-  store.registerSubscription("count", db => db.count)
+  store.computed("count", db => db.count)
   t.is(store.query(["count"]), 5)
 })
 
@@ -269,14 +269,14 @@ test("Can register and execute custom effects", t => {
   t.plan(2)
 
   const store = createStore()
-  store.registerEventFX("test-effects", (cofx, event) => ({
+  store.event.fx("test-effects", (cofx, event) => ({
     http: {url: "/test-url"},
     wait: {ms: 5000, dispatch: ["delayed"]},
   }))
-  store.registerEffect("http", store => config => {
+  store.effect("http", store => config => {
     t.deepEqual(config, {url: "/test-url"})
   })
-  store.registerEffect("wait", store => config => {
+  store.effect("wait", store => config => {
     t.deepEqual(config, {ms: 5000, dispatch: ["delayed"]})
   })
   store.dispatchSync(["test-effects"])
@@ -286,10 +286,10 @@ test("Custom effect factories receive the store", t => {
   t.plan(1)
 
   const store = createStore()
-  store.registerEventFX("test-effects", (cofx, event) => ({
+  store.event.fx("test-effects", (cofx, event) => ({
     http: {url: "/test-url"},
   }))
-  store.registerEffect("http", _store => {
+  store.effect("http", _store => {
     t.is(_store, store)
     return () => {}
   })
