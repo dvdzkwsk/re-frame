@@ -21,10 +21,9 @@ export function atom(initialValue) {
   var _watchers = []
 
   function setValue(nextValue) {
-    var prevValue = _value
     _value = nextValue
     for (var i = 0; i < _watchers.length; i++) {
-      _watchers[i](prevValue, nextValue)
+      _watchers[i](nextValue)
     }
   }
 

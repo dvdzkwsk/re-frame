@@ -57,24 +57,24 @@ test('a top-level subscription is re-run whenever the "db" changes', async t => 
 })
 
 test("subscriptions don't notify watchers if their value didn't change", async t => {
-  const calls = []
+  const history = []
   const store = await makeStore()
   store.computed("count", db => db.count)
   store.event("noop", db => db)
 
   const sub = store.subscribe(["count"])
-  sub.watch((...args) => calls.push(args))
+  sub.watch(val => history.push(val))
 
   store.dispatch(["count"])
   await flush()
-  t.deepEqual(calls, [[0, 1]])
+  t.deepEqual(history, [1])
   store.dispatch(["noop"])
   store.dispatch(["noop"])
   await flush()
-  t.deepEqual(calls, [[0, 1]])
+  t.deepEqual(history, [1])
   store.dispatch(["count"])
   await flush()
-  t.deepEqual(calls, [[0, 1], [1, 2]])
+  t.deepEqual(history, [1, 2])
 
   sub.dispose()
 })

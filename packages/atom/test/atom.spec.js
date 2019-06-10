@@ -7,30 +7,30 @@ test("deref > returns the current value inside the atom", t => {
 })
 
 test("watch > is called whenever the atom changes", t => {
-  const calls = []
+  const history = []
   const a = atom("hello")
-  const unwatch = a.watch((...args) => calls.push(args))
+  const unwatch = a.watch(val => history.push(val))
 
   a.reset("world")
-  t.deepEqual(calls, [["hello", "world"]])
+  t.deepEqual(history, ["world"])
 
   a.swap(val => val.toUpperCase())
-  t.deepEqual(calls, [["hello", "world"], ["world", "WORLD"]])
+  t.deepEqual(history, ["world", "WORLD"])
 
   unwatch()
 })
 
 test("watch > returns a function to remove the watcher", t => {
-  const calls = []
+  const history = []
   const a = atom("hello")
-  const unwatch = a.watch((...args) => calls.push(args))
+  const unwatch = a.watch(val => history.push(val))
 
   a.reset("world")
-  t.is(calls.length, 1)
+  t.is(history.length, 1)
 
   unwatch()
   a.reset("world")
-  t.is(calls.length, 1)
+  t.is(history.length, 1)
 })
 
 test("reset > updates the value inside the atom to be the provided value", t => {

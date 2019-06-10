@@ -4,7 +4,7 @@ import {assoc} from "@re-frame/utils"
 
 global.requestAnimationFrame = fn => setTimeout(fn)
 
-const flush = ms => new Promise(resolve => setTimeout(resolve))
+const flush = () => new Promise(resolve => setTimeout(resolve))
 
 const makeTodo = description => ({
   description,
@@ -100,13 +100,13 @@ test("Can create a todo", async t => {
     },
   ])
   await flush()
-  const todo = todos
-    .deref()
-    .find(todo => todo.description === "Create a new todo")
-
-  t.is(todos.deref().length, 4)
-  t.deepEqual(todo, {
-    description: "Create a new todo",
-    completed: false,
-  })
+  t.deepEqual(todos.deref(), [
+    TODO_LEARN_REFRAME,
+    TODO_WRITE_FIRST_REFRAME_APPLICATION,
+    TODO_TAKE_A_BREAK,
+    {
+      description: "Create a new todo",
+      completed: false,
+    },
+  ])
 })

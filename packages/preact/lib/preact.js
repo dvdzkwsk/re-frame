@@ -34,7 +34,7 @@ export function useLazySubscription(query) {
     if (value !== subscription.deref()) {
       setValue(subscription.deref())
     }
-    subscription.watch(function(prev, next) {
+    subscription.watch(function(next) {
       setValue(next)
     })
     return function() {

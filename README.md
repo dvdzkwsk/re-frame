@@ -20,7 +20,7 @@ yarn add @re-frame/standalone
 Once you've become familiar with re-frame, feel free to install only the packages you need to cut down on install size. You'll need @re-frame/store to create a store, but everything else is optional.
 
 | Package                | Description                                                |
-|------------------------|------------------------------------------------------------|
+| ---------------------- | ---------------------------------------------------------- |
 | @re-frame/store        | Creates an instance of a re-fraem store                    |
 | @re-frame/effects      | Useful effects for most web apps (HTTP, orchestrate, etc.) |
 | @re-frame/interceptors | Common interceptors (path, payload, debug, etc.)           |
@@ -51,7 +51,7 @@ store.computed("count", db => db.count)
 
 // You can subscribe to computed values (subscriptions) with store.subscribe:
 const count = store.subscribe("count")
-count.watch((prev, next) => /* ... */)
+count.watch(value => /* ... */)
 
 // Most events will simply update the store's state. In re-frame, updating the
 // state (or "db") is done by triggering a "db" effect. For regular events, this
