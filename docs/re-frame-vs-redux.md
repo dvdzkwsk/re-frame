@@ -7,13 +7,14 @@ const event = ["add", 5] // re-frame
 const action = {type: "add", payload: 5} // redux
 ```
 
-2. In re-frame, an "EventDB handler" can be thought of as nearly the same thing as a redux "reducer".
+2. In re-frame, an "event handler" can be thought of as nearly the same thing as a redux "reducer".
 
 ```js
 // re-frame event handlers
-const store = reframe.createStore(0)
-store.registerEventDB("increment", (db, event) => db + 1)
-store.registerEventDB("decrement", (db, event) => db - 1)
+const store = reframe.createStore()
+store.event("increment", (db = 0, event) => db + 1)
+store.event("decrement", (db = 0, event) => db - 1)
+
 store.dispatch(["increment"])
 
 // redux reducer

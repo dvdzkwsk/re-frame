@@ -15,7 +15,7 @@ import {createEventQueue} from "./event-queue"
  *
  * ```js
  * const store = createStore()
- * store.registerEventDB('double', db => db * 2)
+ * store.event('double', db => db * 2)
  * store.dispatch(['double'])
  * ```
  *
@@ -34,8 +34,8 @@ import {createEventQueue} from "./event-queue"
  * the two handlers below are functionally equivalent:
  *
  * ```js
- * store.registerEventDB('double-db', db => db * 2)
- * store.registerEventFX('double-fx', ({ db }) => ({
+ * store.event('double-db', db => db * 2)
+ * store.event.fx('double-fx', ({ db }) => ({
  *  db: db * 2,
  * }))
  * ```
@@ -503,7 +503,7 @@ function switchDirections(context) {
  * deep array. Deep arrays allow patterns such as:
  *
  * const STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
- * registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
+ * store.event("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
  *
  * Flattening the interceptors internally makes for a nicer public API,
  * since users can easily share interceptors — single or multiple —
