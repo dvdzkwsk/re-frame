@@ -1,5 +1,6 @@
 import {assoc, shallowClone} from "@re-frame/utils"
 import {atom} from "@re-frame/atom"
+import {createAnimationFrameScheduler} from "@re-frame/schedulers"
 import {createEventQueue} from "./event-queue"
 
 /**
@@ -330,13 +331,14 @@ export function createStore(opts) {
     }
   }
 
+  var scheduleAnimationFrame = createAnimationFrameScheduler()
   function notifySubscriptions(context) {
     if (!context.effects) return
 
     var prevDB = context.coeffects.db
     var nextDB = context.effects.db
     if (nextDB && nextDB !== prevDB) {
-      requestAnimationFrame(() => {
+      scheduleAnimationFrame(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
           var subscription = ACTIVE_SUBSCRIPTIONS[i]
           var prevValue = subscription.deref()

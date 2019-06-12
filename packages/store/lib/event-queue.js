@@ -1,3 +1,5 @@
+import {createMicroTaskScheduler} from "@re-frame/schedulers"
+
 // prettier-ignore
 var STATE_IDLE       = "IDLE",
     STATE_SCHEDULED  = "SCHEDULED",
@@ -14,6 +16,7 @@ var STATE_IDLE       = "IDLE",
 export function createEventQueue(processEvent) {
   var _queue = []
   var _state = STATE_IDLE
+  var scheduleMicroTask = createMicroTaskScheduler()
 
   function _trigger(event, arg) {
     switch (_state) {
@@ -25,7 +28,7 @@ export function createEventQueue(processEvent) {
           case EVENT_ADD_EVENT:
             _state = STATE_SCHEDULED
             _addEvent(arg)
-            _runNextTick()
+            _scheduleProcessor()
             return
         }
         break
@@ -61,7 +64,7 @@ export function createEventQueue(processEvent) {
               return
             }
             _state = STATE_SCHEDULED
-            _runNextTick()
+            _scheduleProcessor()
             return
         }
         break
@@ -82,8 +85,8 @@ export function createEventQueue(processEvent) {
     _queue[_queue.length] = event
   }
 
-  function _runNextTick() {
-    nextTick(function() {
+  function _scheduleProcessor() {
+    scheduleMicroTask(() => {
       _trigger(EVENT_RUN_QUEUE)
     })
   }
@@ -124,9 +127,4 @@ export function createEventQueue(processEvent) {
       _queue = []
     },
   }
-}
-
-var promise = Promise.resolve()
-function nextTick(fn) {
-  return promise.then(fn)
 }

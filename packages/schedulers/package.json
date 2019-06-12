@@ -1,0 +1,24 @@
+{
+  "name": "@re-frame/schedulers",
+  "version": "0.15.0",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "license": "MIT",
+  "main": "./lib/schedulers.js",
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  }
+}

@@ -2,7 +2,7 @@ import test from "ava"
 import {createStore} from "@re-frame/store"
 import {assoc} from "@re-frame/utils"
 
-global.requestAnimationFrame = fn => setTimeout(fn)
+global.requestAnimationFrame = fn => fn()
 
 const flush = () => new Promise(resolve => setTimeout(resolve))
 
