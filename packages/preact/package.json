@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/preact",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/preact.js",
