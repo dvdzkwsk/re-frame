@@ -1,4 +1,5 @@
 import {get, shallowClone, assoc} from "@re-frame/utils"
+import {createDraft, finishDraft} from "immer"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
 // care about the `id` of the event. The payload interceptors strips the id
@@ -128,5 +129,17 @@ export var debug = {
     console.log("@re-frame: after: ", nextDB)
     console.groupEnd()
     return context
+  },
+}
+
+export var immer = {
+  id: "immer",
+  before: function(context) {
+    var draft = createDraft(context.coeffects.db)
+    return assoc(context, ["coeffects", "db"], draft)
+  },
+  after: function(context) {
+    var db = finishDraft(context.effects.db || context.coeffects.db)
+    return assoc(context, ["effects", "db"], db)
   },
 }

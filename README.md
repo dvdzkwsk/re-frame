@@ -23,8 +23,7 @@ Once you've become familiar with re-frame, feel free to install only the package
 | ---------------------- | ---------------------------------------------------------- |
 | @re-frame/store        | Creates an instance of a re-fraem store                    |
 | @re-frame/effects      | Useful effects for most web apps (HTTP, orchestrate, etc.) |
-| @re-frame/interceptors | Common interceptors (path, payload, debug, etc.)           |
-| @re-frame/immer        | An interceptor to write more convenient event handlers     |
+| @re-frame/interceptors | Common interceptors (path, immer, debug, etc.)             |
 | @re-frame/react        | React bindings (useDispatch, useSubscription)              |
 | @re-frame/preact       | Preact bindings (useDispatch, useSubscription)             |
 | @re-frame/global       | A global re-frame store instance                           |
