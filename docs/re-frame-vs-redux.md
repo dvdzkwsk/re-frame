@@ -12,9 +12,11 @@ const action = {type: "add", payload: 5} // redux
 ```js
 // re-frame event handlers
 const store = reframe.createStore()
-store.event("increment", (db = 0, event) => db + 1)
-store.event("decrement", (db = 0, event) => db - 1)
+store.event("init", () => 0)
+store.event("increment", (db, event) => db + 1)
+store.event("decrement", (db, event) => db - 1)
 
+store.dispatch(["init"])
 store.dispatch(["increment"])
 
 // redux reducer

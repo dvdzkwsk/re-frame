@@ -7,11 +7,13 @@ Vanilla JavaScript port of the popular [ClojureScript library](https://github.co
 
 ## Why re-frame?
 
-Re-frame helps make state management predictable, testable, and pragmatic. From a high-level, re-frame is flux-like with events and event handlers, which are similar to [redux's actions and reducers](./docs/re-frame-vs-redux.md). Compared to redux, re-frame is more feature complete out of the box, with built-in interceptors, effects, and subscriptions. You'll find that you can be productive without needing to reach for third-party middleware.
+Re-frame helps make state management predictable, testable, and pragmatic. It achieves this via message passing, which decouples action from intent. On top of this, it provides [first-class semantics](./docs/effects.md) for dealing with side-effects, as these are unavoidable in real-world applications.
+
+From a high-level, re-frame is flux-like with events and event handlers, which are similar to redux's actions and reducers. [Compared to redux](./docs/re-frame-vs-redux.md), re-frame is more feature complete out of the box, with built-in interceptors, effects, subscriptions, and test utilties. You'll find that you can be productive without needing to reach for third-party middleware.
 
 ## Getting Started
 
-The quickest way to get started is by installing `@re-frame/standalone`, which bundles everything you'll need to build a typical application: a store to manage state, subscriptions to query it, first-class developer tools, and effects such as `http` since the real world is more complicated than TodoMVC.
+The quickest way to get started is by installing `@re-frame/standalone`, which bundles everything you'll need to build a typical application: a store to manage state, subscriptions to query it, and effects such as [http](./docs/effects.md#http), [orchestrate](./docs/effects.md#orchestrate), and more since the real world is more complicated than TodoMVC.
 
 ```sh
 yarn add @re-frame/standalone
@@ -19,14 +21,14 @@ yarn add @re-frame/standalone
 
 Once you've become familiar with re-frame, feel free to install only the packages you need to cut down on install size. You'll need @re-frame/store to create a store, but everything else is optional.
 
-| Package                | Description                                                |
-| ---------------------- | ---------------------------------------------------------- |
-| @re-frame/store        | Creates an instance of a re-fraem store                    |
-| @re-frame/effects      | Useful effects for most web apps (HTTP, orchestrate, etc.) |
-| @re-frame/interceptors | Common interceptors (path, immer, debug, etc.)             |
-| @re-frame/react        | React bindings (useDispatch, useSubscription)              |
-| @re-frame/preact       | Preact bindings (useDispatch, useSubscription)             |
-| @re-frame/global       | A global re-frame store instance                           |
+| Package                                                     | Description                                                |
+| ----------------------                                      | ---------------------------------------------------------- |
+| [@re-frame/store](./packages/store/README.md)               | Creates an instance of a re-frame store                    |
+| [@re-frame/effects](./packages/effects/README.md)           | Useful effects for most web apps (HTTP, orchestrate, etc.) |
+| [@re-frame/interceptors](./packages/interceptors/README.md) | Common interceptors (path, immer, debug, etc.)             |
+| [@re-frame/react](./packages/react/README.md)               | React bindings (useDispatch, useSubscription)              |
+| [@re-frame/preact](./packages/preact/README.md)             | Preact bindings (useDispatch, useSubscription)             |
+| [@re-frame/global](./packages/global/README.md)             | A global re-frame store instance                           |
 
 ## Usage
 
@@ -78,8 +80,8 @@ store.dispatch(["add", 4])    // => count: 5
 store.dispatch(["load-data"]) // this will start an HTTP request
 ```
 
-While @re-frame/effects provides numerous built-in effects for you, it's also
-easy to define your own effects:
+While [@re-frame/effects](./packages/effects/README.md) provides numerous built-in effects for you, it's also
+easy to define your own:
 
 ```js
 store.effect("wait", store => config => {
