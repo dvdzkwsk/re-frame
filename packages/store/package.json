@@ -24,7 +24,6 @@
   },
   "dependencies": {
     "@re-frame/atom": "^0.16.0",
-    "@re-frame/schedulers": "^0.16.0",
-    "@re-frame/utils": "^0.16.0"
+    "@re-frame/schedulers": "^0.16.0"
   }
 }

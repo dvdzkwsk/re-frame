@@ -1,4 +1,3 @@
-import {assoc, shallowClone} from "@re-frame/utils"
 import {atom} from "@re-frame/atom"
 import {createAnimationFrameScheduler} from "@re-frame/schedulers"
 import {createEventQueue} from "./event-queue"
@@ -95,12 +94,11 @@ export function createStore(opts) {
   var EFFECT = "EFFECT"
   var COEFFECT = "COEFFECT"
   var SUBSCRIPTION = "SUBSCRIPTION"
-  var EMPTY = {}
-  var REGISTRATIONS = EMPTY
-  REGISTRATIONS[EVENT] = EMPTY
-  REGISTRATIONS[EFFECT] = EMPTY
-  REGISTRATIONS[COEFFECT] = EMPTY
-  REGISTRATIONS[SUBSCRIPTION] = EMPTY
+  var REGISTRATIONS = {}
+  REGISTRATIONS[EVENT] = {}
+  REGISTRATIONS[EFFECT] = {}
+  REGISTRATIONS[COEFFECT] = {}
+  REGISTRATIONS[SUBSCRIPTION] = {}
 
   function registerEventDB(id, interceptors, handler) {
     if (typeof interceptors === "function") {
@@ -165,7 +163,7 @@ export function createStore(opts) {
   }
 
   function register(kind, id, registration) {
-    REGISTRATIONS = assoc(REGISTRATIONS, [kind, id], registration)
+    REGISTRATIONS[kind][id] = registration
   }
 
   function getRegistration(kind, id) {
@@ -207,24 +205,26 @@ export function createStore(opts) {
     register(COEFFECT, id, handler)
   }
 
-  function injectCoeffect(id) {
+  function inject(contextId) {
     return {
-      id: "inject-coeffect",
+      id: "inject",
       before: function before(context) {
-        var handler = getRegistration(COEFFECT, id)
-        return assoc(context, ["coeffects"], handler(context.coeffects))
+        var handler = getRegistration(COEFFECT, contextId)
+        context.coeffects = handler(context.coeffects)
+        return context
       },
     }
   }
 
   // Inserts the current app db into coeffects as "db".
-  registerCoeffect("db", function injectDB(coeffects) {
-    return assoc(coeffects, ["db"], APP_DB.deref())
+  registerCoeffect("db", function(ctx) {
+    ctx.db = APP_DB.deref()
+    return ctx
   })
 
   // The `db` coeffect is used in all event handlers, so we save a single
   // reference to its interceptor as an optimization.
-  var INJECT_DB = injectCoeffect("db")
+  var INJECT_DB = inject("db")
 
   // --- Built-in Interceptors ------------------------------------------------
   var RUN_EFFECTS = {
@@ -433,10 +433,10 @@ export function createStore(opts) {
     subscribe: subscribe,
     event: registerEventDB,
     effect: function(id, factory) {
-      return registerEffect(id, factory(store))
+      registerEffect(id, factory(store))
     },
     context: registerCoeffect,
-    inject: injectCoeffect,
+    inject: inject,
     computed: registerSubscription,
     addPostEventCallback: addPostEventCallback,
     removePostEventCallback: removePostEventCallback,
@@ -452,10 +452,11 @@ export function createStore(opts) {
 function dbHandlerToInterceptor(handler) {
   return {
     id: "db-handler",
-    before: function before(context) {
+    before: function(context) {
       var db = context.coeffects.db
       var event = context.coeffects.event
-      return assoc(context, ["effects", "db"], handler(db, event))
+      context.effects.db = handler(db, event)
+      return context
     },
   }
 }
@@ -466,9 +467,9 @@ function dbHandlerToInterceptor(handler) {
 function fxHandlerToInterceptor(handler) {
   return {
     id: "fx-handler",
-    before: function before(context) {
-      var coeffects = context.coeffects
-      return assoc(context, ["effects"], handler(coeffects, coeffects.event))
+    before: function(context) {
+      context.effects = handler(context.coeffects, context.coeffects.event)
+      return context
     },
   }
 }
@@ -483,7 +484,6 @@ function runInterceptors(context) {
 function runInterceptorQueue(context, direction) {
   while (context.queue.length) {
     var interceptor = context.queue[0]
-    context = shallowClone(context)
     context.queue = context.queue.slice(1)
     context.stack = [interceptor].concat(context.stack)
     if (interceptor[direction]) {
@@ -494,7 +494,6 @@ function runInterceptorQueue(context, direction) {
 }
 
 function switchDirections(context) {
-  context = shallowClone(context)
   context.queue = context.stack
   context.stack = []
   return context

@@ -48,51 +48,51 @@ function switchDirections(context) {
 }
 
 test("payload > strips 'id' from the event", t => {
-  let beforeContext
-  const contextSpy = {
+  let event
+  const eventSpy = {
     id: "context-spy",
     before(context) {
-      beforeContext = context
+      event = context.coeffects.event
       return context
     },
   }
 
   let context = createContext({
-    queue: [payload, contextSpy],
+    queue: [payload, eventSpy],
     effects: {},
     coeffects: {
       event: ["add", 5, 6, 7],
     },
   })
   runInterceptors(context)
-  t.deepEqual(beforeContext.coeffects.event, [5, 6, 7])
+  t.deepEqual(event, [5, 6, 7])
 })
 
 test("payload > restores the original event in its 'after' phase", t => {
-  let beforeContext
-  let afterContext
-  const contextSpy = {
+  let beforeEvent
+  let afterEvent
+  const eventSpy = {
     id: "context-spy",
     before(context) {
-      beforeContext = context
+      beforeEvent = context.coeffects.event
       return context
     },
     after(context) {
-      afterContext = context
+      afterEvent = context.coeffects.event
       return context
     },
   }
 
   let context = createContext({
-    queue: [contextSpy, payload],
+    queue: [eventSpy, payload],
     effects: {},
     coeffects: {
       event: ["add", 5],
     },
   })
   context = runInterceptors(context)
-  t.deepEqual(beforeContext.coeffects.event, ["add", 5])
-  t.deepEqual(afterContext.coeffects.event, ["add", 5])
+  t.deepEqual(beforeEvent, ["add", 5])
+  t.deepEqual(afterEvent, ["add", 5])
 })
 
 test("path > updates `coeffects.db` to be the value of `db` at `path`", t => {

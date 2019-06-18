@@ -1,6 +1,5 @@
 import test from "ava"
 import {createStore} from "@re-frame/store"
-import {assoc} from "@re-frame/utils"
 
 global.requestAnimationFrame = fn => fn()
 
@@ -35,7 +34,7 @@ const makeStore = () => {
     ...db,
     todos: db.todos.map(todo => {
       return todo.description === description
-        ? assoc(todo, ["completed"], !todo.completed)
+        ? {...todo, completed: !todo.completed}
         : todo
     }),
   }))

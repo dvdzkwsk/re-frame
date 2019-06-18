@@ -1,4 +1,3 @@
-import {get, shallowClone, assoc} from "@re-frame/utils"
 import {createDraft, finishDraft} from "immer"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
@@ -19,16 +18,11 @@ export var payload = {
   id: "payload",
   before: function(context) {
     var event = context.coeffects.event
-
-    context = shallowClone(context)
-    context.coeffects = shallowClone(context.coeffects)
     context.coeffects.event = event.slice(1)
     context.coeffects._originalEvent = event
     return context
   },
   after: function(context) {
-    context = shallowClone(context)
-    context.coeffects = shallowClone(context.coeffects)
     context.coeffects.event = context.coeffects._originalEvent
     return context
   },
@@ -39,21 +33,27 @@ export function path(path) {
     id: "path",
     before: function(context) {
       // Preserve the original db so it can be restored after diving into "path".
-      var db = context.coeffects.db
-      context = shallowClone(context)
-      context.coeffects = shallowClone(context.coeffects)
-      context.coeffects._originalDB = db
-      context.coeffects.db = get(db, path)
+      var target = context.coeffects.db
+      context.coeffects._originalDB = target
+
+      // Lookup the value at "path" in "db" and make that the new "db" for
+      // subsequent interceptors.
+      for (var i = 0; i < path.length - 1; i++) {
+        target = target[path[i]]
+        if (!target) {
+          break
+        }
+      }
+      context.coeffects.db = target ? target[path[i]] : undefined
       return context
     },
     after: function(context) {
-      if (!("db" in context.effects)) {
-        return context
+      if ("db" in context.effects) {
+        var origDB = context.coeffects._originalDB
+        var nextDB = assoc(origDB, path, context.effects.db)
+        context.effects.db = nextDB
       }
-
-      var origDB = context.coeffects._originalDB
-      var nextDB = assoc(origDB, path, context.effects.db)
-      return assoc(context, ["effects", "db"], nextDB)
+      return context
     },
   }
 }
@@ -74,7 +74,7 @@ export function validateDB(predicate) {
               after: context.effects.db,
             }
           )
-          context = assoc(context, ["effects"], {})
+          context.effects = {}
           return context
         }
       }
@@ -87,11 +87,10 @@ export function enrich(fn) {
   return {
     id: "enrich",
     after: function(context) {
-      if (!("db" in context.effects)) {
-        return context
+      if ("db" in context.effects) {
+        context.effects.db = fn(context.effects.db, context.coeffects.event)
       }
-      var db = fn(context.effects.db, context.coeffects.event)
-      return assoc(context, ["effects", "db"], db)
+      return context
     },
   }
 }
@@ -100,10 +99,9 @@ export function after(fn) {
   return {
     id: "after",
     after: function(context) {
-      if (!("db" in context.effects)) {
-        return context
+      if ("db" in context.effects) {
+        fn(context.effects.db, context.coeffects.event)
       }
-      fn(context.effects.db, context.coeffects.event)
       return context
     },
   }
@@ -135,11 +133,36 @@ export var debug = {
 export var immer = {
   id: "immer",
   before: function(context) {
-    var draft = createDraft(context.coeffects.db)
-    return assoc(context, ["coeffects", "db"], draft)
+    context.coeffects.db = createDraft(context.coeffects.db)
+    return context
   },
   after: function(context) {
-    var db = finishDraft(context.effects.db || context.coeffects.db)
-    return assoc(context, ["effects", "db"], db)
+    context.effects.db = finishDraft(context.effects.db || context.coeffects.db)
+    return context
   },
+}
+
+var _hasOwnProperty = Object.prototype.hasOwnProperty
+function shallowClone(target) {
+  var clone = {}
+  for (var key in target) {
+    if (_hasOwnProperty.call(target, key)) {
+      clone[key] = target[key]
+    }
+  }
+  return clone
+}
+
+/**
+ * Immutably writes a value to a path inside an object.
+ */
+export function assoc(target, path, value) {
+  var res = shallowClone(target)
+  var curr = res
+  for (var i = 0; i < path.length - 1; i++) {
+    var key = path[i]
+    curr = curr[key] = shallowClone(curr[key])
+  }
+  curr[path[i]] = value
+  return res
 }
