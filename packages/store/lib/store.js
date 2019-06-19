@@ -1,4 +1,4 @@
-import {atom} from "@re-frame/atom"
+import {atom, reaction} from "@re-frame/atom"
 import {createAnimationFrameScheduler} from "@re-frame/schedulers"
 import {createEventQueue} from "./event-queue"
 
@@ -158,8 +158,33 @@ export function createStore(opts) {
     register(EFFECT, id, handler)
   }
 
-  function registerSubscription(id, handler) {
-    register(SUBSCRIPTION, id, handler)
+  function registerSubscription(id, queries, handler) {
+    if (queries.length) {
+      var ratom
+      register(SUBSCRIPTION, id, query => {
+        if (ratom) {
+          return ratom.deref()
+        }
+
+        var subscriptions = queries.map(query => store.subscribe(query))
+        ratom = reaction(() => {
+          return handler.apply(
+            null,
+            [query].concat(subscriptions.map(sub => sub.deref()))
+          )
+        })
+        var dispose = ratom.dispose
+        ratom.dispose = function() {
+          for (var i = 0; i < subscriptions.length; i++) {
+            subscriptions[i].dispose()
+          }
+          dispose()
+          ratom = undefined
+        }
+      })
+    } else {
+      register(SUBSCRIPTION, id, handler)
+    }
   }
 
   function register(kind, id, registration) {
@@ -437,7 +462,13 @@ export function createStore(opts) {
     },
     context: registerCoeffect,
     inject: inject,
-    computed: registerSubscription,
+    computed: function(id, queries, handler) {
+      if (typeof queries === "function") {
+        handler = queries
+        queries = []
+      }
+      return registerSubscription(id, queries, handler)
+    },
     addPostEventCallback: addPostEventCallback,
     removePostEventCallback: removePostEventCallback,
   }
