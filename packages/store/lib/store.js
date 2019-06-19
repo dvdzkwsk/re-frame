@@ -159,18 +159,25 @@ export function createStore(opts) {
   }
 
   function registerSubscription(id, queries, handler) {
+    // TODO: refactor + test. Not yet officially supported in public API
     if (queries.length) {
       var ratom
-      register(SUBSCRIPTION, id, query => {
+      register(SUBSCRIPTION, id, function(query) {
         if (ratom) {
           return ratom.deref()
         }
 
-        var subscriptions = queries.map(query => store.subscribe(query))
-        ratom = reaction(() => {
+        var subscriptions = queries.map(function(query) {
+          return subscribe(query)
+        })
+        ratom = reaction(function() {
           return handler.apply(
             null,
-            [query].concat(subscriptions.map(sub => sub.deref()))
+            [query].concat(
+              subscriptions.map(function(sub) {
+                return sub.deref()
+              })
+            )
           )
         })
         var dispose = ratom.dispose
