@@ -23,13 +23,13 @@
     ]
   },
   "devDependencies": {
-    "webpack": "^4.30.0",
-    "webpack-cli": "^3.3.1"
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7"
   },
   "dependencies": {
-    "htm": "^2.1.1",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
+    "htm": "^2.2.1",
+    "react": "^16.9.0",
+    "react-dom": "^16.9.0",
     "react-json-tree": "^0.11.2"
   }
 }
