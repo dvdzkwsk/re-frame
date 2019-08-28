@@ -23,6 +23,6 @@
     ]
   },
   "dependencies": {
-    "immer": "^2.0.0"
+    "immer": "^3.2.0"
   }
 }
