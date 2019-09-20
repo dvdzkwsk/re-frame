@@ -136,20 +136,36 @@ export var immer = {
     if (!context.coeffects.db) {
       return context
     }
-    return assoc(
-      context,
-      ["coeffects", "db"],
-      createDraft(context.coeffects.db)
-    )
+    var coeffects = shallowClone(context.coeffects)
+    var draft = createDraft(coeffects.db)
+    coeffects.db = draft
+
+    // Keep track of the draft so it can be cleaned up even if the user
+    // discards it (usually an accident).
+    coeffects.__draft = draft
+    return assoc(context, ["coeffects"], coeffects)
   },
   after: function(context) {
     var db = context.effects.db || context.coeffects.db
-    if (isDraft(db)) {
-      return assoc(context, ["effects", "db"], finishDraft(db))
-    } else {
+
+    // If the resulting db isn't a draft, there are two possibilities:
+    // 1. A draft was never created in the first place. This happens when there
+    // was no initial db value to wrap.
+    // 2. A draft was created but another interceptor or event handler replaced
+    // db with something other than that draft. This is usually a mistake, so
+    // warn the user about it and make sure the original draft gets disposed.
+    if (!isDraft(db)) {
+      if (context.coeffects.__draft) {
+        var eventId = context.coeffects.event[0]
+        console.warn(
+          '@re-frame: an immer draft was created while processing event "%s", but a handler replaced the draft with another value. The original draft has been disposed to avoid memory leaks.',
+          eventId
+        )
+      }
       return context
     }
-  }
+    return assoc(context, ["effects", "db"], finishDraft(db))
+  },
 }
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty

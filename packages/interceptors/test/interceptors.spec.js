@@ -410,3 +410,37 @@ test("immer > does not throw if no db exists", t => {
     context = runInterceptors(context)
   })
 })
+
+test.only("immer > warns if a draft was created but not returned", t => {
+  t.plan(2)
+
+  const db = {}
+  let context = createContext({
+    queue: [
+      immer,
+      {
+        id: "bad-interceptor",
+        after(context) {
+          context.effects.db = undefined
+          context.coeffects.db = undefined
+          return context
+        },
+      },
+    ],
+    coeffects: {
+      db,
+      event: ["some-event"],
+    },
+  })
+
+  const warn = console.warn
+  console.warn = (message, id) => {
+    t.is(
+      message,
+      '@re-frame: an immer draft was created while processing event "%s", but a handler replaced the draft with another value. The original draft has been disposed to avoid memory leaks.'
+    )
+    t.is(id, "some-event")
+  }
+  context = runInterceptors(context)
+  console.warn = warn
+})
