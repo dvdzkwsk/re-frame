@@ -396,3 +396,17 @@ test("immer > does not require the db to be returned as an effect", t => {
     },
   })
 })
+
+test("immer > does not throw if no db exists", t => {
+  const db = undefined
+  let context = createContext({
+    queue: [immer],
+    coeffects: {
+      db,
+    },
+  })
+
+  t.notThrows(() => {
+    context = runInterceptors(context)
+  })
+})

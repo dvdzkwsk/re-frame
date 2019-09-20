@@ -1,4 +1,4 @@
-import {createDraft, finishDraft} from "immer"
+import {createDraft, finishDraft, isDraft} from "immer"
 
 // Events are tuples that look like [id, payload]. Most event handlers don't
 // care about the `id` of the event. The payload interceptors strips the id
@@ -133,13 +133,23 @@ export var debug = {
 export var immer = {
   id: "immer",
   before: function(context) {
-    context.coeffects.db = createDraft(context.coeffects.db)
-    return context
+    if (!context.coeffects.db) {
+      return context
+    }
+    return assoc(
+      context,
+      ["coeffects", "db"],
+      createDraft(context.coeffects.db)
+    )
   },
   after: function(context) {
-    context.effects.db = finishDraft(context.effects.db || context.coeffects.db)
-    return context
-  },
+    var db = context.effects.db || context.coeffects.db
+    if (isDraft(db)) {
+      return assoc(context, ["effects", "db"], finishDraft(db))
+    } else {
+      return context
+    }
+  }
 }
 
 var _hasOwnProperty = Object.prototype.hasOwnProperty
