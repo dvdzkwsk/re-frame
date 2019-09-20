@@ -23,8 +23,8 @@
     ]
   },
   "devDependencies": {
-    "webpack": "^4.39.3",
-    "webpack-cli": "^3.3.7"
+    "webpack": "^4.40.2",
+    "webpack-cli": "^3.3.9"
   },
   "dependencies": {
     "htm": "^2.2.1",

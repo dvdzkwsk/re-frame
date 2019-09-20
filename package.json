@@ -28,8 +28,8 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
-    "@types/node": "^12.7.2",
-    "ava": "^2.3.0",
+    "@types/node": "^12.7.5",
+    "ava": "^2.4.0",
     "esm": "^3.2.25",
     "lerna": "^3.16.4",
     "prettier": "^1.18.2"
