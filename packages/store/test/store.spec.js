@@ -1,7 +1,7 @@
 import test from "ava"
 import {createStore} from "../lib/store.js"
 
-process.env.NODE_ENV === "development"
+process.env.NODE_ENV = "development"
 global.requestAnimationFrame = fn => setTimeout(fn)
 
 async function flush() {
@@ -9,22 +9,22 @@ async function flush() {
   await new Promise(resolve => setTimeout(resolve)) // let subscriptions run
 }
 
-function createStoreWithState(state, opts) {
-  const store = createStore(opts)
+function createStoreWithState(state) {
+  const store = createStore()
   store.event("init", () => state)
   store.dispatchSync(["init"])
   return store
 }
 
 test("runtime checks are only enabled in development mode", t => {
-  // dev store should throw validation errors
+  // validation should be enabled in development
   process.env.NODE_ENV = "development"
   t.throws(() => {
     const store = createStore()
     store.event("foo", [null], () => {})
-  }, /Invalid interceptor provided/)
+  })
 
-  // prod store should skip validation
+  // validation should be skipped in production
   process.env.NODE_ENV = "production"
   t.notThrows(() => {
     const store = createStore()
@@ -144,20 +144,21 @@ test("EventFX > throws if a requested event has not been registered", t => {
   }, 'The EventFX handler "create_effect" attempted to create an effect "effectThatDoesntExist", but that effect has not been registered.')
 })
 
-test("EventFX > does not throw if no effects were returned", t => {
+test("EventFX > warns, but does not throw if no effects were returned", t => {
+  t.plan(2)
   const store = createStore()
   const warn = console.warn
-  const warnings = []
-  console.warn = msg => warnings.push(msg)
+  console.warn = msg => {
+    t.is(
+      msg,
+      'EventFX "event-fx" did not return any effects, which is likely a mistake. To signal that you do not want to run any effects, return an empty object: {}.'
+    )
+  }
 
   store.event.fx("event-fx", () => {})
   t.notThrows(() => {
     store.dispatchSync(["event-fx"])
   })
-  t.is(
-    warnings[0],
-    'EventFX "event-fx" did not return any effects, which is likely a mistake. To signal that you do not want to run any effects, return an empty object: {}.'
-  )
   console.warn = warn
 })
 

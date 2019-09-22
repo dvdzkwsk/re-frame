@@ -107,12 +107,7 @@ export function createStore(opts) {
     }
 
     if (process.env.NODE_ENV === "development") {
-      assertValidInterceptors(
-        interceptors,
-        'Invalid interceptor provided when registering EventDB handler "' +
-          id +
-          '": '
-      )
+      assertValidInterceptors(id, interceptors)
     }
     register(
       EVENT,
@@ -134,12 +129,7 @@ export function createStore(opts) {
     }
 
     if (process.env.NODE_ENV === "development") {
-      assertValidInterceptors(
-        interceptors,
-        'Invalid interceptor provided when registering EventFX handler "' +
-          id +
-          '": '
-      )
+      assertValidInterceptors(id, interceptors)
     }
     register(
       EVENT,
@@ -205,14 +195,14 @@ export function createStore(opts) {
   // --- Dispatch -------------------------------------------------------------
   function dispatch(event) {
     if (process.env.NODE_ENV === "development") {
-      validateEvent(event)
+      assertValidEvent(event)
     }
     EVENT_QUEUE.push(event)
   }
 
   function dispatchSync(event) {
     if (process.env.NODE_ENV === "development") {
-      validateEvent(event)
+      assertValidEvent(event)
     }
     processEvent(event)
   }
@@ -275,7 +265,7 @@ export function createStore(opts) {
       }
       for (var effectId in context.effects) {
         if (process.env.NODE_ENV === "development") {
-          validateEffect(context, effectId)
+          assertValidEffect(context, effectId)
         }
         var handler = getRegistration(EFFECT, effectId)
         handler(context.effects[effectId])
@@ -290,7 +280,7 @@ export function createStore(opts) {
   function query(query) {
     query = normalizeQuery(query)
     if (process.env.NODE_ENV === "development") {
-      validateQuery(query)
+      assertValidQuery(query)
     }
 
     var handler = getRegistration(SUBSCRIPTION, query[0])
@@ -300,7 +290,7 @@ export function createStore(opts) {
   function subscribe(query) {
     query = normalizeQuery(query)
     if (process.env.NODE_ENV === "development") {
-      validateQuery(query)
+      assertValidQuery(query)
     }
 
     var subscription = findCachedSubscription(query)
@@ -391,7 +381,7 @@ export function createStore(opts) {
     return query
   }
 
-  function validateQuery(query) {
+  function assertValidQuery(query) {
     if (!Array.isArray(query)) {
       throw new Error(
         "You called subscribe() with an invalid query. A query is an array that looks like [id] or [id, ...params]."
@@ -406,7 +396,7 @@ export function createStore(opts) {
     }
   }
 
-  function validateEffect(context, effectId) {
+  function assertValidEffect(context, effectId) {
     if (!getRegistration(EFFECT, effectId)) {
       var eventId = context.coeffects.event[0]
       throw new Error(
@@ -419,7 +409,7 @@ export function createStore(opts) {
     }
   }
 
-  function validateEvent(event) {
+  function assertValidEvent(event) {
     if (!Array.isArray(event)) {
       throw new Error(
         "You dispatched an invalid event. An event is an array that looks like [id] or [id, payload]."
@@ -571,7 +561,7 @@ function flattenInterceptors(interceptors) {
   return flattened
 }
 
-function assertValidInterceptors(interceptors, errorPrefix) {
+function assertValidInterceptors(eventId, interceptors) {
   for (var i = 0; i < interceptors.length; i++) {
     var interceptor = interceptors[i]
     var err // Will read as: Interceptor at index N {{err}}
@@ -597,9 +587,17 @@ function assertValidInterceptors(interceptors, errorPrefix) {
     if (err) {
       var identifier =
         interceptor && interceptor.id
-          ? 'Interceptor with id "' + interceptor.id + '"'
-          : "Interceptor at index " + i
-      throw new Error(errorPrefix + identifier + " " + err)
+          ? 'with id "' + interceptor + '"'
+          : "at index " + i
+
+      throw new Error(
+        'Invalid interceptor provided when registering event handler "' +
+          eventId +
+          '": interceptor ' +
+          identifier +
+          " " +
+          err
+      )
     }
   }
 }
