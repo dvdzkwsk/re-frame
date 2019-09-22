@@ -136,14 +136,14 @@ export var immer = {
     if (!context.coeffects.db) {
       return context
     }
-    var coeffects = shallowClone(context.coeffects)
+    var coeffects = context.coeffects
     var draft = createDraft(coeffects.db)
     coeffects.db = draft
 
     // Keep track of the draft so it can be cleaned up even if the user
     // discards it (usually an accident).
     coeffects.__draft = draft
-    return assoc(context, ["coeffects"], coeffects)
+    return context
   },
   after: function(context) {
     var db = context.effects.db || context.coeffects.db
@@ -164,7 +164,8 @@ export var immer = {
       }
       return context
     }
-    return assoc(context, ["effects", "db"], finishDraft(db))
+    context.effects.db = finishDraft(db)
+    return context
   },
 }
 
