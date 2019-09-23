@@ -49,7 +49,7 @@ export function createStore(opts) {
   var APP_DB = atom()
 
   // Interceptors that are run on every event
-  var GLOBAL_INTERCEPTORS = opts && opts.interceptors
+  var GLOBAL_INTERCEPTORS = (opts && opts.interceptors) || []
 
   // --- Event Processing -----------------------------------------------------
   /**
