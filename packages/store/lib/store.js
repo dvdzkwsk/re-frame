@@ -546,9 +546,6 @@ function flattenInterceptors(interceptors) {
 
   for (var i = 0; i < interceptors.length; i++) {
     var entry = interceptors[i]
-    if (!entry) {
-      continue
-    }
     if (Array.isArray(entry)) {
       entry = flattenInterceptors(entry)
       for (var j = 0; j < entry.length; j++) {

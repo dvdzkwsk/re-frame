@@ -11,24 +11,26 @@ async function flush() {
 
 function createStoreWithState(state) {
   const store = createStore()
-  store.event("init", () => state)
-  store.dispatchSync(["init"])
+  store.event("__init__", () => state)
+  store.dispatchSync(["__init__"])
   return store
 }
 
 test("runtime checks are only enabled in development mode", t => {
+  const invalidInterceptors = [null]
+
   // validation should be enabled in development
   process.env.NODE_ENV = "development"
   t.throws(() => {
     const store = createStore()
-    store.event("foo", [null], () => {})
+    store.event("foo", invalidInterceptors, () => {})
   })
 
   // validation should be skipped in production
   process.env.NODE_ENV = "production"
   t.notThrows(() => {
     const store = createStore()
-    store.event("foo", [null], () => {})
+    store.event("foo", invalidInterceptors, () => {})
   })
 
   process.env.NODE_ENV = "development"
