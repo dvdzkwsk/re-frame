@@ -2,7 +2,6 @@ import test from "ava"
 import {createStore} from "../lib/store.js"
 
 process.env.NODE_ENV = "development"
-global.requestAnimationFrame = fn => setTimeout(fn)
 
 async function flush() {
   await Promise.resolve() // let dispatch run
@@ -46,7 +45,7 @@ test("throws if a dispatched event type hasn't been registered with the store", 
 test("dispatch > EventDB handler updates DB state", async t => {
   const store = createStoreWithState(1)
   store.event("double", db => db * 2)
-  const value = store.computed("db", db => db)
+  store.computed("db", db => db)
 
   store.dispatch(["double"])
   await flush()

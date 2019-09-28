@@ -1,8 +1,6 @@
 import test from "ava"
 import {createStore} from "@re-frame/store"
 
-global.requestAnimationFrame = fn => fn()
-
 const flush = () => new Promise(resolve => setTimeout(resolve))
 
 const makeTodo = description => ({

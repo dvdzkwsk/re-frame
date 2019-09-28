@@ -1,6 +1,9 @@
 import {atom, reaction} from "@re-frame/atom"
-import {createAnimationFrameScheduler} from "@re-frame/schedulers"
 import {createEventQueue} from "./event-queue"
+import {
+  animationFrameScheduler,
+  synchronousScheduler,
+} from "@re-frame/schedulers"
 
 /**
  * Creates an instance of a re-frame store. Like many flux implementations,
@@ -353,14 +356,18 @@ export function createStore(opts) {
     }
   }
 
-  var scheduleAnimationFrame = createAnimationFrameScheduler()
+  var subscriptionScheduler =
+    typeof window !== "undefined"
+      ? animationFrameScheduler
+      : synchronousScheduler
+
   function notifySubscriptions(context) {
     if (!context.effects) return
 
     var prevDB = context.coeffects.db
     var nextDB = context.effects.db
     if (nextDB && nextDB !== prevDB) {
-      scheduleAnimationFrame(() => {
+      subscriptionScheduler(() => {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
           var subscription = ACTIVE_SUBSCRIPTIONS[i]
           var prevValue = subscription.deref()

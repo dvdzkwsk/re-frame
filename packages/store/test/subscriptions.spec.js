@@ -1,8 +1,6 @@
 import test from "ava"
 import {createStore} from "@re-frame/store"
 
-global.requestAnimationFrame = fn => setTimeout(fn)
-
 async function flush() {
   await Promise.resolve() // let dispatch run
   await new Promise(resolve => setTimeout(resolve)) // let subscriptions run

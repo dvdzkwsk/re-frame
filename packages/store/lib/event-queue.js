@@ -1,4 +1,4 @@
-import {createMicroTaskScheduler} from "@re-frame/schedulers"
+import {microTaskScheduler} from "@re-frame/schedulers"
 
 // prettier-ignore
 var STATE_IDLE       = "IDLE",
@@ -16,7 +16,6 @@ var STATE_IDLE       = "IDLE",
 export function createEventQueue(processEvent) {
   var _queue = []
   var _state = STATE_IDLE
-  var scheduleMicroTask = createMicroTaskScheduler()
 
   function _trigger(event, arg) {
     switch (_state) {
@@ -86,7 +85,7 @@ export function createEventQueue(processEvent) {
   }
 
   function _scheduleProcessor() {
-    scheduleMicroTask(() => {
+    microTaskScheduler(() => {
       _trigger(EVENT_RUN_QUEUE)
     })
   }
