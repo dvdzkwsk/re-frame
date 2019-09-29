@@ -1,7 +1,7 @@
 import {atom, reaction} from "@re-frame/atom"
 import {createEventQueue} from "./event-queue"
 import {
-  animationFrameScheduler,
+  createAnimationFrameScheduler,
   synchronousScheduler,
 } from "@re-frame/schedulers"
 
@@ -358,7 +358,7 @@ export function createStore(opts) {
 
   var subscriptionScheduler =
     typeof window !== "undefined"
-      ? animationFrameScheduler
+      ? createAnimationFrameScheduler()
       : synchronousScheduler
 
   function notifySubscriptions(context) {
