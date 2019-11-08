@@ -159,20 +159,3 @@ test("disposing of a shared subscription only closes the subscription if no more
   await flush()
   t.is(calls, 3) // unchanged from previous test
 })
-
-test("subscribe() accepts a simple string as sugar", t => {
-  const store = makeStore()
-  store.computed("count", db => db.count)
-
-  const sub = store.subscribe("count")
-  t.is(sub.deref(), 0)
-
-  sub.dispose()
-})
-
-test("query() accepts a simple string as sugar", t => {
-  const store = makeStore()
-  store.computed("count", db => db.count)
-
-  t.is(store.query("count"), 0)
-})
