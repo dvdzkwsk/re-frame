@@ -1,11 +1,6 @@
-import React from "react"
+import {createContext, useContext, useEffect, useState, useRef} from "react"
 
-var useContext = React.useContext
-var useEffect = React.useEffect
-var useState = React.useState
-var useRef = React.useRef
-
-export var StoreContext = React.createContext()
+export var StoreContext = createContext()
 export var StoreProvider = StoreContext.Provider
 StoreProvider.displayName = "@re-frame/StoreProvider"
 
