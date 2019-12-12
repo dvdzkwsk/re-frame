@@ -32,9 +32,25 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 ## Usage
 
+@re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
+
+| @re-frame/store API                                         | Clojure re-frame API                                       |
+| ----------------------                                      | ---------------------------------------------------------- |
+| `store.event("id", handler)`                                | `(re-frame/reg-event-db :id handler)`                      |
+| `store.event.fx("id", handler)`                             | `(re-frame/reg-event-fx :id handler)`                      |
+| `store.dispatch(["id", arg])`                               | `(re-frame/dispatch [:id arg])`                            |
+| `store.computed("id", handler)`                             | `(re-frame/reg-sub :id handler)`                           |
+| `store.subscribe(["id", arg])`                              | `(re-frame/subscribe [:id arg])`                           |
+| `store.effect("id", handler)`                               | `(re-frame/reg-fx :id handler)`                            |
+
+Below is an example that shows how to create a store, define event handlers, setup and access subscriptions, and run side effects. For now, you should refer to the original re-frame documentation for best practices.
+
 ```js
 import {createStore, http} from "@re-frame/standalone"
 
+// Unlike the original re-frame library which uses a singleton store, the JavaScript
+// package provides an API for creating your own independent stores. If you want the
+// convenience of a global store, use @re-frame/global
 const store = createStore()
 
 // Register event handlers — these are how you'll change the store's state. In
