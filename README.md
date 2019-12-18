@@ -168,16 +168,7 @@ const ChatList = () => {
 import React from "react"
 import {useDispatch} from "@re-frame/react"
 
-// useDispatch will dispatch the event you give it. We automatically take care
-// of preventing duplicate dispatches on subsequent renders. If you want to
-// re-dispatch an event, simply change the event id or the data included with
-// it, such as "chatId" in the example below.
-const ChatList = ({chatId}) => {
-  useDispatch(["load-chats", chatId])
-  // ... more logic here
-}
-
-// useDispatch also returns a "dispatch" function
+// useDispatch returns a "dispatch" function
 const ChatList = () => {
   const dispatch = useDispatch()
   const onClick = () => {

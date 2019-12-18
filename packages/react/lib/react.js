@@ -9,13 +9,8 @@ export function useStore() {
   return [useSubscription, store.dispatch]
 }
 
-export function useDispatch(event) {
+export function useDispatch() {
   var store = useContext(StoreContext)
-  if (event) {
-    useEffect(function() {
-      store.dispatch(event)
-    }, event)
-  }
   return store.dispatch
 }
 
