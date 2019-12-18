@@ -10,7 +10,7 @@ function makeStore() {
   const store = createStore()
   store.registerEventDB("init", () => ({count: 0}))
   store.registerEventDB("count", db => ({count: db.count + 1}))
-  store.dispatchSync(["init"])
+  store.dispatchSync({id: "init"})
   return store
 }
 
@@ -38,15 +38,15 @@ test('a top-level subscription is re-run whenever the "db" changes', async t => 
   store.computed("count", db => db.count)
   const sub = store.subscribe(["count"])
 
-  store.dispatch(["count"])
+  store.dispatch({id: "count"})
   await flush()
   t.is(sub.deref(), 1)
 
-  store.dispatch(["count"])
+  store.dispatch({id: "count"})
   await flush()
   t.is(sub.deref(), 2)
 
-  store.dispatch(["count"])
+  store.dispatch({id: "count"})
   await flush()
   t.is(sub.deref(), 3)
 
@@ -62,14 +62,14 @@ test("subscriptions don't notify watchers if their value didn't change", async t
   const sub = store.subscribe(["count"])
   sub.watch(val => history.push(val))
 
-  store.dispatch(["count"])
+  store.dispatch({id: "count"})
   await flush()
   t.deepEqual(history, [1])
-  store.dispatch(["noop"])
-  store.dispatch(["noop"])
+  store.dispatch({id: "noop"})
+  store.dispatch({id: "noop"})
   await flush()
   t.deepEqual(history, [1])
-  store.dispatch(["count"])
+  store.dispatch({id: "count"})
   await flush()
   t.deepEqual(history, [1, 2])
 
@@ -93,7 +93,7 @@ test("simple (no query args) subscriptions are de-duplicated", async t => {
   t.is(sub1, sub3)
   t.is(calls, 1) // subscription handler should only be called once
 
-  store.dispatch(["double"])
+  store.dispatch({id: "double"})
   await flush()
   t.is(calls, 2) // subscription handler should only be called one more time
 
@@ -120,7 +120,7 @@ test("complex (1 or more query args) subscriptions are de-duplicated", async t =
   t.is(sub2, sub3)
   t.is(calls, 2) // once for each unique subscription
 
-  store.dispatch(["double"])
+  store.dispatch({id: "double"})
   await flush()
   t.is(calls, 4) // and again for each unique subscription
 
@@ -144,18 +144,18 @@ test("disposing of a shared subscription only closes the subscription if no more
   t.is(calls, 1)
 
   sub1.dispose()
-  store.dispatch(["double"])
+  store.dispatch({id: "double"})
   await flush()
   t.is(calls, 2)
 
   sub2.dispose()
-  store.dispatch(["double"])
+  store.dispatch({id: "double"})
   await flush()
   t.is(calls, 3)
 
   // Subscription should be inactive after sub3 disposes.
   sub3.dispose()
-  store.dispatch(["double"])
+  store.dispatch({id: "double"})
   await flush()
   t.is(calls, 3) // unchanged from previous test
 })

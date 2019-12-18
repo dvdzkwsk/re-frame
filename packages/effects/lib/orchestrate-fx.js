@@ -9,10 +9,9 @@ export function orchestrate(store) {
     }
 
     function postEventCallback(event) {
-      var id = event[0]
       for (var i = 0; i < config.rules.length; i++) {
         var rule = config.rules[i]
-        if (rule.after !== id) continue
+        if (rule.after !== event.id) continue
 
         if (rule.dispatch) {
           store.dispatch(rule.dispatch)

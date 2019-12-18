@@ -13,13 +13,12 @@ import {
  * and dispatched events.
  *
  * Once an event is dispatched, the store checks its id and uses that to look
- * up its corresponding event handler. In the example below, "double" is the
- * event id.
+ * up its corresponding event handler.
  *
  * ```js
  * const store = createStore()
- * store.registerEventDB'double', db => db * 2)
- * store.dispatch(['double'])
+ * store.registerEventDB('double', db => db * 2)
+ * store.dispatch({ id: 'double' })
  * ```
  *
  * Here we registered an "EventDB" handler. There's another, higher-level
@@ -37,7 +36,7 @@ import {
  * the two handlers below are functionally equivalent:
  *
  * ```js
- * store.registerEventDB'double-db', db => db * 2)
+ * store.registerEventDB('double-db', db => db * 2)
  * store.registerEventFX('double-fx', ({ db }) => ({
  *  db: db * 2,
  * }))
@@ -77,7 +76,7 @@ export function createStore(opts) {
    * @noreturn
    */
   function processEvent(event) {
-    var interceptors = getRegistration(EVENT, event[0])
+    var interceptors = getRegistration(EVENT, event.id)
     var context = {
       queue: interceptors,
       stack: [],
@@ -257,7 +256,7 @@ export function createStore(opts) {
     after: function after(context) {
       if (!context.effects) {
         if (process.env.NODE_ENV === "development") {
-          var eventId = context.coeffects.event[0]
+          var eventId = context.coeffects.event.id
           console.warn(
             'EventFX "' +
               eventId +
@@ -396,7 +395,7 @@ export function createStore(opts) {
 
   function assertValidEffect(context, effectId) {
     if (!getRegistration(EFFECT, effectId)) {
-      var eventId = context.coeffects.event[0]
+      var eventId = context.coeffects.event.id
       throw new Error(
         'The EventFX handler "' +
           eventId +
@@ -408,17 +407,17 @@ export function createStore(opts) {
   }
 
   function assertValidEvent(event) {
-    if (!Array.isArray(event)) {
+    if (!event || typeof event !== "object" || !event.id) {
       throw new Error(
-        "You dispatched an invalid event. An event is an array that looks like [id] or [id, payload]."
+        'You dispatched an invalid event. An event is an object that has an "id" key.'
       )
     }
-    if (!getRegistration(EVENT, event[0])) {
+    if (!getRegistration(EVENT, event.id)) {
       throw new Error(
         "You dispatched an event that isn't registered with the store. " +
           'Please register "' +
-          event[0] +
-          '" with store.registerEventDB) or store.registerEventFX().'
+          event.id +
+          '" with store.registerEventDB() or store.registerEventFX().'
       )
     }
   }

@@ -9,10 +9,6 @@ test('exports "path" interceptor', t => {
   t.is(typeof reframe.path, "function")
 })
 
-test('exports "payload" interceptor', t => {
-  t.is(typeof reframe.payload, "object")
-})
-
 test('exports "orchestrate" effect', t => {
   t.is(typeof reframe.orchestrate, "function")
 })

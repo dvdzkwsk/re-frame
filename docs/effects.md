@@ -19,19 +19,17 @@ store.registerEventFX("load-data", ctx => ({
   http: {
     method: "GET",
     url: "my.api.com/endpoint",
-    success: ["load-data-success"],
-    failure: ["load-data-failure"],
+    success: "load-data-success",
+    failure: "load-data-failure",
   },
 }))
-store.registerEventDB("load-data-success", (db, event) => {
-  const [, response] = event
+store.registerEventDB("load-data-success", (db, {response}) => {
   return {
     loading: false,
     data: response,
   }
 })
-store.registerEventDB("load-data-failure", (db, event) => {
-  const [, error] = event
+store.registerEventDB("load-data-failure", (db, {error}) => {
   return {
     loading: false,
     error,
@@ -50,11 +48,14 @@ store.registerEffect("orchestrate", orchestrate)
 
 store.registerEventFX("boot", () => ({
   orchestrate: {
-    dispatch: ["first-event"],
+    dispatch: {id: "first-event"},
     rules: [
-      {after: "first-event", dispatch: ["second-event"]},
-      {after: "second-event", dispatchN: [["third-event"], ["fourth-event"]]},
-      {after: "third-event", dispatch: ["last-event"], halt: true},
+      {after: "first-event", dispatch: {id: "second-event"}},
+      {
+        after: "second-event",
+        dispatchN: [{id: "third-event"}, {id: "fourth-event"}],
+      },
+      {after: "third-event", dispatch: {id: "last-event"}, halt: true},
     ],
   },
 }))

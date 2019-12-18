@@ -34,14 +34,14 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 @re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
 
-| @re-frame/store API                    | Clojure re-frame API                         |
-| -------------------------------------- | -------------------------------------------- |
-| `store.registerEventDB("id", handler)` | `(re-frame/reg-event-db :id handler)`        |
-| `store.registerEventFX("id", handler)` | `(re-frame/reg-registerEventFX :id handler)` |
-| `store.dispatch(["id", arg])`          | `(re-frame/dispatch [:id arg])`              |
-| `store.computed("id", handler)`        | `(re-frame/reg-sub :id handler)`             |
-| `store.subscribe(["id", arg])`         | `(re-frame/subscribe [:id arg])`             |
-| `store.registerEffect("id", handler)`  | `(re-frame/reg-fx :id handler)`              |
+| @re-frame/store API                    | Clojure re-frame API                  |
+| -------------------------------------- | ------------------------------------- |
+| `store.registerEventDB("id", handler)` | `(re-frame/reg-event-db :id handler)` |
+| `store.registerEventFX("id", handler)` | `(re-frame/reg-event-fx :id handler)` |
+| `store.dispatch({ id: "foo" })`        | `(re-frame/dispatch [:id arg])`       |
+| `store.computed("id", handler)`        | `(re-frame/reg-sub :id handler)`      |
+| `store.subscribe(["id", arg])`         | `(re-frame/subscribe [:id arg])`      |
+| `store.registerEffect("id", handler)`  | `(re-frame/reg-fx :id handler)`       |
 
 Below is an example that shows how to create a store, define event handlers, setup and access subscriptions, and run side effects. For now, you should refer to the original re-frame documentation for best practices.
 
@@ -90,10 +90,10 @@ store.registerEventFX("load-data", (ctx, event) => ({
 }))
 
 // Dispatch events to the store.
-store.dispatch(["init"])      // => count: 0
-store.dispatch(["increment"]) // => count: 1
-store.dispatch(["add", 4])    // => count: 5
-store.dispatch(["load-data"]) // this will start an HTTP request
+store.dispatch({ id: "init" })             // => count: 0
+store.dispatch({ id: "increment" })        // => count: 1
+store.dispatch({ id: "add", payload: 4 })  // => count: 5
+store.dispatch({ id: "load-data" })        // this will start an HTTP request
 ```
 
 While [@re-frame/effects](./packages/effects/README.md) provides numerous built-in effects for you, it's also
@@ -112,7 +112,7 @@ store.registerEventFX("transition", (ctx, event) => ({
   },
   wait: {
     ms: 1000,
-    dispatch: ["finish-transition"],
+    dispatch: { id: "finish-transition" },
   },
 })
 store.registerEventDB("finish-transition", (db, event) => ({
@@ -168,13 +168,13 @@ const ChatList = () => {
 import React from "react"
 import {useDispatch} from "@re-frame/react"
 
-// useDispatch returns a "dispatch" function
-const ChatList = () => {
+const MyComponent = () => {
   const dispatch = useDispatch()
-  const onClick = () => {
-    dispatch(["something-happened"])
-  }
-  // ... more logic here
+  return (
+    <button onClick={() => dispatch({id: "my-event"})}>
+      Click me to trigger "my-event"
+    </button>
+  )
 }
 ```
 

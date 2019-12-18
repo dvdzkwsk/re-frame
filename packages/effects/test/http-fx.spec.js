@@ -37,7 +37,7 @@ test("makes a fetch request to config.url", async t => {
   t.deepEqual(fetch.calls, [{arguments: ["/fake-url", {url: "/fake-url"}]}])
 })
 
-test('on "not ok" response, dispatches response as last value in "failure" event', async t => {
+test('on "not ok" response, dispatches response as "error" in "failure" event', async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
@@ -48,11 +48,13 @@ test('on "not ok" response, dispatches response as last value in "failure" event
   }
 
   const fx = http(store, {fetch})
-  await fx({url: "/fake-url", success: ["on-success"], failure: ["on-failure"]})
-  t.deepEqual(store.dispatch.calls, [{arguments: [["on-failure", response]]}])
+  await fx({url: "/fake-url", success: "on-success", failure: "on-failure"})
+  t.deepEqual(store.dispatch.calls, [
+    {arguments: [{id: "on-failure", error: response}]},
+  ])
 })
 
-test('on "ok" response, dispatches response as last value in "success" event', async t => {
+test('on "ok" response, dispatches response as "response" in "success" event', async t => {
   const store = makeStore()
   const fetch = spy(() => Promise.resolve(response))
   const response = {
@@ -63,8 +65,10 @@ test('on "ok" response, dispatches response as last value in "success" event', a
   }
 
   const fx = http(store, {fetch})
-  await fx({url: "/fake-url", success: ["on-success"]})
-  t.deepEqual(store.dispatch.calls, [{arguments: [["on-success", response]]}])
+  await fx({url: "/fake-url", success: "on-success"})
+  t.deepEqual(store.dispatch.calls, [
+    {arguments: [{id: "on-success", response}]},
+  ])
 })
 
 test('automatically parses json body if content-type matches "application/json"', async t => {
@@ -83,9 +87,9 @@ test('automatically parses json body if content-type matches "application/json"'
   }
 
   const fx = http(store, {fetch})
-  await fx({url: "/fake-url", success: ["on-success"]})
+  await fx({url: "/fake-url", success: "on-success"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["on-success", {mockJsonObject: true}]]},
+    {arguments: [{id: "on-success", response: {mockJsonObject: true}}]},
   ])
 })
 

@@ -22,14 +22,16 @@ export function http(store, opts) {
       })
       .then(
         function(res) {
+          // TODO: should merge with config.success if it's an object
           if (config.success) {
-            store.dispatch(config.success.concat(res))
+            store.dispatch({id: config.success, response: res})
           }
           return res
         },
         function(err) {
+          // TODO: should merge with config.failure if it's an object
           if (config.failure) {
-            store.dispatch(config.failure.concat(err))
+            store.dispatch({id: config.failure, error: err})
           } else {
             throw err
           }

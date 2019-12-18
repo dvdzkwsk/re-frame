@@ -47,54 +47,6 @@ function switchDirections(context) {
   return context
 }
 
-test("payload > strips 'id' from the event", t => {
-  let event
-  const eventSpy = {
-    id: "context-spy",
-    before(context) {
-      event = context.coeffects.event
-      return context
-    },
-  }
-
-  let context = createContext({
-    queue: [payload, eventSpy],
-    effects: {},
-    coeffects: {
-      event: ["add", 5, 6, 7],
-    },
-  })
-  runInterceptors(context)
-  t.deepEqual(event, [5, 6, 7])
-})
-
-test("payload > restores the original event in its 'after' phase", t => {
-  let beforeEvent
-  let afterEvent
-  const eventSpy = {
-    id: "context-spy",
-    before(context) {
-      beforeEvent = context.coeffects.event
-      return context
-    },
-    after(context) {
-      afterEvent = context.coeffects.event
-      return context
-    },
-  }
-
-  let context = createContext({
-    queue: [eventSpy, payload],
-    effects: {},
-    coeffects: {
-      event: ["add", 5],
-    },
-  })
-  context = runInterceptors(context)
-  t.deepEqual(beforeEvent, ["add", 5])
-  t.deepEqual(afterEvent, ["add", 5])
-})
-
 test("path > updates `coeffects.db` to be the value of `db` at `path`", t => {
   let context = createContext({
     queue: [path(["foo", "bar", "baz"])],
@@ -211,7 +163,7 @@ test("validateDB > when the predicate fails, all effects are discarded", t => {
   let context = createContext({
     queue: [validateDB(db => typeof db.count === "number")],
     coeffects: {
-      event: ["bad-event"],
+      event: {id: "bad-event"},
       db: {
         count: 1,
       },
@@ -245,7 +197,7 @@ test('enrich > applies "fn" to "db" effect', t => {
       },
     },
     coeffects: {
-      event: ["noop"],
+      event: {id: "noop"},
     },
   })
   context = runInterceptors(context)
@@ -263,7 +215,7 @@ test('enrich > is ignored if "db" effect does not exist', t => {
       db: {
         count: 1,
       },
-      event: ["noop"],
+      event: {id: "noop"},
     },
   })
   context = runInterceptors(context)
@@ -281,11 +233,11 @@ test('after > runs "fn" as a side-effect against "db" effect', t => {
       },
     },
     coeffects: {
-      event: ["noop"],
+      event: {id: "noop"},
     },
   })
   context = runInterceptors(context)
-  t.deepEqual(calls, [[{count: 1}, ["noop"]]])
+  t.deepEqual(calls, [[{count: 1}, {id: "noop"}]])
 })
 
 test('after > is ignored if "db" effect does not exist', t => {
@@ -295,7 +247,7 @@ test('after > is ignored if "db" effect does not exist', t => {
     queue: [after(fn)],
     effects: {},
     coeffects: {
-      event: ["noop"],
+      event: {id: "noop"},
     },
   })
   context = runInterceptors(context)
@@ -429,7 +381,7 @@ test.only("immer > warns if a draft was created but not returned", t => {
     ],
     coeffects: {
       db,
-      event: ["some-event"],
+      event: {id: "some-event"},
     },
   })
 

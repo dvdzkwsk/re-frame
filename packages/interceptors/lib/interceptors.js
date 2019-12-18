@@ -1,33 +1,5 @@
 import {createDraft, finishDraft, isDraft} from "immer"
 
-// Events are tuples that look like [id, payload]. Most event handlers don't
-// care about the `id` of the event. The payload interceptors strips the id
-// out of the tuple to create more convenient event handlers.
-//
-// The original event is restored in the "after" phase so earlier interceptors
-// receive the original, unstripped event.
-//
-// registerEventDB('add', (db, [id, arg]) => db + arg)
-//
-// Becomes:
-//
-// registerEventDB('add', [payload], (db, [arg]) => db + arg)
-//                            |
-//                            └────── interceptor
-export var payload = {
-  id: "payload",
-  before: function(context) {
-    var event = context.coeffects.event
-    context.coeffects.event = event.slice(1)
-    context.coeffects._originalEvent = event
-    return context
-  },
-  after: function(context) {
-    context.coeffects.event = context.coeffects._originalEvent
-    return context
-  },
-}
-
 export function path(path) {
   return {
     id: "path",
@@ -64,7 +36,7 @@ export function validateDB(predicate) {
     after: function(context) {
       if (context.effects.db) {
         if (!predicate(context.effects.db)) {
-          var eventId = context.coeffects.event[0]
+          var eventId = context.coeffects.event.id
           console.error(
             'Event "' +
               eventId +
@@ -119,10 +91,10 @@ export var debug = {
     var nextDB = context.effects.db
 
     if (!("db" in context.effects) || nextDB === origDB) {
-      console.log("@re-frame: no db change caused by event: ", event)
+      console.log("@re-frame: no db change caused by event: %s", event.id)
       return context
     }
-    console.group("@re-frame: db change caused by event: ", event)
+    console.group("@re-frame: db change caused by event :%s: ", event.id)
     console.log("@re-frame: before: ", origDB)
     console.log("@re-frame: after: ", nextDB)
     console.groupEnd()
@@ -156,7 +128,7 @@ export var immer = {
     // warn the user about it and make sure the original draft gets disposed.
     if (!isDraft(db)) {
       if (context.coeffects.__draft) {
-        var eventId = context.coeffects.event[0]
+        var eventId = context.coeffects.event.id
         console.warn(
           '@re-frame: an immer draft was created while processing event "%s", but a handler replaced the draft with another value. The original draft has been disposed to avoid memory leaks.',
           eventId

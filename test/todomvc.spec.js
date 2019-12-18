@@ -26,27 +26,27 @@ const makeStore = () => {
       TODO_TAKE_A_BREAK,
     ],
   }))
-  store.dispatchSync(["init"])
+  store.dispatchSync({id: "init"})
 
-  store.registerEventDB("toggle-completed", (db, [_, {description}]) => ({
+  store.registerEventDB("toggle-completed", (db, {todo}) => ({
     ...db,
-    todos: db.todos.map(todo => {
-      return todo.description === description
-        ? {...todo, completed: !todo.completed}
-        : todo
+    todos: db.todos.map(t => {
+      return t.description === todo.description
+        ? {...t, completed: !t.completed}
+        : t
     }),
   }))
 
-  store.registerEventDB("create-todo-success", (db, [_, todo]) => ({
+  store.registerEventDB("create-todo-success", (db, {response}) => ({
     ...db,
-    todos: db.todos.concat(todo),
+    todos: db.todos.concat(response),
   }))
 
-  store.registerEventFX("create-todo", (cofx, [_, json]) => ({
+  store.registerEventFX("create-todo", (cofx, {todo}) => ({
     http: {
       method: "POST",
       url: "/create-todo",
-      body: json,
+      body: todo,
       success: "create-todo-success",
     },
   }))
@@ -56,7 +56,7 @@ const makeStore = () => {
     Promise.resolve().then(() => {
       switch (config.url) {
         case "/create-todo":
-          store.dispatchSync([config.success, config.body])
+          store.dispatchSync({id: config.success, response: config.body})
           break
       }
     })
@@ -67,19 +67,19 @@ const makeStore = () => {
 
 test("Can toggle a todo between complete and incomplete", t => {
   const store = makeStore()
-  store.computed("todo", (db, [id, todo]) => {
+  store.computed("todo", (db, [, todo]) => {
     return db.todos.find(td => td.description === todo.description)
   })
 
   const findTodo = todo => store.query(["todo", todo])
 
-  store.dispatchSync(["toggle-completed", TODO_LEARN_REFRAME])
+  store.dispatchSync({id: "toggle-completed", todo: TODO_LEARN_REFRAME})
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
 
-  store.dispatchSync(["toggle-completed", TODO_LEARN_REFRAME])
+  store.dispatchSync({id: "toggle-completed", todo: TODO_LEARN_REFRAME})
   t.is(findTodo(TODO_LEARN_REFRAME).completed, false)
 
-  store.dispatchSync(["toggle-completed", TODO_LEARN_REFRAME])
+  store.dispatchSync({id: "toggle-completed", todo: TODO_LEARN_REFRAME})
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
 })
 
@@ -89,13 +89,10 @@ test("Can create a todo", async t => {
   store.computed("todos", db => db.todos)
   const todos = store.subscribe(["todos"])
 
-  store.dispatchSync([
-    "create-todo",
-    {
-      description: "Create a new todo",
-      completed: false,
-    },
-  ])
+  store.dispatchSync({
+    id: "create-todo",
+    todo: {description: "Create a new todo", completed: false},
+  })
   await flush()
   t.deepEqual(todos.deref(), [
     TODO_LEARN_REFRAME,

@@ -21,10 +21,9 @@ function makeStore() {
       fxHandler = handler
     },
     dispatch: spy(event => {
-      if (event[0] === "boot") {
+      if (event.id === "boot") {
         orchestrateEffect(fxHandler(event).orchestrate)
       }
-
       if (postEventCallback) {
         postEventCallback(event)
       }
@@ -46,7 +45,7 @@ test("orchestrate > does not register a postEventCallback if rules is empty", t 
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [],
     },
   }))
@@ -55,10 +54,10 @@ test("orchestrate > does not register a postEventCallback if rules is empty", t 
 
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.registerPostEventCallback.calls, [])
 })
 
@@ -67,14 +66,14 @@ test('orchestrate > if an initial "dispatch" event is provided, it is dispatched
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [{after: "first-dispatch", halt: true}],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
   ])
 })
 
@@ -86,8 +85,8 @@ test('orchestrate > does not perfom an initial "dispatch" event if one is not pr
       rules: [{after: "first-dispatch", halt: true}],
     },
   }))
-  store.dispatch(["boot"])
-  t.deepEqual(store.dispatch.calls, [{arguments: [["boot"]]}])
+  store.dispatch({id: "boot"})
+  t.deepEqual(store.dispatch.calls, [{arguments: [{id: "boot"}]}])
 })
 
 test('orchestrate > when an "after" event is seen, its corresponding "dispatch" is dispatched', t => {
@@ -95,17 +94,21 @@ test('orchestrate > when an "after" event is seen, its corresponding "dispatch" 
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [
-        {after: "first-dispatch", dispatch: ["second-dispatch"], halt: true},
+        {
+          after: "first-dispatch",
+          dispatch: {id: "second-dispatch"},
+          halt: true,
+        },
       ],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["second-dispatch"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "second-dispatch"}]},
   ])
 })
 
@@ -114,19 +117,23 @@ test('orchestrate > a rule can also dispatch multiple events with "dispatchN"', 
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [
-        {after: "first-dispatch", dispatchN: [["a"], ["b"], ["c"]], halt: true},
+        {
+          after: "first-dispatch",
+          dispatchN: [{id: "a"}, {id: "b"}, {id: "c"}],
+          halt: true,
+        },
       ],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["a"]]},
-    {arguments: [["b"]]},
-    {arguments: [["c"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "a"}]},
+    {arguments: [{id: "b"}]},
+    {arguments: [{id: "c"}]},
   ])
 })
 
@@ -135,51 +142,51 @@ test("orchestrate > multiple rules can be triggered by the same event", t => {
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [
-        {after: "first-dispatch", dispatch: ["a"]},
-        {after: "first-dispatch", dispatch: ["b"]},
+        {after: "first-dispatch", dispatch: {id: "a"}},
+        {after: "first-dispatch", dispatch: {id: "b"}},
       ],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["a"]]},
-    {arguments: [["b"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "a"}]},
+    {arguments: [{id: "b"}]},
   ])
 })
 
 // TODO: is this desired behavior? I don't necessarily think so.
-test('orchestrate > "halt" takes effect only after all rules are applied to the current event', t => {
+test('orchestrate > "halt" takes effect only after all matching rules are run for a single current event', t => {
   const store = makeStore()
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [
-        {after: "first-dispatch", dispatch: ["a"], halt: true},
-        {after: "first-dispatch", dispatch: ["b"], halt: true},
+        {after: "first-dispatch", dispatch: {id: "a"}, halt: true},
+        {after: "first-dispatch", dispatch: {id: "b"}, halt: true},
       ],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["a"]]},
-    {arguments: [["b"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "a"}]},
+    {arguments: [{id: "b"}]},
   ])
 
   // we've halted, rules should no longer be triggered
-  store.dispatch(["first-dispatch"])
+  store.dispatch({id: "first-dispatch"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["a"]]},
-    {arguments: [["b"]]},
-    {arguments: [["first-dispatch"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "a"}]},
+    {arguments: [{id: "b"}]},
+    {arguments: [{id: "first-dispatch"}]},
   ])
 })
 
@@ -188,24 +195,28 @@ test('orchestrate > halts if a rule with "halt: true" is triggered', t => {
   store.registerEffect("orchestrate", orchestrate(store))
   store.registerEventFX("boot", () => ({
     orchestrate: {
-      dispatch: ["first-dispatch"],
+      dispatch: {id: "first-dispatch"},
       rules: [
-        {after: "first-dispatch", dispatch: ["second-dispatch"]},
-        {after: "second-dispatch", dispatch: ["third-dispatch"], halt: true},
+        {after: "first-dispatch", dispatch: {id: "second-dispatch"}},
+        {
+          after: "second-dispatch",
+          dispatch: {id: "third-dispatch"},
+          halt: true,
+        },
       ],
     },
   }))
-  store.dispatch(["boot"])
+  store.dispatch({id: "boot"})
   t.deepEqual(store.dispatch.calls, [
-    {arguments: [["boot"]]},
-    {arguments: [["first-dispatch"]]},
-    {arguments: [["second-dispatch"]]},
-    {arguments: [["third-dispatch"]]},
+    {arguments: [{id: "boot"}]},
+    {arguments: [{id: "first-dispatch"}]},
+    {arguments: [{id: "second-dispatch"}]},
+    {arguments: [{id: "third-dispatch"}]},
   ])
 
   // should have halted, so rules should not be re-triggered
   store.dispatch.calls = []
   t.is(store.removePostEventCallback.calls.length, 1)
-  store.dispatch(["first-dispatch"])
-  t.deepEqual(store.dispatch.calls, [{arguments: [["first-dispatch"]]}])
+  store.dispatch({id: "first-dispatch"})
+  t.deepEqual(store.dispatch.calls, [{arguments: [{id: "first-dispatch"}]}])
 })
