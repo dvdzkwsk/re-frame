@@ -297,3 +297,23 @@ test("Custom effect factories receive the store", t => {
   })
   store.dispatchSync(["test-effects"])
 })
+
+test("Subscriptions are notified after postEventCallbacks are called", t => {
+  let callOrder = []
+
+  const store = createStore()
+  store.event("boot", () => 1)
+  store.computed("subscription", () => 1)
+  store.addPostEventCallback(() => {
+    callOrder.push("post-event-callback")
+  })
+
+  const sub = store.subscribe(["subscription"])
+  sub.watch(() => {
+    callOrder.push("subscription-notified")
+  })
+  store.dispatchSync(["boot"])
+  sub.dispose()
+
+  t.deepEqual(callOrder, ["post-event-callback", "subscription-notified"])
+})
