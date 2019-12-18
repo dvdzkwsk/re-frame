@@ -22,7 +22,7 @@ yarn add @re-frame/standalone
 Once you've become familiar with re-frame, feel free to install only the packages you need to cut down on install size. You'll need @re-frame/store to create a store, but everything else is optional.
 
 | Package                                                     | Description                                                |
-| ----------------------                                      | ---------------------------------------------------------- |
+| ----------------------------------------------------------- | ---------------------------------------------------------- |
 | [@re-frame/store](./packages/store/README.md)               | Creates an instance of a re-frame store                    |
 | [@re-frame/effects](./packages/effects/README.md)           | Useful effects for most web apps (HTTP, orchestrate, etc.) |
 | [@re-frame/interceptors](./packages/interceptors/README.md) | Common interceptors (path, immer, debug, etc.)             |
@@ -34,14 +34,14 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 @re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
 
-| @re-frame/store API                                         | Clojure re-frame API                                       |
-| ----------------------                                      | ---------------------------------------------------------- |
-| `store.event("id", handler)`                                | `(re-frame/reg-event-db :id handler)`                      |
-| `store.event.fx("id", handler)`                             | `(re-frame/reg-event-fx :id handler)`                      |
-| `store.dispatch(["id", arg])`                               | `(re-frame/dispatch [:id arg])`                            |
-| `store.computed("id", handler)`                             | `(re-frame/reg-sub :id handler)`                           |
-| `store.subscribe(["id", arg])`                              | `(re-frame/subscribe [:id arg])`                           |
-| `store.effect("id", handler)`                               | `(re-frame/reg-fx :id handler)`                            |
+| @re-frame/store API                    | Clojure re-frame API                         |
+| -------------------------------------- | -------------------------------------------- |
+| `store.registerEventDB("id", handler)` | `(re-frame/reg-event-db :id handler)`        |
+| `store.registerEventFX("id", handler)` | `(re-frame/reg-registerEventFX :id handler)` |
+| `store.dispatch(["id", arg])`          | `(re-frame/dispatch [:id arg])`              |
+| `store.computed("id", handler)`        | `(re-frame/reg-sub :id handler)`             |
+| `store.subscribe(["id", arg])`         | `(re-frame/subscribe [:id arg])`             |
+| `store.registerEffect("id", handler)`  | `(re-frame/reg-fx :id handler)`              |
 
 Below is an example that shows how to create a store, define event handlers, setup and access subscriptions, and run side effects. For now, you should refer to the original re-frame documentation for best practices.
 
@@ -55,9 +55,9 @@ const store = createStore()
 
 // Register event handlers — these are how you'll change the store's state. In
 // re-frame, the state of the store is called "db" (it's your in-memory database).
-store.event("init", (db, event) => ({count: 0}))
-store.event("increment", (db, event) => ({...db, count: db.count + 1}))
-store.event("add", (db, event) => {
+store.registerEventDB("init", (db, event) => ({count: 0}))
+store.registerEventDB("increment", (db, event) => ({...db, count: db.count + 1}))
+store.registerEventDB("add", (db, event) => {
   const [id, amount] = event
   return {...db, count: db.count + amount}
 })
@@ -72,11 +72,11 @@ count.watch(value => /* ... */)
 
 // Most events will simply update the store's state. In re-frame, updating the
 // state (or "db") is done by triggering a "db" effect. For regular events, this
-// is done automatically. However, you can step up a level and use "event.fx"
+// is done automatically. However, you can step up a level and use "registerEventFX"
 // to trigger any number of effects.
 import {http} from "@re-frame/effects"
-store.effect("http", http)
-store.event.fx("load-data", (ctx, event) => ({
+store.registerEffect("http", http)
+store.registerEventFX("load-data", (ctx, event) => ({
   db: {
     ...ctx.db,
     loadingData: true,
@@ -100,12 +100,12 @@ While [@re-frame/effects](./packages/effects/README.md) provides numerous built-
 easy to define your own:
 
 ```js
-store.effect("wait", store => config => {
+store.registerEffect("wait", store => config => {
   setTimeout(() => {
     store.dispatch(config.dispatch)
   }, config.ms)
 })
-store.event.fx("transition", (ctx, event) => ({
+store.registerEventFX("transition", (ctx, event) => ({
   db: {
     ...ctx.db,
     transitioning: true,
@@ -115,7 +115,7 @@ store.event.fx("transition", (ctx, event) => ({
     dispatch: ["finish-transition"],
   },
 })
-store.event("finish-transition", (db, event) => ({
+store.registerEventDB("finish-transition", (db, event) => ({
   ...db,
   transitioning: false,
 }))

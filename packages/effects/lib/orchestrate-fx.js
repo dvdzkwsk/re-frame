@@ -28,7 +28,7 @@ export function orchestrate(store) {
       }
     }
 
-    store.addPostEventCallback(postEventCallback)
+    store.registerPostEventCallback(postEventCallback)
     if (config.dispatch) {
       store.dispatch(config.dispatch)
     }

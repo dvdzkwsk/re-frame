@@ -8,8 +8,8 @@ async function flush() {
 
 function makeStore() {
   const store = createStore()
-  store.event("init", () => ({count: 0}))
-  store.event("count", db => ({count: db.count + 1}))
+  store.registerEventDB("init", () => ({count: 0}))
+  store.registerEventDB("count", db => ({count: db.count + 1}))
   store.dispatchSync(["init"])
   return store
 }
@@ -57,7 +57,7 @@ test("subscriptions don't notify watchers if their value didn't change", async t
   const history = []
   const store = makeStore()
   store.computed("count", db => db.count)
-  store.event("noop", db => db)
+  store.registerEventDB("noop", db => db)
 
   const sub = store.subscribe(["count"])
   sub.watch(val => history.push(val))
@@ -80,7 +80,7 @@ test("simple (no query args) subscriptions are de-duplicated", async t => {
   const store = makeStore()
 
   let calls = 0
-  store.event("double", db => ({count: db.count * 2}))
+  store.registerEventDB("double", db => ({count: db.count * 2}))
   store.computed("count", db => {
     calls++
     return db.count
@@ -106,7 +106,7 @@ test("complex (1 or more query args) subscriptions are de-duplicated", async t =
   const store = makeStore()
 
   let calls = 0
-  store.event("double", db => ({count: db.count * 2}))
+  store.registerEventDB("double", db => ({count: db.count * 2}))
   store.computed("count", db => {
     calls++
     return db.count
@@ -133,7 +133,7 @@ test("disposing of a shared subscription only closes the subscription if no more
   const store = makeStore()
 
   let calls = 0
-  store.event("double", db => ({count: db.count * 2}))
+  store.registerEventDB("double", db => ({count: db.count * 2}))
   store.computed("count", db => {
     calls++
     return db.count

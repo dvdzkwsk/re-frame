@@ -21,12 +21,16 @@ test('exports "computed"', t => {
   t.is(typeof reframe.computed, "function")
 })
 
-test('exports "event"', t => {
-  t.is(typeof reframe.event, "function")
+test('exports "registerEventDB"', t => {
+  t.is(typeof reframe.registerEventDB, "function")
 })
 
-test('exports "event.fx"', t => {
-  t.is(typeof reframe.event.fx, "function")
+test('exports "registerEventFX"', t => {
+  t.is(typeof reframe.registerEventFX, "function")
+})
+
+test('exports "registerEffect"', t => {
+  t.is(typeof reframe.registerEffect, "function")
 })
 
 test('exports "context"', t => {
@@ -37,8 +41,8 @@ test('exports "inject"', t => {
   t.is(typeof reframe.inject, "function")
 })
 
-test('exports "addPostEventCallback"', t => {
-  t.is(typeof reframe.addPostEventCallback, "function")
+test('exports "registerPostEventCallback"', t => {
+  t.is(typeof reframe.registerPostEventCallback, "function")
 })
 
 test('exports "removePostEventCallback"', t => {

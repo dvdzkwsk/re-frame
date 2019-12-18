@@ -19,7 +19,7 @@ const [
 
 const makeStore = () => {
   const store = createStore()
-  store.event("init", () => ({
+  store.registerEventDB("init", () => ({
     todos: [
       TODO_LEARN_REFRAME,
       TODO_WRITE_FIRST_REFRAME_APPLICATION,
@@ -28,7 +28,7 @@ const makeStore = () => {
   }))
   store.dispatchSync(["init"])
 
-  store.event("toggle-completed", (db, [_, {description}]) => ({
+  store.registerEventDB("toggle-completed", (db, [_, {description}]) => ({
     ...db,
     todos: db.todos.map(todo => {
       return todo.description === description
@@ -37,12 +37,12 @@ const makeStore = () => {
     }),
   }))
 
-  store.event("create-todo-success", (db, [_, todo]) => ({
+  store.registerEventDB("create-todo-success", (db, [_, todo]) => ({
     ...db,
     todos: db.todos.concat(todo),
   }))
 
-  store.event.fx("create-todo", (cofx, [_, json]) => ({
+  store.registerEventFX("create-todo", (cofx, [_, json]) => ({
     http: {
       method: "POST",
       url: "/create-todo",
@@ -51,7 +51,7 @@ const makeStore = () => {
     },
   }))
 
-  store.effect("http", store => config => {
+  store.registerEffect("http", store => config => {
     // simulate a network request
     Promise.resolve().then(() => {
       switch (config.url) {

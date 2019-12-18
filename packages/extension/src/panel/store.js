@@ -20,31 +20,31 @@ store.computed("connected?", db => db && db.connected)
 store.computed("history", db => db.history)
 store.computed("time-traveling?", db => db.isTimeTraveling)
 
-store.event("init", () => ({connected: false}))
-store.event("connected", () => ({
+store.registerEventDB("init", () => ({connected: false}))
+store.registerEventDB("connected", () => ({
   connected: true,
   db: null,
   history: [],
   isTimeTraveling: false,
 }))
-store.event("sync-db", (db, [_, dbValue]) => ({...db, db: dbValue}))
-store.event("recorded-event", (db, [_, entry]) => ({
+store.registerEventDB("sync-db", (db, [_, dbValue]) => ({...db, db: dbValue}))
+store.registerEventDB("recorded-event", (db, [_, entry]) => ({
   ...db,
   history: db.history.concat([entry]),
 }))
 
-store.event("request-db", [sendEventToPage], db => db)
-store.event("time-travel", [sendEventToPage], db => ({
+store.registerEventDB("request-db", [sendEventToPage], db => db)
+store.registerEventDB("time-travel", [sendEventToPage], db => ({
   ...db,
   isTimeTraveling: true,
 }))
-store.event("time-travel:stop", [sendEventToPage], db => ({
+store.registerEventDB("time-travel:stop", [sendEventToPage], db => ({
   ...db,
   isTimeTraveling: false,
 }))
-store.event("time-travel:forward", [sendEventToPage], db => db)
-store.event("time-travel:back", [sendEventToPage], db => db)
-store.event("time-travel:clear-history", [sendEventToPage], db => ({
+store.registerEventDB("time-travel:forward", [sendEventToPage], db => db)
+store.registerEventDB("time-travel:back", [sendEventToPage], db => db)
+store.registerEventDB("time-travel:clear-history", [sendEventToPage], db => ({
   ...db,
   history: [],
 }))

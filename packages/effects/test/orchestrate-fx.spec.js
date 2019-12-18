@@ -32,7 +32,7 @@ function makeStore() {
     registerEffect(id, handler) {
       orchestrateEffect = handler
     },
-    addPostEventCallback: spy(cb => {
+    registerPostEventCallback: spy(cb => {
       postEventCallback = cb
     }),
     removePostEventCallback: spy(() => {
@@ -51,7 +51,7 @@ test("orchestrate > does not register a postEventCallback if rules is empty", t 
     },
   }))
   store.dispatch(["boot"])
-  t.deepEqual(store.addPostEventCallback.calls, [])
+  t.deepEqual(store.registerPostEventCallback.calls, [])
 
   store.registerEventFX("boot", () => ({
     orchestrate: {
@@ -59,7 +59,7 @@ test("orchestrate > does not register a postEventCallback if rules is empty", t 
     },
   }))
   store.dispatch(["boot"])
-  t.deepEqual(store.addPostEventCallback.calls, [])
+  t.deepEqual(store.registerPostEventCallback.calls, [])
 })
 
 test('orchestrate > if an initial "dispatch" event is provided, it is dispatched to the store', t => {

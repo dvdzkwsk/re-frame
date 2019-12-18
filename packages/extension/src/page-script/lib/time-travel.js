@@ -21,8 +21,8 @@ export function enableTimeTravel(store, sendMessage) {
 
   function init() {
     store.computed("@re-frame/db", db => db)
-    store.event("@re-frame/time-travel", (db, event) => event[1])
-    store.addPostEventCallback(recordEvent)
+    store.registerEventDB("@re-frame/time-travel", (db, event) => event[1])
+    store.registerPostEventCallback(recordEvent)
 
     const db = store.query(["@re-frame/db"])
     if (db) {

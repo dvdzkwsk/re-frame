@@ -18,7 +18,7 @@ import {
  *
  * ```js
  * const store = createStore()
- * store.event('double', db => db * 2)
+ * store.registerEventDB'double', db => db * 2)
  * store.dispatch(['double'])
  * ```
  *
@@ -37,8 +37,8 @@ import {
  * the two handlers below are functionally equivalent:
  *
  * ```js
- * store.event('double-db', db => db * 2)
- * store.event.fx('double-fx', ({ db }) => ({
+ * store.registerEventDB'double-db', db => db * 2)
+ * store.registerEventFX('double-fx', ({ db }) => ({
  *  db: db * 2,
  * }))
  * ```
@@ -418,7 +418,7 @@ export function createStore(opts) {
         "You dispatched an event that isn't registered with the store. " +
           'Please register "' +
           event[0] +
-          '" with store.event() or store.event.fx().'
+          '" with store.registerEventDB) or store.registerEventFX().'
       )
     }
   }
@@ -426,12 +426,12 @@ export function createStore(opts) {
   // --- Lifecycle Hooks ------------------------------------------------------
   /**
    * List of callbacks that should be invoked after an event is processed.
-   * Callbacks are added with "store.addPostEventCallback", and removed
+   * Callbacks are added with "store.registerPostEventCallback", and removed
    * with "store.removePostEventCallback".
    */
   var POST_EVENT_CALLBACKS = []
 
-  function addPostEventCallback(cb) {
+  function registerPostEventCallback(cb) {
     POST_EVENT_CALLBACKS.push(cb)
   }
   function removePostEventCallback(cb) {
@@ -451,10 +451,13 @@ export function createStore(opts) {
     dispatchSync: dispatchSync,
     query: query,
     subscribe: subscribe,
-    event: registerEventDB,
-    effect: function(id, factory) {
+    registerEventDB: registerEventDB,
+    registerEventFX: registerEventFX,
+    registerEffect: function(id, factory) {
       registerEffect(id, factory(store))
     },
+    registerPostEventCallback: registerPostEventCallback,
+    removePostEventCallback: removePostEventCallback,
     context: registerCoeffect,
     inject: inject,
     computed: function(id, queries, handler) {
@@ -464,10 +467,7 @@ export function createStore(opts) {
       }
       return registerSubscription(id, queries, handler)
     },
-    addPostEventCallback: addPostEventCallback,
-    removePostEventCallback: removePostEventCallback,
   }
-  store.event.fx = registerEventFX
 
   return store
 }
@@ -530,7 +530,7 @@ function switchDirections(context) {
  * deep array. Deep arrays allow patterns such as:
  *
  * const STANDARD_INTERCEPTORS = [InterceptorA, InterceptorB, ...]
- * store.event("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
+ * store.registerEventDB("foo", [STANDARD_INTERCEPTORS, MyInterceptor], handler)
  *
  * Flattening the interceptors internally makes for a nicer public API,
  * since users can easily share interceptors — single or multiple —
