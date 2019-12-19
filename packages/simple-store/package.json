@@ -1,0 +1,28 @@
+{
+  "name": "@re-frame/simple-store",
+  "version": "0.18.0",
+  "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
+  "description": "A re-frame store with an especially ergonomic API",
+  "license": "MIT",
+  "main": "./lib/store.js",
+  "sideEffects": false,
+  "files": [
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "ava"
+  },
+  "ava": {
+    "require": [
+      "esm"
+    ]
+  },
+  "dependencies": {
+    "@re-frame/store": "^0.18.0"
+  }
+}
