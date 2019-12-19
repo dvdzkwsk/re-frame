@@ -67,7 +67,7 @@ const makeStore = () => {
 
 test("Can toggle a todo between complete and incomplete", t => {
   const store = makeStore()
-  store.computed("todo", (db, [, todo]) => {
+  store.registerSubscription("todo", (db, [, todo]) => {
     return db.todos.find(td => td.description === todo.description)
   })
 
@@ -86,7 +86,7 @@ test("Can toggle a todo between complete and incomplete", t => {
 test("Can create a todo", async t => {
   const store = makeStore()
 
-  store.computed("todos", db => db.todos)
+  store.registerSubscription("todos", db => db.todos)
   const todos = store.subscribe(["todos"])
 
   store.dispatchSync({

@@ -45,7 +45,7 @@ test("throws if a dispatched event type hasn't been registered with the store", 
 test("dispatch > EventDB handler updates DB state", async t => {
   const store = createStoreWithState(1)
   store.registerEventDB("double", db => db * 2)
-  store.computed("db", db => db)
+  store.registerSubscription("db", db => db)
 
   store.dispatch({id: "double"})
   await flush()
@@ -179,7 +179,7 @@ test("subscribe > returns an atom with the current computed value for the subscr
   const store = createStoreWithState({
     todos: ["foo", "bar", "baz"],
   })
-  store.computed("todos", (db, query) => {
+  store.registerSubscription("todos", (db, query) => {
     return db.todos
   })
   const todos = store.subscribe(["todos"])
@@ -195,7 +195,7 @@ test("subscribe > provides the query vector to the subscription handler", async 
     ...db,
     todos: db.todos.concat(event.todo),
   }))
-  store.computed("todos", (db, query) => {
+  store.registerSubscription("todos", (db, query) => {
     return db.todos.filter(todo => todo.includes(query[1]))
   })
   const todos = store.subscribe(["todos", "baz"]) // look for todos that match "baz"
@@ -224,7 +224,7 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
     ...db,
     todos: db.todos.concat(event.todo),
   }))
-  store.computed("todos", (db, query) => {
+  store.registerSubscription("todos", (db, query) => {
     return db.todos
   })
   const todos = store.subscribe(["todos"])
@@ -268,7 +268,7 @@ test("removePostEventCallback > removes the callback from the registry", t => {
 
 test("Can execute a one-time query without setting up a subscription", t => {
   const store = createStoreWithState({count: 5})
-  store.computed("count", db => db.count)
+  store.registerSubscription("count", db => db.count)
   t.is(store.query(["count"]), 5)
 })
 
@@ -308,7 +308,7 @@ test("Subscriptions are notified after postEventCallbacks are called", t => {
 
   const store = createStore()
   store.registerEventDB("boot", () => 1)
-  store.computed("subscription", () => 1)
+  store.registerSubscription("subscription", () => 1)
   store.registerPostEventCallback(() => {
     callOrder.push("post-event-callback")
   })

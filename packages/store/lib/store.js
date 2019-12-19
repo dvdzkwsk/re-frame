@@ -146,13 +146,14 @@ export function createStore(opts) {
     )
   }
 
-  function registerEffect(id, handler) {
-    register(EFFECT, id, handler)
-  }
-
   function registerSubscription(id, queries, handler) {
+    if (typeof queries === "function") {
+      handler = queries
+      queries = undefined
+    }
+
     // TODO: refactor + test. Not yet officially supported in public API
-    if (queries.length) {
+    if (queries && queries.length) {
       var ratom
       register(SUBSCRIPTION, id, function(query) {
         if (ratom) {
@@ -209,31 +210,16 @@ export function createStore(opts) {
     processEvent(event)
   }
 
-  // --- Built-in Effects -----------------------------------------------------
-  registerEffect("db", function(nextDB) {
-    APP_DB.reset(nextDB)
-  })
-
-  registerEffect("dispatch", function(event) {
-    dispatch(event)
-  })
-
-  registerEffect("dispatchN", function(events) {
-    for (var i = 0; i < events.length; i++) {
-      dispatch(events[i])
-    }
-  })
-
   // --- Coeffects ------------------------------------------------------------
   function registerCoeffect(id, handler) {
     register(COEFFECT, id, handler)
   }
 
-  function inject(contextId) {
+  function injectCoeffect(coeffectId) {
     return {
-      id: "inject",
+      id: "inject-coeffect",
       before: function before(context) {
-        var handler = getRegistration(COEFFECT, contextId)
+        var handler = getRegistration(COEFFECT, coeffectId)
         context.coeffects = handler(context.coeffects)
         return context
       },
@@ -248,7 +234,7 @@ export function createStore(opts) {
 
   // The `db` coeffect is used in all event handlers, so we save a single
   // reference to its interceptor as an optimization.
-  var INJECT_DB = inject("db")
+  var INJECT_DB = injectCoeffect("db")
 
   // --- Built-in Interceptors ------------------------------------------------
   var RUN_EFFECTS = {
@@ -452,21 +438,38 @@ export function createStore(opts) {
     subscribe: subscribe,
     registerEventDB: registerEventDB,
     registerEventFX: registerEventFX,
-    registerEffect: function(id, factory) {
-      registerEffect(id, factory(store))
-    },
+    registerEffect: registerEffect,
+    registerSubscription: registerSubscription,
+    registerCoeffect: registerCoeffect,
+    injectCoeffect: injectCoeffect,
     registerPostEventCallback: registerPostEventCallback,
     removePostEventCallback: removePostEventCallback,
-    context: registerCoeffect,
-    inject: inject,
-    computed: function(id, queries, handler) {
-      if (typeof queries === "function") {
-        handler = queries
-        queries = []
-      }
-      return registerSubscription(id, queries, handler)
-    },
   }
+
+  // --- Built-in Effects -----------------------------------------------------
+  function registerEffect(id, factory) {
+    register(EFFECT, id, factory(store))
+  }
+
+  registerEffect("db", function(_store) {
+    return function(nextDB) {
+      APP_DB.reset(nextDB)
+    }
+  })
+
+  registerEffect("dispatch", function(store) {
+    return function(event) {
+      store.dispatch(event)
+    }
+  })
+
+  registerEffect("dispatchN", function(store) {
+    return function(events) {
+      for (var i = 0; i < events.length; i++) {
+        store.dispatch(events[i])
+      }
+    }
+  })
 
   return store
 }

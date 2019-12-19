@@ -17,8 +17,8 @@ test('exports "subscribe"', t => {
   t.is(typeof reframe.subscribe, "function")
 })
 
-test('exports "computed"', t => {
-  t.is(typeof reframe.computed, "function")
+test('exports "registerSubscription"', t => {
+  t.is(typeof reframe.registerSubscription, "function")
 })
 
 test('exports "registerEventDB"', t => {
@@ -33,12 +33,12 @@ test('exports "registerEffect"', t => {
   t.is(typeof reframe.registerEffect, "function")
 })
 
-test('exports "context"', t => {
-  t.is(typeof reframe.context, "function")
+test('exports "registerCoeffect"', t => {
+  t.is(typeof reframe.registerCoeffect, "function")
 })
 
-test('exports "inject"', t => {
-  t.is(typeof reframe.inject, "function")
+test('exports "injectCoeffect"', t => {
+  t.is(typeof reframe.injectCoeffect, "function")
 })
 
 test('exports "registerPostEventCallback"', t => {

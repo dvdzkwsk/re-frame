@@ -16,7 +16,7 @@ function makeStore() {
 
 test("subscribe() returns an atom with the current value of the subscription", t => {
   const store = makeStore()
-  store.computed("count", db => db.count)
+  store.registerSubscription("count", db => db.count)
 
   const sub = store.subscribe(["count"])
   t.is(sub.deref(), 0)
@@ -26,7 +26,7 @@ test("subscribe() returns an atom with the current value of the subscription", t
 
 test("subscribe() returns an atom with the current value of the subscription for complex queries", t => {
   const store = makeStore()
-  store.computed("key", (db, query) => db[query[1]])
+  store.registerSubscription("key", (db, query) => db[query[1]])
   const sub = store.subscribe(["key", "count"])
   t.is(sub.deref(), 0)
 
@@ -35,7 +35,7 @@ test("subscribe() returns an atom with the current value of the subscription for
 
 test('a top-level subscription is re-run whenever the "db" changes', async t => {
   const store = makeStore()
-  store.computed("count", db => db.count)
+  store.registerSubscription("count", db => db.count)
   const sub = store.subscribe(["count"])
 
   store.dispatch({id: "count"})
@@ -56,7 +56,7 @@ test('a top-level subscription is re-run whenever the "db" changes', async t => 
 test("subscriptions don't notify watchers if their value didn't change", async t => {
   const history = []
   const store = makeStore()
-  store.computed("count", db => db.count)
+  store.registerSubscription("count", db => db.count)
   store.registerEventDB("noop", db => db)
 
   const sub = store.subscribe(["count"])
@@ -81,7 +81,7 @@ test("simple (no query args) subscriptions are de-duplicated", async t => {
 
   let calls = 0
   store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.computed("count", db => {
+  store.registerSubscription("count", db => {
     calls++
     return db.count
   })
@@ -107,7 +107,7 @@ test("complex (1 or more query args) subscriptions are de-duplicated", async t =
 
   let calls = 0
   store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.computed("count", db => {
+  store.registerSubscription("count", db => {
     calls++
     return db.count
   })
@@ -134,7 +134,7 @@ test("disposing of a shared subscription only closes the subscription if no more
 
   let calls = 0
   store.registerEventDB("double", db => ({count: db.count * 2}))
-  store.computed("count", db => {
+  store.registerSubscription("count", db => {
     calls++
     return db.count
   })

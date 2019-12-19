@@ -20,7 +20,7 @@ export function enableTimeTravel(store, sendMessage) {
   }
 
   function init() {
-    store.computed("@re-frame/db", db => db)
+    store.registerSubscription("@re-frame/db", db => db)
     store.registerEventDB("@re-frame/time-travel", (db, event) => event[1])
     store.registerPostEventCallback(recordEvent)
 

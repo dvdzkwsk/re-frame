@@ -15,10 +15,10 @@ const sendEventToPage = {
   },
 }
 
-store.computed("db", db => db.db)
-store.computed("connected?", db => db && db.connected)
-store.computed("history", db => db.history)
-store.computed("time-traveling?", db => db.isTimeTraveling)
+store.registerSubscription("db", db => db.db)
+store.registerSubscription("connected?", db => db && db.connected)
+store.registerSubscription("history", db => db.history)
+store.registerSubscription("time-traveling?", db => db.isTimeTraveling)
 
 store.registerEventDB("init", () => ({connected: false}))
 store.registerEventDB("connected", () => ({

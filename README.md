@@ -34,14 +34,14 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 @re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
 
-| @re-frame/store API                    | Clojure re-frame API                  |
-| -------------------------------------- | ------------------------------------- |
-| `store.registerEventDB("id", handler)` | `(re-frame/reg-event-db :id handler)` |
-| `store.registerEventFX("id", handler)` | `(re-frame/reg-event-fx :id handler)` |
-| `store.dispatch({ id: "foo" })`        | `(re-frame/dispatch [:id arg])`       |
-| `store.computed("id", handler)`        | `(re-frame/reg-sub :id handler)`      |
-| `store.subscribe(["id", arg])`         | `(re-frame/subscribe [:id arg])`      |
-| `store.registerEffect("id", handler)`  | `(re-frame/reg-fx :id handler)`       |
+| @re-frame/store API                         | Clojure re-frame API                  |
+| ------------------------------------------- | ------------------------------------- |
+| `store.registerEventDB("id", handler)`      | `(re-frame/reg-event-db :id handler)` |
+| `store.registerEventFX("id", handler)`      | `(re-frame/reg-event-fx :id handler)` |
+| `store.registerEffect("id", handler)`       | `(re-frame/reg-fx :id handler)`       |
+| `store.registerSubscription("id", handler)` | `(re-frame/reg-sub :id handler)`      |
+| `store.subscribe(["id", arg])`              | `(re-frame/subscribe [:id arg])`      |
+| `store.dispatch({ id: "foo" })`             | `(re-frame/dispatch [:id arg])`       |
 
 Below is an example that shows how to create a store, define event handlers, setup and access subscriptions, and run side effects. For now, you should refer to the original re-frame documentation for best practices.
 
@@ -64,7 +64,7 @@ store.registerEventDB("add", (db, event) => {
 
 // Register computed values with the store. These will be recomputed whenever
 // the state changes.
-store.computed("count", db => db.count)
+store.registerSubscription("count", db => db.count)
 
 // You can subscribe to computed values (subscriptions) with store.subscribe:
 const count = store.subscribe("count")
