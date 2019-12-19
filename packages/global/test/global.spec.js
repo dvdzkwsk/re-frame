@@ -1,6 +1,10 @@
 import test from "ava"
 import * as reframe from "../lib/global.js"
 
+test("exports the global store", t => {
+  t.is(typeof reframe.store, "object")
+})
+
 test('exports "dispatch"', t => {
   t.is(typeof reframe.dispatch, "function")
 })
