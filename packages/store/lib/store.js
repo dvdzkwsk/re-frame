@@ -350,7 +350,7 @@ export function createStore(opts) {
     var prevDB = context.coeffects.db
     var nextDB = context.effects.db
     if (nextDB && nextDB !== prevDB) {
-      subscriptionScheduler(() => {
+      subscriptionScheduler(function() {
         for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
           var subscription = ACTIVE_SUBSCRIPTIONS[i]
           var prevValue = subscription.deref()

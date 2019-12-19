@@ -85,7 +85,7 @@ export function createEventQueue(processEvent) {
   }
 
   function _scheduleProcessor() {
-    microTaskScheduler(() => {
+    microTaskScheduler(function() {
       _trigger(EVENT_RUN_QUEUE)
     })
   }
