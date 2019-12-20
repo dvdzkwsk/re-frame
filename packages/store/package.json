@@ -2,7 +2,7 @@
   "name": "@re-frame/store",
   "version": "0.18.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
-  "description": "JavaScript port of Clojure's popular re-frame library",
+  "description": "A re-frame store with an especially ergonomic API",
   "license": "MIT",
   "main": "./lib/store.js",
   "sideEffects": false,
@@ -23,7 +23,6 @@
     ]
   },
   "dependencies": {
-    "@re-frame/atom": "^0.18.0",
-    "@re-frame/schedulers": "^0.18.0"
+    "@re-frame/core": "^0.18.0"
   }
 }

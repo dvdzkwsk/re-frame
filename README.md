@@ -21,15 +21,15 @@ yarn add @re-frame/standalone
 
 Once you've become familiar with re-frame, feel free to install only the packages you need to cut down on install size. You'll need @re-frame/store to create a store, but everything else is optional.
 
-| Package                                                     | Description                                                |
-| ----------------------------------------------------------- | ---------------------------------------------------------- |
-| [@re-frame/simple-store](./packages/simple-store/README.md) | Creates a re-frame store (loose API)                       |
-| [@re-frame/store](./packages/store/README.md)               | Creates a re-frame store (strict API)                      |
-| [@re-frame/effects](./packages/effects/README.md)           | Useful effects for most web apps (HTTP, orchestrate, etc.) |
-| [@re-frame/interceptors](./packages/interceptors/README.md) | Common interceptors (path, immer, debug, etc.)             |
-| [@re-frame/react](./packages/react/README.md)               | React bindings (useDispatch, useSubscription)              |
-| [@re-frame/preact](./packages/preact/README.md)             | Preact bindings (useDispatch, useSubscription)             |
-| [@re-frame/global](./packages/global/README.md)             | A global re-frame store instance                           |
+| Package                                                     | Description                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------ |
+| [@re-frame/store](./packages/store/README.md)               | Creates a re-frame store (ergonomic API over @re-frame/core) |
+| [@re-frame/core](./packages/core/README.md)                 | Low-level store API                                          |
+| [@re-frame/effects](./packages/effects/README.md)           | Useful effects for most web apps (HTTP, orchestrate, etc.)   |
+| [@re-frame/interceptors](./packages/interceptors/README.md) | Common interceptors (path, immer, debug, etc.)               |
+| [@re-frame/react](./packages/react/README.md)               | React bindings (useDispatch, useSubscription)                |
+| [@re-frame/preact](./packages/preact/README.md)             | Preact bindings (useDispatch, useSubscription)               |
+| [@re-frame/global](./packages/global/README.md)             | A global re-frame store instance                             |
 
 ## Usage
 
@@ -38,7 +38,7 @@ Below is an example that shows how to create a store, define event handlers, set
 Unlike the original re-frame library which uses a singleton store, the JavaScript package provides an API for creating your own independent stores. If you want the convenience of a global store, use @re-frame/global.
 
 ```js
-import {createStore} from "@re-frame/simple-store"
+import {createStore} from "@re-frame/store"
 
 const store = createStore()
 ```
@@ -193,7 +193,18 @@ const MyComponent = () => {
 
 @re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
 
-| @re-frame/store API                         | Clojure re-frame API                  |
+| @re-frame/store API             | Clojure re-frame API                  |
+| ------------------------------- | ------------------------------------- |
+| `store.event("id", handler)`    | `(re-frame/reg-event-db :id handler)` |
+| `store.event.fx("id", handler)` | `(re-frame/reg-event-fx :id handler)` |
+| `store.effect("id", handler)`   | `(re-frame/reg-fx :id handler)`       |
+| `store.computed("id", handler)` | `(re-frame/reg-sub :id handler)`      |
+| `store.subscribe(id, params)`   | `(re-frame/subscribe [:id arg])`      |
+| `store.dispatch(id, payload)`   | `(re-frame/dispatch [:id arg])`       |
+
+Low-level store API:
+
+| @re-frame/core API                          | Clojure re-frame API                  |
 | ------------------------------------------- | ------------------------------------- |
 | `store.registerEventDB("id", handler)`      | `(re-frame/reg-event-db :id handler)` |
 | `store.registerEventFX("id", handler)`      | `(re-frame/reg-event-fx :id handler)` |

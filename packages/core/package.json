@@ -1,10 +1,10 @@
 {
-  "name": "@re-frame/simple-store",
+  "name": "@re-frame/core",
   "version": "0.18.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
-  "description": "A re-frame store with an especially ergonomic API",
+  "description": "JavaScript port of Clojure's popular re-frame library",
   "license": "MIT",
-  "main": "./lib/store.js",
+  "main": "./lib/core.js",
   "sideEffects": false,
   "files": [
     "lib",
@@ -23,6 +23,7 @@
     ]
   },
   "dependencies": {
-    "@re-frame/store": "^0.18.0"
+    "@re-frame/atom": "^0.18.0",
+    "@re-frame/schedulers": "^0.18.0"
   }
 }
