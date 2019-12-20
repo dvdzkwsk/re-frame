@@ -20,5 +20,9 @@
     "require": [
       "esm"
     ]
+  },
+  "devDependencies": {
+    "react": "^16.12.0",
+    "react-test-renderer": "^16.12.0"
   }
 }

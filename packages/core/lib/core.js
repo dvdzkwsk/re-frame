@@ -146,21 +146,22 @@ export function createStore(opts) {
     )
   }
 
-  function registerSubscription(id, queries, handler) {
-    if (typeof queries === "function") {
-      handler = queries
-      queries = undefined
+  function registerSubscription(id, dependencies, handler) {
+    if (typeof dependencies === "function") {
+      handler = dependencies
+      dependencies = undefined
     }
 
     // TODO: refactor + test. Not yet officially supported in public API
-    if (queries && queries.length) {
+    if (dependencies && dependencies.length) {
       var ratom
       register(SUBSCRIPTION, id, function(query) {
+        console.log("run subscription with query", query)
         if (ratom) {
           return ratom.deref()
         }
 
-        var subscriptions = queries.map(function(query) {
+        var subscriptions = dependencies.map(function(query) {
           return subscribe(query)
         })
         ratom = reaction(function() {
@@ -613,7 +614,8 @@ function deepEqual(a, b) {
     if (a.constructor === RegExp) {
       return a.source === b.source && a.flags === b.flags
     }
-    if (a.valueOf !== Object.prototype.valueOf) {
+    // Inserted existence check to handle null prototypes
+    if (a.valueOf !== Object.prototype.valueOf && a.valueOf && b.valueOf) {
       return a.valueOf() === b.valueOf()
     }
     // From fork, but do we need it?

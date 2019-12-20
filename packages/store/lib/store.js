@@ -44,7 +44,9 @@ function makeSimpleQuery(subscribe) {
     } else {
       query = Object.create(null)
       query.id = id
-      query.where = where
+      if (where) {
+        query.where = where
+      }
     }
     return subscribe(query)
   }
