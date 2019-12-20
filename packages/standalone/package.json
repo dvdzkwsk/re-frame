@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/standalone",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "license": "MIT",
   "main": "./lib/standalone.js",
@@ -22,8 +22,8 @@
     ]
   },
   "dependencies": {
-    "@re-frame/effects": "^0.18.0",
-    "@re-frame/interceptors": "^0.18.0",
-    "@re-frame/store": "^0.18.0"
+    "@re-frame/effects": "^0.19.0",
+    "@re-frame/interceptors": "^0.19.0",
+    "@re-frame/store": "^0.19.0"
   }
 }
