@@ -1,12 +1,5 @@
 import test from "ava"
-import {
-  after,
-  path,
-  payload,
-  enrich,
-  immer,
-  validateDB,
-} from "../lib/interceptors.js"
+import {after, path, enrich, immer, validateDB} from "../lib/interceptors.js"
 
 function createContext(context) {
   return {

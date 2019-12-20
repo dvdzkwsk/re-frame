@@ -26,7 +26,7 @@ import React from "react"
 import {useSubscription} from "@re-frame/react"
 
 const ChatList = () => {
-  const chats = useSubscription(["chats"])
+  const chats = useSubscription("chats")
   return (
     <ol>
       {chats.map(chat => (
@@ -43,24 +43,12 @@ const ChatList = () => {
 import React from "react"
 import {useDispatch} from "@re-frame/react"
 
-// Dispatch will only fire once in this example
-const ChatList = () => {
-  useDispatch(["load-chats"])
-  // ... more logic here
-}
-
-// Dispatch will fire every time `filter` changes
-const ChatList = ({filter}) => {
-  useDispatch(["load-chats", filter])
-  // ... more logic here
-}
-
-// useDispatch also returns a "dispatch" function
-const ChatList = () => {
-  const dispatch = useDispatch() // does not dispatch anything
-  const onClick = () => {
-    dispatch(["some-click-event"])
-  }
-  // ... more logic here
+const MyComponent = () => {
+  const dispatch = useDispatch()
+  return (
+    <button onClick={() => dispatch({id: "my-event"})}>
+      Click me to trigger "my-event"
+    </button>
+  )
 }
 ```

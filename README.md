@@ -1,7 +1,7 @@
 # re-frame
 
 [![Build Status](https://travis-ci.com/davezuko/re-frame.svg?branch=master)](https://travis-ci.com/davezuko/re-frame)
-[![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/store)](https://bundlephobia.com/result?p=@re-frame/store)
+[![Bundle Size](https://badgen.net/bundlephobia/minzip/@re-frame/core)](https://bundlephobia.com/result?p=@re-frame/core)
 
 Vanilla JavaScript port of the popular [ClojureScript library](https://github.com/Day8/re-frame) for pragmatic, flux-like state management. I highly recommend checking out re-frame's [original documentation](https://github.com/Day8/re-frame/blob/master/docs/INTRO.md) to learn about its philosophy, terminology, and patterns. All design credit goes to the original authors — thank you for the inspiration.
 
@@ -13,7 +13,7 @@ From a high-level, re-frame is flux-like with events and event handlers, which a
 
 ## Getting Started
 
-The quickest way to get started is by installing `@re-frame/standalone`, which bundles everything you'll need to build a typical application: a store to manage state, subscriptions to query it, and effects such as [http](./docs/effects.md#http), [orchestrate](./docs/effects.md#orchestrate), and more since the real world is more complicated than TodoMVC.
+The quickest way to get started is by installing `@re-frame/standalone`, which bundles everything you'll need to build a typical application: a store to manage state, subscriptions to query it, effects such as [http](./docs/effects.md#http), [orchestrate](./docs/effects.md#orchestrate), and more since the real world is more complicated than TodoMVC.
 
 ```sh
 yarn add @re-frame/standalone
@@ -46,14 +46,16 @@ const store = createStore()
 A store holds application state in an object called "db" (it's your in-memory database). To make updates to the db, you register and dispatch events:
 
 ```js
+// Define event handlers:
 store.event("init", (db, event) => ({count: 0}))
 store.event("increment", (db, event) => ({count: db.count + 1}))
 
+// Send events to the store:
 store.dispatch("init")       // db = { count: 0 }
 store.dispatch("increment")  // db = { count: 1 }
 store.dispatch("increment")  // db = { count: 2 }
 
-// You can also pass data with events:
+// Pass data with events:
 store.event("add", (db, { amount }) => ({ count: db.count + amount }))
 store.dispatch("add", { amount: 5 })
 ```
@@ -109,84 +111,6 @@ store.event.fx("load-data", (ctx, event) => ({
 
 // Initiate the effect:
 store.dispatch("load-data")
-````
-
-While [@re-frame/effects](./packages/effects/README.md) provides numerous built-in effects for you, it's also easy to define your own:
-
-```js
-store.effect("wait", store => config => {
-  setTimeout(() => {
-    store.dispatch(config.dispatch)
-  }, config.ms)
-})
-
-store.event.fx("test-wait", (ctx) => ({
-  db: {
-    ...ctx.db,
-    waiting: true,
-  },
-  wait: {
-    ms: 5000,
-    dispatch: "done-waiting",
-  }
-}))
-````
-
-## React Integration
-
-1. Make your store available via React context by using `StoreProvider` from `@re-frame/react` at the root of your application. This will allow you to access subscriptions and dispatch events within the React tree.
-
-> Using Preact? Use `@re-frame/preact` instead; its API is exactly the same.
-
-```js
-import React from "react"
-import ReactDOM from "react-dom"
-import {createStore} from "@re-frame/standalone"
-import {StoreProvider} from "@re-frame/react"
-
-const store = createStore()
-
-const App = () => (
-  <StoreProvider value={store}>
-    <YourAppGoesHere />
-  </StoreProvider>
-)
-
-ReactDOM.render(<App />, document.getElementById("root"))
-```
-
-2. Subscribe to your store from within the tree.
-
-```js
-import React from "react"
-import {useSubscription} from "@re-frame/react"
-
-const ChatList = () => {
-  const chats = useSubscription(["chats"])
-  return (
-    <ol>
-      {chats.map(chat => (
-        <li key={chat.id}>{chat.title}</li>
-      )}
-    </ol>
-  )
-}
-```
-
-3. Dispatch events to your store.
-
-```js
-import React from "react"
-import {useDispatch} from "@re-frame/react"
-
-const MyComponent = () => {
-  const dispatch = useDispatch()
-  return (
-    <button onClick={() => dispatch({id: "my-event"})}>
-      Click me to trigger "my-event"
-    </button>
-  )
-}
 ```
 
 ## Differences from Clojure's re-frame
@@ -199,8 +123,8 @@ const MyComponent = () => {
 | `store.event.fx("id", handler)` | `(re-frame/reg-event-fx :id handler)` |
 | `store.effect("id", handler)`   | `(re-frame/reg-fx :id handler)`       |
 | `store.computed("id", handler)` | `(re-frame/reg-sub :id handler)`      |
-| `store.subscribe(id, params)`   | `(re-frame/subscribe [:id arg])`      |
-| `store.dispatch(id, payload)`   | `(re-frame/dispatch [:id arg])`       |
+| `store.subscribe("id", params)` | `(re-frame/subscribe [:id arg])`      |
+| `store.dispatch("id", payload)` | `(re-frame/dispatch [:id arg])`       |
 
 Low-level store API:
 

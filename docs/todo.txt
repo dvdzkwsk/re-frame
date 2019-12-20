@@ -1,7 +1,0 @@
-* Evaluate performance of naive subscriptions implementation. A lookup table would
-  likely be better for tracking subscriptions, but at what point?
-* More detailed investigation around timing functions for nextTick
-* Implement `on-changes` interceptor
-* Make terminology consistent, e.g. "fx" vs "effects"
-* Debug tracing
-* Should context -> interceptors be considered immutable? Much nicer to work with when mutable.
