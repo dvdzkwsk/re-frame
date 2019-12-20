@@ -156,7 +156,6 @@ export function createStore(opts) {
     if (dependencies && dependencies.length) {
       var ratom
       register(SUBSCRIPTION, id, function(query) {
-        console.log("run subscription with query", query)
         if (ratom) {
           return ratom.deref()
         }
