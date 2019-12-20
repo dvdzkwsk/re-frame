@@ -23,7 +23,8 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 | Package                                                     | Description                                                |
 | ----------------------------------------------------------- | ---------------------------------------------------------- |
-| [@re-frame/store](./packages/store/README.md)               | Creates an instance of a re-frame store                    |
+| [@re-frame/simple-store](./packages/simple-store/README.md) | Creates a re-frame store (loose API)                       |
+| [@re-frame/store](./packages/store/README.md)               | Creates a re-frame store (strict API)                      |
 | [@re-frame/effects](./packages/effects/README.md)           | Useful effects for most web apps (HTTP, orchestrate, etc.) |
 | [@re-frame/interceptors](./packages/interceptors/README.md) | Common interceptors (path, immer, debug, etc.)             |
 | [@re-frame/react](./packages/react/README.md)               | React bindings (useDispatch, useSubscription)              |
@@ -32,94 +33,104 @@ Once you've become familiar with re-frame, feel free to install only the package
 
 ## Usage
 
-@re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
-
-| @re-frame/store API                         | Clojure re-frame API                  |
-| ------------------------------------------- | ------------------------------------- |
-| `store.registerEventDB("id", handler)`      | `(re-frame/reg-event-db :id handler)` |
-| `store.registerEventFX("id", handler)`      | `(re-frame/reg-event-fx :id handler)` |
-| `store.registerEffect("id", handler)`       | `(re-frame/reg-fx :id handler)`       |
-| `store.registerSubscription("id", handler)` | `(re-frame/reg-sub :id handler)`      |
-| `store.subscribe(["id", arg])`              | `(re-frame/subscribe [:id arg])`      |
-| `store.dispatch({ id: "foo" })`             | `(re-frame/dispatch [:id arg])`       |
-
 Below is an example that shows how to create a store, define event handlers, setup and access subscriptions, and run side effects. For now, you should refer to the original re-frame documentation for best practices.
 
+Unlike the original re-frame library which uses a singleton store, the JavaScript package provides an API for creating your own independent stores. If you want the convenience of a global store, use @re-frame/global.
+
 ```js
-import {createStore, http} from "@re-frame/standalone"
+import {createStore} from "@re-frame/simple-store"
 
-// Unlike the original re-frame library which uses a singleton store, the JavaScript
-// package provides an API for creating your own independent stores. If you want the
-// convenience of a global store, use @re-frame/global
 const store = createStore()
+```
 
-// Register event handlers — these are how you'll change the store's state. In
-// re-frame, the state of the store is called "db" (it's your in-memory database).
-store.registerEventDB("init", (db, event) => ({count: 0}))
-store.registerEventDB("increment", (db, event) => ({...db, count: db.count + 1}))
-store.registerEventDB("add", (db, event) => {
-  const [id, amount] = event
-  return {...db, count: db.count + amount}
-})
+A store holds application state in an object called "db" (it's your in-memory database). To make updates to the db, you register and dispatch events:
 
-// Register computed values with the store. These will be recomputed whenever
-// the state changes.
-store.registerSubscription("count", db => db.count)
+```js
+store.event("init", (db, event) => ({count: 0}))
+store.event("increment", (db, event) => ({count: db.count + 1}))
 
-// You can subscribe to computed values (subscriptions) with store.subscribe:
+store.dispatch("init")       // db = { count: 0 }
+store.dispatch("increment")  // db = { count: 1 }
+store.dispatch("increment")  // db = { count: 2 }
+
+// You can also pass data with events:
+store.event("add", (db, { amount }) => ({ count: db.count + amount }))
+store.dispatch("add", { amount: 5 })
+```
+
+To access the db, register queries with the store. All active queries are recomputed every time the db changes, and are only recomputed once per change regardless of how many subscribers exist.
+
+```js
+store.computed("count", db => db.count)
+
 const count = store.subscribe("count")
-count.watch(value => /* ... */)
 
-// Most events will simply update the store's state. In re-frame, updating the
-// state (or "db") is done by triggering a "db" effect. For regular events, this
-// is done automatically. However, you can step up a level and use "registerEventFX"
-// to trigger any number of effects.
+store.dispatchSync("init")       // db = { count: 0 }
+count.deref()                    // 0
+store.dispatchSync("increment")  // db = { count: 1 }
+count.deref()                    // 1
+
+// You can also watch a subscription to see all changes over time:
+count.watch(value => { ... })
+
+// Cleanup your subscription when you're done with it.
+count.dispose()
+
+// You can also pass parameters to the query:
+store.computed("todos", (db, { completed }) => {
+  return db.todos.filter(todo => todo.completed === completed)
+})
+store.subscribe("todos", { completed: false })
+```
+
+Most events will simply update the store's state. This update is one particular type of effect that events can have (appropriately called the "db" effect"), and while most events will only update the db, you can step up a level and trigger any number of effects.
+
+```js
 import {http} from "@re-frame/effects"
-store.registerEffect("http", http)
-store.registerEventFX("load-data", (ctx, event) => ({
+
+// Register your effect with the store:
+store.effect("http", http)
+
+// Define an event handler that will trigger that effect:
+store.event.fx("load-data", (ctx, event) => ({
+  // Updates your store state ("db")
   db: {
     ...ctx.db,
     loadingData: true,
   },
+  // Also triggers an "http" effect to make a network request.
   http: {
     url: "my.api.com/endpoint",
     method: "GET",
-    success: ["load-data-success"], // you will need to register these events as well
-    failure: ["load-data-failure"],
+    success: "load-data-success",
+    failure: "load-data-failure",
   },
 }))
 
-// Dispatch events to the store.
-store.dispatch({ id: "init" })             // => count: 0
-store.dispatch({ id: "increment" })        // => count: 1
-store.dispatch({ id: "add", payload: 4 })  // => count: 5
-store.dispatch({ id: "load-data" })        // this will start an HTTP request
-```
+// Initiate the effect:
+store.dispatch("load-data")
+````
 
-While [@re-frame/effects](./packages/effects/README.md) provides numerous built-in effects for you, it's also
-easy to define your own:
+While [@re-frame/effects](./packages/effects/README.md) provides numerous built-in effects for you, it's also easy to define your own:
 
 ```js
-store.registerEffect("wait", store => config => {
+store.effect("wait", store => config => {
   setTimeout(() => {
     store.dispatch(config.dispatch)
   }, config.ms)
 })
-store.registerEventFX("transition", (ctx, event) => ({
+
+store.event.fx("test-wait", (ctx) => ({
   db: {
     ...ctx.db,
-    transitioning: true,
+    waiting: true,
   },
   wait: {
-    ms: 1000,
-    dispatch: { id: "finish-transition" },
-  },
-})
-store.registerEventDB("finish-transition", (db, event) => ({
-  ...db,
-  transitioning: false,
+    ms: 5000,
+    dispatch: "done-waiting",
+  }
 }))
-```
+````
 
 ## React Integration
 
@@ -178,6 +189,19 @@ const MyComponent = () => {
 }
 ```
 
+## Differences from Clojure's re-frame
+
+@re-frame's API provides the same conceptual ideas as the original re-frame library, with a few name changes to make them more compact and palatable to developers that are used to mobx and redux:
+
+| @re-frame/store API                         | Clojure re-frame API                  |
+| ------------------------------------------- | ------------------------------------- |
+| `store.registerEventDB("id", handler)`      | `(re-frame/reg-event-db :id handler)` |
+| `store.registerEventFX("id", handler)`      | `(re-frame/reg-event-fx :id handler)` |
+| `store.registerEffect("id", handler)`       | `(re-frame/reg-fx :id handler)`       |
+| `store.registerSubscription("id", handler)` | `(re-frame/reg-sub :id handler)`      |
+| `store.subscribe({ id, arg })`              | `(re-frame/subscribe [:id arg])`      |
+| `store.dispatch({ id, arg })`               | `(re-frame/dispatch [:id arg])`       |
+
 ## Supported Browsers
 
 | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/edge/edge_48x48.png" alt="IE / Edge" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>IE / Edge | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png" alt="Firefox" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Firefox | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png" alt="Chrome" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Chrome | [<img src="https://raw.githubusercontent.com/alrra/browser-logos/master/src/safari/safari_48x48.png" alt="Safari" width="24px" height="24px" />](http://godban.github.io/browsers-support-badges/)</br>Safari |
@@ -189,7 +213,8 @@ const MyComponent = () => {
 The MIT License (MIT)
 
 Copyright (c) 2018 David Zukowski<br />
-Copyright (c) 2015-2017 Michael Thompson
+Copyright (c) 2015-2017 Michael Thompson<br />
+Copyright (c) 2017 Evgeny Poberezkin
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

@@ -8,11 +8,11 @@ export function createStore() {
   store.event.fx = store.registerEventFX
   store.effect = store.registerEffect
   store.inject = store.injectCoeffect
+  store.computed = store.registerSubscription
 
   // Ergonomic wrappers
   store.dispatch = makeSimpleDispatch(store.dispatch)
   store.dispatchSync = makeSimpleDispatch(store.dispatchSync)
-  store.computed = makeSimpleComputed(store.registerSubscription)
   store.query = makeSimpleQuery(store.query)
   store.subscribe = makeSimpleQuery(store.subscribe)
 
@@ -33,33 +33,20 @@ export function createStore() {
  * Store only supports subscribing with a tuple: ["id", ...args].
  * makeSimpleSubscribe allows passing these values in unwrapped:
  *
- * Before : subscribe(["id", 1, 2, 3])
- * After  : subscribe("id, 1, 2, 3)
+ * Before : subscribe({ id: "foo", foo: true })
+ * After  : subscribe("id", { foo: true })
  */
 function makeSimpleQuery(subscribe) {
-  return function normalizeQuery(query) {
-    if (typeof query === "string") {
-      query = [].slice.call(arguments)
+  return function normalizeQuery(id, where) {
+    var query
+    if (typeof id === "object") {
+      query = id
+    } else {
+      query = Object.create(null)
+      query.id = id
+      query.where = where
     }
     return subscribe(query)
-  }
-}
-
-/**
- * Before : registerSubscription("foo", (db, [id, ...args]) => {})
- * After  : computed("foo", (db, ...args) => {})
- */
-function makeSimpleComputed(registerSubscription) {
-  return function computed(id, queries, handler) {
-    if (typeof queries === "function") {
-      handler = queries
-      queries = undefined
-    }
-    function simpleHandler(db, query) {
-      var args = [db].concat(query.slice(1))
-      return handler.apply(null, args)
-    }
-    return registerSubscription(id, queries, simpleHandler)
   }
 }
 

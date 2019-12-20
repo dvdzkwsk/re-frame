@@ -10,7 +10,7 @@ test('adds "init(initialState)" API to seed store', t => {
   const store = createStore()
   store.init({todos: [1, 2, 3]})
   store.computed("db", db => db)
-  t.deepEqual(store.query(["db"]), {todos: [1, 2, 3]})
+  t.deepEqual(store.query({id: "db"}), {todos: [1, 2, 3]})
 })
 
 test('casts dispatch("event") to { id: "event" }', t => {
@@ -70,27 +70,10 @@ test('supports query("query", arg1)', t => {
       {id: 2, description: "Todo #2"},
     ],
   })
-  store.computed("todo", (db, id) => db.todos.find(todo => todo.id === id))
-  t.deepEqual(store.query("todo", 1), {id: 1, description: "Todo #1"})
-})
-
-test('supports query("query", ...args)', t => {
-  const store = createStore()
-  store.init({
-    todos: [
-      {id: 1, description: "Todo #1"},
-      {id: 2, description: "Todo #2"},
-      {id: 3, description: "Todo #3"},
-      {id: 4, description: "Todo #4"},
-    ],
-  })
-  store.computed("todos", (db, ...ids) => {
-    return db.todos.filter(todo => ids.includes(todo.id))
-  })
-  t.deepEqual(store.query("todos", 2, 4), [
-    {id: 2, description: "Todo #2"},
-    {id: 4, description: "Todo #4"},
-  ])
+  store.computed("todo", (db, {where}) =>
+    db.todos.find(todo => todo.id === where.id)
+  )
+  t.deepEqual(store.query("todo", {id: 1}), {id: 1, description: "Todo #1"})
 })
 
 test('supports subscribe("sub")', t => {
@@ -112,29 +95,10 @@ test('supports subscribe("sub", arg1)', t => {
       {id: 2, description: "Todo #2"},
     ],
   })
-  store.computed("todo", (db, id) => db.todos.find(todo => todo.id === id))
-  const sub = store.subscribe("todo", 1)
-  t.deepEqual(sub.deref(), {id: 1, description: "Todo #1"})
-  sub.dispose()
-})
-
-test('supports subscribe("sub", ...args)', t => {
-  const store = createStore()
-  store.init({
-    todos: [
-      {id: 1, description: "Todo #1"},
-      {id: 2, description: "Todo #2"},
-      {id: 3, description: "Todo #3"},
-      {id: 4, description: "Todo #4"},
-    ],
-  })
-  store.computed("todos", (db, ...ids) =>
-    db.todos.filter(todo => ids.includes(todo.id))
+  store.computed("todo", (db, {where}) =>
+    db.todos.find(todo => todo.id === where.id)
   )
-  const sub = store.subscribe("todos", 2, 4)
-  t.deepEqual(sub.deref(), [
-    {id: 2, description: "Todo #2"},
-    {id: 4, description: "Todo #4"},
-  ])
+  const sub = store.subscribe("todo", {id: 1})
+  t.deepEqual(sub.deref(), {id: 1, description: "Todo #1"})
   sub.dispose()
 })

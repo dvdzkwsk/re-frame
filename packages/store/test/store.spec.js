@@ -49,15 +49,15 @@ test("dispatch > EventDB handler updates DB state", async t => {
 
   store.dispatch({id: "double"})
   await flush()
-  t.is(store.query(["db"]), 2)
+  t.is(store.query({id: "db"}), 2)
 
   store.dispatch({id: "double"})
   await flush()
-  t.is(store.query(["db"]), 4)
+  t.is(store.query({id: "db"}), 4)
 
   store.dispatch({id: "double"})
   await flush()
-  t.is(store.query(["db"]), 8)
+  t.is(store.query({id: "db"}), 8)
 })
 
 test("dispatch > throws if called with an unwrapped string", async t => {
@@ -171,7 +171,7 @@ test("EventFX > warns, but does not throw if no effects were returned", t => {
 test("subscribe > throws if the target subscription has not been registered", t => {
   const store = createStore()
   t.throws(() => {
-    store.subscribe(["unregistered"])
+    store.subscribe({id: "unregistered"})
   }, 'You attempted to subscribe to "unregistered", but no subscription has been registered with that id.')
 })
 
@@ -179,10 +179,10 @@ test("subscribe > returns an atom with the current computed value for the subscr
   const store = createStoreWithState({
     todos: ["foo", "bar", "baz"],
   })
-  store.registerSubscription("todos", (db, query) => {
+  store.registerSubscription("todos", (db, _query) => {
     return db.todos
   })
-  const todos = store.subscribe(["todos"])
+  const todos = store.subscribe({id: "todos"})
   t.deepEqual(todos.deref(), ["foo", "bar", "baz"])
   todos.dispose()
 })
@@ -195,10 +195,10 @@ test("subscribe > provides the query vector to the subscription handler", async 
     ...db,
     todos: db.todos.concat(event.todo),
   }))
-  store.registerSubscription("todos", (db, query) => {
-    return db.todos.filter(todo => todo.includes(query[1]))
+  store.registerSubscription("todos", (db, {where}) => {
+    return db.todos.filter(todo => todo.includes(where.description))
   })
-  const todos = store.subscribe(["todos", "baz"]) // look for todos that match "baz"
+  const todos = store.subscribe({id: "todos", where: {description: "baz"}})
   t.deepEqual(todos.deref(), [])
 
   store.dispatch({id: "add-todo", todo: "foo"})
@@ -224,10 +224,10 @@ test("subscribe > recomputes the value in the computed atom whenever the store c
     ...db,
     todos: db.todos.concat(event.todo),
   }))
-  store.registerSubscription("todos", (db, query) => {
+  store.registerSubscription("todos", db => {
     return db.todos
   })
-  const todos = store.subscribe(["todos"])
+  const todos = store.subscribe({id: "todos"})
   t.deepEqual(todos.deref(), [])
 
   store.dispatch({id: "add-todo", todo: "foo"})
@@ -269,7 +269,7 @@ test("removePostEventCallback > removes the callback from the registry", t => {
 test("Can execute a one-time query without setting up a subscription", t => {
   const store = createStoreWithState({count: 5})
   store.registerSubscription("count", db => db.count)
-  t.is(store.query(["count"]), 5)
+  t.is(store.query({id: "count"}), 5)
 })
 
 test("Can register and execute custom effects", t => {
@@ -313,7 +313,7 @@ test("Subscriptions are notified after postEventCallbacks are called", t => {
     callOrder.push("post-event-callback")
   })
 
-  const sub = store.subscribe(["subscription"])
+  const sub = store.subscribe({id: "subscription"})
   sub.watch(() => {
     callOrder.push("subscription-notified")
   })

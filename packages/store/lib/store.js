@@ -270,7 +270,8 @@ export function createStore(opts) {
       assertValidQuery(query)
     }
 
-    var handler = getRegistration(SUBSCRIPTION, query[0])
+    // TODO: should recompute if already in cache? Currently differs from subscribe()
+    var handler = getRegistration(SUBSCRIPTION, query.id)
     return handler(APP_DB.deref(), query)
   }
 
@@ -309,7 +310,7 @@ export function createStore(opts) {
 
     subscription._reset = reset
     subscription._query = query
-    subscription._handler = getRegistration(SUBSCRIPTION, query[0])
+    subscription._handler = getRegistration(SUBSCRIPTION, query.id)
     var db = APP_DB.deref()
     if (db) {
       subscription._reset(subscription._handler(db, query))
@@ -319,22 +320,11 @@ export function createStore(opts) {
   }
 
   function findCachedSubscription(query) {
-    var id = query[0]
-
+    var id = query.id
     for (var i = 0; i < ACTIVE_SUBSCRIPTIONS.length; i++) {
-      var subscription = ACTIVE_SUBSCRIPTIONS[i]
-      if (subscription._query[0] !== id) {
-        continue
-      }
-      var matched = true
-      for (var j = 1; j < subscription._query.length; j++) {
-        if (query[j] !== subscription._query[j]) {
-          matched = false
-          break
-        }
-      }
-      if (matched) {
-        return subscription
+      var existingQuery = ACTIVE_SUBSCRIPTIONS[i]._query
+      if (existingQuery.id === id && deepEqual(query, existingQuery)) {
+        return ACTIVE_SUBSCRIPTIONS[i]
       }
     }
   }
@@ -365,15 +355,15 @@ export function createStore(opts) {
 
   // --- Utilities ------------------------------------------------------------
   function assertValidQuery(query) {
-    if (!Array.isArray(query)) {
+    if (!query || typeof query !== "object" || !query.id) {
       throw new Error(
-        "You called subscribe() with an invalid query. A query is an array that looks like [id] or [id, ...params]."
+        'You called subscribe() with an invalid query. A query is an object with an "id" key.'
       )
     }
-    if (!getRegistration(SUBSCRIPTION, query[0])) {
+    if (!getRegistration(SUBSCRIPTION, query.id)) {
       throw new Error(
         'You attempted to subscribe to "' +
-          query[0] +
+          query.id +
           '", but no subscription has been registered with that id.'
       )
     }
@@ -597,4 +587,56 @@ function assertValidInterceptors(eventId, interceptors) {
       )
     }
   }
+}
+
+// Forked from Evgeny Poberezkin's MIT-licensed fast-deep-equal package because
+// it still uses CommonJS (we need ESM).
+function deepEqual(a, b) {
+  if (a === b) return true
+  if (a && b && typeof a == "object" && typeof b == "object") {
+    if (a.constructor !== b.constructor) {
+      return false
+    }
+    var length, i, keys
+    if (Array.isArray(a)) {
+      length = a.length
+      if (length != b.length) {
+        return false
+      }
+      for (i = length; i-- !== 0; ) {
+        if (!deepEqual(a[i], b[i])) {
+          return false
+        }
+      }
+      return true
+    }
+    if (a.constructor === RegExp) {
+      return a.source === b.source && a.flags === b.flags
+    }
+    if (a.valueOf !== Object.prototype.valueOf) {
+      return a.valueOf() === b.valueOf()
+    }
+    // From fork, but do we need it?
+    // if (a.toString !== Object.prototype.toString) {
+    //   return a.toString() === b.toString()
+    // }
+    keys = Object.keys(a)
+    length = keys.length
+    if (length !== Object.keys(b).length) {
+      return false
+    }
+    for (i = length; i-- !== 0; ) {
+      if (!Object.prototype.hasOwnProperty.call(b, keys[i])) {
+        return false
+      }
+    }
+    for (i = length; i-- !== 0; ) {
+      var key = keys[i]
+      if (!deepEqual(a[key], b[key])) {
+        return false
+      }
+    }
+    return true
+  }
+  return a !== a && b !== b
 }

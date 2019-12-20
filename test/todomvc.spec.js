@@ -67,11 +67,11 @@ const makeStore = () => {
 
 test("Can toggle a todo between complete and incomplete", t => {
   const store = makeStore()
-  store.registerSubscription("todo", (db, [, todo]) => {
-    return db.todos.find(td => td.description === todo.description)
+  store.registerSubscription("todo", (db, {where}) => {
+    return db.todos.find(todo => todo.id === where.id)
   })
 
-  const findTodo = todo => store.query(["todo", todo])
+  const findTodo = todo => store.query({id: "todo", where: {id: todo.id}})
 
   store.dispatchSync({id: "toggle-completed", todo: TODO_LEARN_REFRAME})
   t.is(findTodo(TODO_LEARN_REFRAME).completed, true)
@@ -87,7 +87,7 @@ test("Can create a todo", async t => {
   const store = makeStore()
 
   store.registerSubscription("todos", db => db.todos)
-  const todos = store.subscribe(["todos"])
+  const todos = store.subscribe({id: "todos"})
 
   store.dispatchSync({
     id: "create-todo",
