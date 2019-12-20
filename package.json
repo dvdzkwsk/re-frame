@@ -28,10 +28,13 @@
     "trailingComma": "es5"
   },
   "devDependencies": {
+    "@rollup/plugin-node-resolve": "^6.0.0",
     "@types/node": "^12.12.20",
     "ava": "^2.4.0",
     "esm": "^3.2.25",
     "lerna": "^3.18.4",
-    "prettier": "^1.18.2"
+    "prettier": "^1.18.2",
+    "rollup": "^1.27.13",
+    "terser": "^4.4.3"
   }
 }
