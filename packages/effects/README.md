@@ -53,7 +53,7 @@ store.event.fx("boot", () => ({
       {after: "first-event", dispatch: {id: "second-event"}},
       {
         after: "second-event",
-        dispatchN: [{id: "third-event"}, {id: "fourth-event"}],
+        dispatch: [{id: "third-event"}, {id: "fourth-event"}],
       },
       {after: "third-event", dispatch: {id: "last-event"}, halt: true},
     ],

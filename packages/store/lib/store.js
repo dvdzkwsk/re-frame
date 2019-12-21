@@ -63,15 +63,19 @@ function makeSimpleQuery(subscribe) {
  * After  : dispatch("event", { error: true, message: "error!" })
  */
 function makeSimpleDispatch(dispatcher) {
-  return function dispatch(id, payload) {
-    var event
-    if (typeof id === "object") {
-      event = id
+  return function dispatch(event, payload) {
+    if (typeof event === "object") {
+      if (Array.isArray(event)) {
+        event.forEach(function(event) {
+          dispatcher(event)
+        })
+      } else {
+        dispatcher(event)
+      }
     } else {
-      event = Object.create(null)
-      event.id = id
-      if (arguments.length > 1) {
-        if (typeof payload === "object" && payload) {
+      event = {id: event}
+      if (payload) {
+        if (typeof payload === "object") {
           for (var key in payload) {
             if (payload.hasOwnProperty(key)) {
               if (key === "id") {
@@ -85,7 +89,7 @@ function makeSimpleDispatch(dispatcher) {
           event.payload = payload
         }
       }
+      dispatcher(event)
     }
-    return dispatcher(event)
   }
 }

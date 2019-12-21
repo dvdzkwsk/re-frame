@@ -453,14 +453,6 @@ export function createStore(opts) {
     }
   })
 
-  registerEffect("dispatchN", function(store) {
-    return function(events) {
-      for (var i = 0; i < events.length; i++) {
-        store.dispatch(events[i])
-      }
-    }
-  })
-
   return store
 }
 

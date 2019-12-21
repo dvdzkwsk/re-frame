@@ -1,6 +1,8 @@
 import test from "ava"
 import {createStore} from "../lib/store.js"
 
+const flush = () => new Promise(resolve => setTimeout(resolve))
+
 test("createStore returns a store", t => {
   const store = createStore()
   t.is(typeof store, "object")
@@ -51,6 +53,25 @@ test('casts dispatch("event", { foo: "bar" }) to { id: "event", foo: "bar" }', t
     t.deepEqual(event, {id: "event", foo: "bar"})
   })
   store.dispatchSync("event", {foo: "bar"})
+})
+
+test("supports dispatching multiple events", async t => {
+  const store = createStore()
+  const events = []
+  store.registerPostEventCallback(event => events.push(event))
+  store.event("test", () => null)
+  store.dispatch(["test", "test", "test", "test"])
+  await flush()
+  t.deepEqual(events, ["test", "test", "test", "test"])
+})
+
+test("supports dispatching multiple events synchronously", t => {
+  const store = createStore()
+  const events = []
+  store.registerPostEventCallback(event => events.push(event))
+  store.event("test", () => null)
+  store.dispatchSync(["test", "test", "test", "test"])
+  t.deepEqual(events, ["test", "test", "test", "test"])
 })
 
 test('supports query("query")', t => {

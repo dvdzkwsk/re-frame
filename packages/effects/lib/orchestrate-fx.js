@@ -16,11 +16,6 @@ export function orchestrate(store) {
         if (rule.dispatch) {
           store.dispatch(rule.dispatch)
         }
-        if (rule.dispatchN) {
-          for (var j = 0; j < rule.dispatchN.length; j++) {
-            store.dispatch(rule.dispatchN[j])
-          }
-        }
         if (rule.halt) {
           halt()
         }

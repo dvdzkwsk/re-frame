@@ -112,31 +112,6 @@ test('orchestrate > when an "after" event is seen, its corresponding "dispatch" 
   ])
 })
 
-test('orchestrate > a rule can also dispatch multiple events with "dispatchN"', t => {
-  const store = makeStore()
-  store.registerEffect("orchestrate", orchestrate(store))
-  store.registerEventFX("boot", () => ({
-    orchestrate: {
-      dispatch: {id: "first-dispatch"},
-      rules: [
-        {
-          after: "first-dispatch",
-          dispatchN: [{id: "a"}, {id: "b"}, {id: "c"}],
-          halt: true,
-        },
-      ],
-    },
-  }))
-  store.dispatch({id: "boot"})
-  t.deepEqual(store.dispatch.calls, [
-    {arguments: [{id: "boot"}]},
-    {arguments: [{id: "first-dispatch"}]},
-    {arguments: [{id: "a"}]},
-    {arguments: [{id: "b"}]},
-    {arguments: [{id: "c"}]},
-  ])
-})
-
 test("orchestrate > multiple rules can be triggered by the same event", t => {
   const store = makeStore()
   store.registerEffect("orchestrate", orchestrate(store))
