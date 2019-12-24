@@ -1,6 +1,6 @@
 {
   "name": "@re-frame/store",
-  "version": "0.19.0",
+  "version": "0.20.0",
   "author": "David Zukowski <zukoweb@gmail.com> (https://zuko.me)",
   "description": "A re-frame store with an especially ergonomic API",
   "license": "MIT",
@@ -23,6 +23,6 @@
     ]
   },
   "dependencies": {
-    "@re-frame/core": "^0.19.0"
+    "@re-frame/core": "^0.20.0"
   }
 }
