@@ -102,48 +102,37 @@ export function createStore(opts) {
   REGISTRATIONS[COEFFECT] = {}
   REGISTRATIONS[SUBSCRIPTION] = {}
 
-  function registerEventDB(id, interceptors, handler) {
-    if (typeof interceptors === "function") {
-      handler = interceptors
-      interceptors = []
-    }
-
-    if (process.env.NODE_ENV === "development") {
-      assertValidInterceptors(id, interceptors)
-    }
-    register(
-      EVENT,
-      id,
-      flattenInterceptors([
-        INJECT_DB,
-        RUN_EFFECTS,
-        GLOBAL_INTERCEPTORS,
-        interceptors,
-        dbHandlerToInterceptor(handler),
-      ])
-    )
-  }
-
   function registerEventFX(id, interceptors, handler) {
     if (typeof interceptors === "function") {
       handler = interceptors
       interceptors = []
     }
-
     if (process.env.NODE_ENV === "development") {
       assertValidInterceptors(id, interceptors)
     }
-    register(
-      EVENT,
-      id,
-      flattenInterceptors([
-        INJECT_DB,
-        RUN_EFFECTS,
-        GLOBAL_INTERCEPTORS,
-        interceptors,
-        fxHandlerToInterceptor(handler),
-      ])
-    )
+    interceptors = flattenInterceptors([
+      INJECT_DB,
+      RUN_EFFECTS,
+      GLOBAL_INTERCEPTORS,
+      interceptors,
+      eventHandlerToInterceptor(handler),
+    ])
+    register(EVENT, id, interceptors)
+  }
+
+  function registerEventDB(id, interceptors, handler) {
+    if (typeof interceptors === "function") {
+      handler = interceptors
+      interceptors = []
+    }
+    if (process.env.NODE_ENV === "development") {
+      assertValidInterceptors(id, interceptors)
+    }
+    registerEventFX(id, interceptors, function(cofx, event) {
+      return {
+        db: handler(cofx.db, event),
+      }
+    })
   }
 
   function registerSubscription(id, dependencies, handler) {
@@ -456,27 +445,9 @@ export function createStore(opts) {
   return store
 }
 
-// A DB handler receives the current db and event and return a new db.
-// This interceptor wraps that handler so that its return value is
-// automatically applied to the "db" effect.
-function dbHandlerToInterceptor(handler) {
+function eventHandlerToInterceptor(handler) {
   return {
-    id: "db-handler",
-    before: function(context) {
-      var db = context.coeffects.db
-      var event = context.coeffects.event
-      context.effects.db = handler(db, event)
-      return context
-    },
-  }
-}
-
-// An FX handler takes coeffects and returns effects. Where a DB handler
-// returns `effects.db`, this FX handler returns the entire `effects`
-// object. This gives it a chance to do more  than just update the db.
-function fxHandlerToInterceptor(handler) {
-  return {
-    id: "fx-handler",
+    id: "event-handler",
     before: function(context) {
       context.effects = handler(context.coeffects, context.coeffects.event)
       return context
