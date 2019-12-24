@@ -110,20 +110,8 @@ export function createEventQueue(processEvent) {
   }
 
   return {
-    push: function push(event) {
+    push: function(event) {
       _trigger(EVENT_ADD_EVENT, event)
-    },
-    pause: function pause() {
-      _trigger(EVENT_PAUSE)
-    },
-    resume: function resume() {
-      _trigger(EVENT_RESUME)
-    },
-    size: function size() {
-      return _queue.length
-    },
-    purge: function purge() {
-      _queue = []
     },
   }
 }
