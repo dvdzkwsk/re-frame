@@ -42,16 +42,11 @@ import {
  * }))
  * ```
  *
- * @param {object} [opts] - optional configuration
- * @param {object[]} [opts.interceptors] - global interceptors
  * @returns {object}
  */
-export function createStore(opts) {
+export function createStore() {
   // APP_DB is an atom that contains the current state of the store.
   var APP_DB = atom()
-
-  // Interceptors that are run on every event
-  var GLOBAL_INTERCEPTORS = (opts && opts.interceptors) || []
 
   // --- Event Processing -----------------------------------------------------
   /**
@@ -113,7 +108,6 @@ export function createStore(opts) {
     interceptors = flattenInterceptors([
       INJECT_DB,
       RUN_EFFECTS,
-      GLOBAL_INTERCEPTORS,
       interceptors,
       eventHandlerToInterceptor(handler),
     ])
