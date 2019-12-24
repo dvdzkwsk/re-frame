@@ -1,6 +1,6 @@
 import {atom, reaction} from "@re-frame/atom"
-import {createEventQueue} from "./event-queue"
 import {
+  scheduleMicroTask,
   createAnimationFrameScheduler,
   synchronousScheduler,
 } from "@re-frame/schedulers"
@@ -443,6 +443,56 @@ export function createStore(opts) {
   })
 
   return store
+}
+
+// Possible event queue states
+// prettier-ignore
+var IDLE       = 0,
+    SCHEDULED  = 1,
+    RUNNING    = 2
+
+function createEventQueue(processEvent) {
+  var _queue = []
+  var _state = IDLE
+
+  function push(event) {
+    _queue.push(event)
+    if (_state == IDLE) {
+      _scheduleProcessor()
+    }
+  }
+
+  function _scheduleProcessor() {
+    _state = SCHEDULED
+    scheduleMicroTask(_runQueue)
+  }
+
+  function _runQueue() {
+    _state = RUNNING
+
+    // cache the number of events to process so that only the events that were
+    // in the queue at the start of the run are processed. Any that are added
+    // during the run should be processed in the next batch.
+    for (var i = 0, len = _queue.length; i < len; i++) {
+      try {
+        processEvent(_queue[i])
+      } catch (e) {
+        // TODO: surface this exception
+        // TODO: how should/could events recover from an exception? This
+        // queue-emptying behavior mimics Clojure re-frame until I have answers.
+        _state = IDLE
+        _queue = []
+        return
+      }
+    }
+    _state = IDLE
+    _queue = _queue.slice(i)
+    if (_queue.length) {
+      _scheduleProcessor()
+    }
+  }
+
+  return {push: push}
 }
 
 function eventHandlerToInterceptor(handler) {

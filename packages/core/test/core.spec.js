@@ -4,8 +4,12 @@ import {createStore} from "../lib/core.js"
 process.env.NODE_ENV = "development"
 
 async function flush() {
-  await Promise.resolve() // let dispatch run
+  await flushEventQueue()
   await new Promise(resolve => setTimeout(resolve)) // let subscriptions run
+}
+
+function flushEventQueue() {
+  return Promise.resolve()
 }
 
 function createStoreWithState(state) {
@@ -94,20 +98,26 @@ test("dispatch > processes events dispatched in the same loop as batch", async t
   t.deepEqual(processedEvents, [{id: "a"}, {id: "b"}, {id: "c"}])
 })
 
-test("dispatch > processes events in the order they are dispatched", async t => {
+test("dispatch > processes events dispatched in separate loops in separate batches", async t => {
   const processedEvents = []
   const store = createStore()
   store.registerEventDB("a", (db, event) => processedEvents.push(event))
-  store.registerEventDB("b", (db, event) => processedEvents.push(event))
+  store.registerEventDB("b", (db, event) => {
+    processedEvents.push(event)
+    store.dispatch({id: "c"})
+    store.dispatch({id: "d"})
+  })
+
   store.registerEventDB("c", (db, event) => processedEvents.push(event))
+  store.registerEventDB("d", (db, event) => processedEvents.push(event))
 
   store.dispatch({id: "a"})
   store.dispatch({id: "b"})
-  store.dispatch({id: "c"})
+  await flushEventQueue()
+  t.deepEqual(processedEvents, [{id: "a"}, {id: "b"}])
 
-  await flush()
-
-  t.deepEqual(processedEvents, [{id: "a"}, {id: "b"}, {id: "c"}])
+  await flushEventQueue()
+  t.deepEqual(processedEvents, [{id: "a"}, {id: "b"}, {id: "c"}, {id: "d"}])
 })
 
 test("dispatchSync > processes an event synchronously", t => {
@@ -321,4 +331,22 @@ test("Subscriptions are notified after postEventCallbacks are called", t => {
   sub.dispose()
 
   t.deepEqual(callOrder, ["post-event-callback", "subscription-notified"])
+})
+
+test("If an event throws an exception, no further events are processed in that run", async t => {
+  const store = createStore()
+  const events = []
+  store.registerPostEventCallback(event => events.push(event))
+  store.registerEventDB("a", db => db)
+  store.registerEventDB("b", db => db)
+  store.registerEventDB("c", db => {
+    throw new Error()
+  })
+  store.registerEventDB("d", db => db)
+  store.dispatch({id: "a"})
+  store.dispatch({id: "b"})
+  store.dispatch({id: "c"})
+  store.dispatch({id: "d"})
+  await flush()
+  t.deepEqual(events, [{id: "a"}, {id: "b"}])
 })

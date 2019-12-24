@@ -50,6 +50,6 @@ function subscribeToWindowState(callback) {
   }
 }
 
-export function microTaskScheduler(fn) {
+export function scheduleMicroTask(fn) {
   Promise.resolve().then(fn)
 }
