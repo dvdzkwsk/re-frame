@@ -61,6 +61,9 @@ export function useSubscription(query, params, dependencies) {
   var setValue = state[1]
 
   useEffect(() => {
+    if (subscription.deref() !== value) {
+      setValue(subscription.deref())
+    }
     subscription.watch(function(next) {
       setValue(next)
     })
