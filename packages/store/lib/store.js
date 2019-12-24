@@ -67,7 +67,7 @@ function makeSimpleDispatch(dispatcher) {
     if (typeof event === "object") {
       if (Array.isArray(event)) {
         event.forEach(function(event) {
-          dispatcher(event)
+          dispatch(event)
         })
       } else {
         dispatcher(event)

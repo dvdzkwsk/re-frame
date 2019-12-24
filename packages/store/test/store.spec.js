@@ -62,7 +62,7 @@ test("supports dispatching multiple events", async t => {
   store.event("test", () => null)
   store.dispatch(["test", "test", "test", "test"])
   await flush()
-  t.deepEqual(events, ["test", "test", "test", "test"])
+  t.deepEqual(events, [{id: "test"}, {id: "test"}, {id: "test"}, {id: "test"}])
 })
 
 test("supports dispatching multiple events synchronously", t => {
@@ -71,7 +71,7 @@ test("supports dispatching multiple events synchronously", t => {
   store.registerPostEventCallback(event => events.push(event))
   store.event("test", () => null)
   store.dispatchSync(["test", "test", "test", "test"])
-  t.deepEqual(events, ["test", "test", "test", "test"])
+  t.deepEqual(events, [{id: "test"}, {id: "test"}, {id: "test"}, {id: "test"}])
 })
 
 test('supports query("query")', t => {
