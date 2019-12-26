@@ -1,14 +1,10 @@
 export function orchestrate(store) {
   return function(config) {
-    if (!config.rules || !config.rules.length) {
-      return
-    }
-
     function halt() {
-      store.removePostEventCallback(postEventCallback)
+      store.removePostEventCallback(checkOrchestrateRules)
     }
 
-    function postEventCallback(event) {
+    function checkOrchestrateRules(event) {
       for (var i = 0; i < config.rules.length; i++) {
         var rule = config.rules[i]
         if (rule.after !== event.id) continue
@@ -22,9 +18,11 @@ export function orchestrate(store) {
       }
     }
 
-    store.registerPostEventCallback(postEventCallback)
     if (config.dispatch) {
       store.dispatch(config.dispatch)
+    }
+    if (config.rules && config.rules.length) {
+      store.registerPostEventCallback(checkOrchestrateRules)
     }
   }
 }
