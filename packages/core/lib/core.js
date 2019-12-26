@@ -393,7 +393,10 @@ export function createStore() {
     POST_EVENT_CALLBACKS.push(cb)
   }
   function removePostEventCallback(cb) {
-    POST_EVENT_CALLBACKS.splice(POST_EVENT_CALLBACKS.indexOf(cb), 1)
+    var index = POST_EVENT_CALLBACKS.indexOf(cb)
+    if (index !== -1) {
+      POST_EVENT_CALLBACKS.splice(index, 1)
+    }
   }
   function notifyPostEventCallbacks(event) {
     if (POST_EVENT_CALLBACKS.length) {
