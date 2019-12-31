@@ -120,6 +120,37 @@ test("useSubscription with a dependency list only resubscribes when those depend
   t.is(subscriptions, 2)
 })
 
+test("useSubscription does not miss subscription changes between render and watcher setup", t => {
+  t.plan(2)
+
+  const store = createStore()
+  store.init({value: 1})
+  store.computed("value", db => db.value)
+  store.event("increment", db => ({value: db.value + 1}))
+
+  let renders = 0
+  const App = () => {
+    return h(StoreProvider, {value: store}, h(Child))
+  }
+  const Child = () => {
+    const value = useSubscription("value")
+    if (renders === 0) {
+      t.is(value, 1)
+      store.dispatchSync("increment")
+    }
+    if (renders === 1) {
+      t.is(value, 2)
+    }
+    renders++
+    return null
+  }
+
+  let renderer
+  TestRenderer.act(() => {
+    renderer = TestRenderer.create(h(App))
+  })
+})
+
 test("useLazySubscription does not compute the subscription until after the component is mounted", async t => {
   let renders = 0
   const store = createStore()
@@ -148,5 +179,35 @@ test("useLazySubscription does not compute the subscription until after the comp
 
   TestRenderer.act(() => {
     renderer.update(h(App))
+  })
+})
+
+test("useLazySubscription does not miss subscription changes between render and watcher setup", t => {
+  t.plan(1)
+
+  const store = createStore()
+  store.init({value: 1})
+  store.computed("value", db => db.value)
+  store.event("increment", db => ({value: db.value + 1}))
+
+  let renders = 0
+  const App = () => {
+    return h(StoreProvider, {value: store}, h(Child))
+  }
+  const Child = () => {
+    const value = useLazySubscription("value")
+    if (renders === 0) {
+      store.dispatchSync("increment")
+    }
+    if (renders === 1) {
+      t.is(value, 2)
+    }
+    renders++
+    return null
+  }
+
+  let renderer
+  TestRenderer.act(() => {
+    renderer = TestRenderer.create(h(App))
   })
 })
