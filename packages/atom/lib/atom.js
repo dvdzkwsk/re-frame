@@ -46,8 +46,11 @@ export function atom(initialValue) {
     },
     watch: function(watcher) {
       _watchers.push(watcher)
-      return function() {
-        _watchers.splice(_watchers.indexOf(watcher), 1)
+      return function dispose() {
+        var index = _watchers.indexOf(watcher)
+        if (index !== -1) {
+          _watchers.splice(index, 1)
+        }
       }
     },
   }

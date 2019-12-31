@@ -33,6 +33,25 @@ test("watch > returns a function to remove the watcher", t => {
   t.is(history.length, 1)
 })
 
+test("watch > disposing a watcher more than once is a noop", t => {
+  let calls = 0
+  const a = atom("hello")
+  const dispose1 = a.watch(() => calls++)
+  const dispose2 = a.watch(() => calls++)
+
+  a.reset(1)
+  t.is(calls, 2)
+
+  dispose1()
+  dispose1()
+
+  calls = 0
+  a.reset(2)
+  t.is(calls, 1)
+
+  a.dispose()
+})
+
 test("reset > updates the value inside the atom to be the provided value", t => {
   const a = atom("hello")
 
